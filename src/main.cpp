@@ -10,14 +10,18 @@ class $modify(RandomizerLevelListLayer, LevelListLayer) {
 		if (!LevelListLayer::init(list))
 			return false;
 
-		auto randomizerButtonSprite = ButtonSprite::create("Random", 0.3f);
-		auto randomizerButton = CCMenuItemSpriteExtra::create(
+		ButtonSprite *randomizerButtonSprite = ButtonSprite::create("Random", 0.3f);
+		CCMenuItemSpriteExtra *randomizerButton = CCMenuItemSpriteExtra::create(
 			randomizerButtonSprite,
 			this,
 			menu_selector(RandomizerLevelListLayer::onButton)
 		);
 
-		auto menuLocation = this->getChildByID("right-side-menu");
+	    // The server delete button is part of the button-menu instead of the right-side-menu for whatever reason.
+	    // This causes an extra button added to the right-side-menu to overlap with it, so it has to be handled differently.
+        const bool serverDeleteVisible = list->m_accountID == GJAccountManager::get()->m_accountID;
+		CCNode *menuLocation = this->getChildByID(serverDeleteVisible ? "left-side-menu" : "right-side-menu");
+
 		menuLocation->addChild(randomizerButton);
 		randomizerButton->setID("random-button"_spr);
 		menuLocation->updateLayout();
@@ -26,16 +30,16 @@ class $modify(RandomizerLevelListLayer, LevelListLayer) {
 	}
 
 	void onButton(CCObject*) {
-		auto levels = this->getChildByID("GJListLayer")
+		CCArray *levels = this->getChildByID("GJListLayer")
 			->getChildByID("list-view")
 			->getChildByType<TableView>(0)
 			->getChildByType<CCContentLayer>(0)
 			->getChildren();  // Should get all LevelCell objects in the list
 
-		auto levelPicked = dynamic_cast<LevelCell *>(levels->randomObject())->m_level;
+		GJGameLevel *levelPicked = dynamic_cast<LevelCell *>(levels->randomObject())->m_level;
 
-		auto levelScene = LevelInfoLayer::scene(levelPicked, false);
-		auto transitionFade = CCTransitionFade::create(0.5, levelScene);
+        CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
+        CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
 		CCDirector::sharedDirector()->pushScene(transitionFade);
 	}
 };
