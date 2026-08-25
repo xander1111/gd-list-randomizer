@@ -1,14 +1,14 @@
 {
-	"geode": "4.7.0",
+	"geode": "5.9.0",
 	"gd": {
-		"win": "2.2074",
-		"android": "2.2074",
-		"mac": "2.2074",
-		"ios": "2.2074"
+		"win": "2.2081",
+		"android": "2.2081",
+		"mac": "2.2081",
+		"ios": "2.2081"
 	},
 	"id": "xe1a.list_randomizer",
 	"name": "list_randomizer",
-	"version": "v1.0.0",
+	"version": "v0.0.1",
 	"developer": "xe1a",
 	"description": "Adds a way to pick a random level from any ingame list"
 }
