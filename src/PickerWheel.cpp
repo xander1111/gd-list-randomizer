@@ -84,57 +84,57 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float windowHeight) const
 {
     CCMenu* wheelSlices = CCMenu::create();
 
-    // TODO Special cases:
-    // Exactly 2 levels - triangle masks don't work in this case, need to use rectangles or something
-    // Exactly 1 level - Don't need any masks
-    // 0 levels - Needs some placeholder
+    switch (_slices.size()) {
+    case 0:
+        // TODO add circle and maybe placeholder text
+        break;
+    case 1:
+        // TODO just add a circle
+        break;
+    default:
+        break;
+    }
 
-    const unsigned int totalWeight = _slices.size();  // TODO sum weights of slices instead of counting number of levels
+    unsigned int totalWeight = 0;
+    float currentRotation = 0.f;
+    const float radius = windowHeight * 0.4f;
 
-    for (int i = 0; i < _slices.size(); ++i) {
-        const PickerWheelSlice& slice = _slices[i];
+    for (const auto & slice : _slices)
+        totalWeight += slice.weight;
 
+    for (const auto & slice : _slices) {
         const float angleDeg = 360.f * (static_cast<float>(slice.weight) / static_cast<float>(totalWeight));
-        const float angleRad = kmDegreesToRadians(angleDeg);
+        CCDrawNode* arc = CCDrawNode::create();
+        std::vector<CCPoint> points;
+        points.reserve(CircleSegmentCount + 3);
+        points.emplace_back(0.f, 0.f);
 
-        // Create circle to use for arc
-        CCDrawNode* circle = CCDrawNode::create();
-        circle->drawCircle(
-            {0, 0},
-            windowHeight * 0.4f,
+        const int arcSegments = std::max(1, static_cast<int>(std::ceil((angleDeg / 360.f) * CircleSegmentCount)));
+        for (int s = 0; s <= arcSegments; ++s) {
+            const float t = static_cast<float>(s) / static_cast<float>(arcSegments);
+            const float a = kmDegreesToRadians(angleDeg * t);
+            points.emplace_back(radius * cos(a), radius * sin(a));
+        }
+        points.emplace_back(0.f, 0.f);
+
+        arc->drawPolygon(
+            points.data(),
+            static_cast<unsigned int>(points.size()),
             *slice.color,
-            1.f,
-            {.r = 0, .g = 0, .b = 0, .a = 1},
-            50
-        );
-
-        // Mask circle to only render the desired arc
-        float l = windowHeight * 2.f;
-
-        CCDrawNode* mask = CCDrawNode::create();
-        CCPoint points[] = {
-            {0, 0},
-            {l, 0},
-            {l * cos(angleRad), l * sin(angleRad)},
-            {0, 0}  // Theoretically this point shouldn't be needed, but the mask doesn't seem to properly handle small angles without it
-        };
-        mask->drawPolygon(
-            points,
-            4,
-            {.r = 0, .g = 0, .b = 0, .a = 1},
             0.f,
             {.r = 0, .g = 0, .b = 0, .a = 1},
             BorderAlignment::Center
         );
 
-        CCClippingNode* clipper = CCClippingNode::create(mask);
-        clipper->addChild(circle);
+        // ~1 degree is where it's pretty much impossible to even tell that there's text
+        if (angleDeg > 1.f) {
+            // TODO add level name text to the slice
+        }
 
-        // TODO add level name text to the slice
+        arc->setRotation(currentRotation);
+        currentRotation -= angleDeg;
 
-        clipper->setRotation(angleDeg * static_cast<float>(i));
-
-        wheelSlices->addChild(clipper);
+        wheelSlices->addChild(arc);
     }
 
     return wheelSlices;
