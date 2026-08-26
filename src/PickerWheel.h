@@ -13,16 +13,20 @@ public:
     bool init() override;
 
 private:
-    explicit PickerWheel(GJLevelList* list);
-
-    void spinWheel(CCObject*);
-
     struct PickerWheelSlice
     {
         GJGameLevel* level;
-        int weight;
-        ccColor3B color;
+        unsigned int weight;
+        ccColor4F* color;
     };
 
-    GJLevelList* _list;
+    static ccColor4F* _defaultSliceColor;
+
+    explicit PickerWheel(const GJLevelList* list);
+
+    void spinWheel(CCObject*);
+
+    [[nodiscard]] CCMenu* generateWheelSliceNodes(float windowHeight) const;
+
+    std::vector<PickerWheelSlice> _slices;
 };
