@@ -21,12 +21,13 @@ private:
     };
 
     static ccColor4F* _defaultSliceColor;
+    static ccColor4F* _defaultSliceColorA;
+    static ccColor4F* _defaultSliceColorB;
+    std::vector<PickerWheelSlice> _slices;
 
     explicit PickerWheel(const GJLevelList* list);
 
     void spinWheel(CCObject*);
 
     [[nodiscard]] CCMenu* generateWheelSliceNodes(float windowHeight) const;
-
-    std::vector<PickerWheelSlice> _slices;
 };

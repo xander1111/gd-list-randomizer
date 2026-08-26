@@ -2,7 +2,8 @@
 
 #include <Geode/utils/cocos.hpp>
 
-ccColor4F* PickerWheel::_defaultSliceColor = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
+ccColor4F* PickerWheel::_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
+ccColor4F* PickerWheel::_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
 
 PickerWheel* PickerWheel::create(GJLevelList* list)
 {
@@ -52,14 +53,19 @@ bool PickerWheel::init()
 PickerWheel::PickerWheel(const GJLevelList* list)
 {
     CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
-    for (auto [index, level] : levels) {
+    bool firstSlice = true;
+    bool evenSlice = true;
+    for (auto [key, level] : levels) {
         PickerWheelSlice newSlice = {
             .level = level,
-            .weight = 1,
-            .color = _defaultSliceColor
+            .weight = firstSlice ? 100u : 1u,  // TODO undo temp test
+            .color = evenSlice ? _defaultSliceColorA : _defaultSliceColorB
         };
 
         _slices.emplace_back(newSlice);
+
+        firstSlice = false;
+        evenSlice = !evenSlice;
     }
 }
 
