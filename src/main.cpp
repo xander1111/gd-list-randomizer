@@ -33,13 +33,7 @@ class $modify(RandomizerLevelListLayer, LevelListLayer) {
 	}
 
 	void onButton(CCObject*) {
-		CCArray* levels = this->getChildByID("GJListLayer")
-			->getChildByID("list-view")
-			->getChildByType<TableView>(0)
-			->getChildByType<CCContentLayer>(0)
-			->getChildren();  // Should get all LevelCell objects in the list
-
-	    CCScene* scene = WheelLayer::scene(levels);
+	    CCScene* scene = WheelLayer::scene(m_levelList);
         CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, scene);
         CCDirector::sharedDirector()->pushScene(transitionFade);
 	}

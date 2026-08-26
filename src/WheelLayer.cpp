@@ -1,10 +1,12 @@
 #include "WheelLayer.h"
 
-WheelLayer::WheelLayer(CCArray* levels) : _levels(levels) {}
+#include "PickerWheel.h"
 
-WheelLayer* WheelLayer::create(CCArray* levels)
+WheelLayer::WheelLayer(GJLevelList* list) : _list(list) {}
+
+WheelLayer* WheelLayer::create(GJLevelList* list)
 {
-    auto layer = new WheelLayer(levels);
+    auto layer = new WheelLayer(list);
     if (layer && layer->init()) {
         layer->autorelease();
     } else {
@@ -15,9 +17,9 @@ WheelLayer* WheelLayer::create(CCArray* levels)
     return layer;
 }
 
-CCScene* WheelLayer::scene(CCArray* levels)
+CCScene* WheelLayer::scene(GJLevelList* list)
 {
-    WheelLayer* layer = create(levels);
+    WheelLayer* layer = create(list);
     CCScene* scene = CCScene::create();
     scene->addChild(layer);
     return scene;
@@ -78,28 +80,23 @@ bool WheelLayer::init()
     );
     exitButton->setID("exit-button"_spr);
 
+
     CCMenu* const exitMenu = CCMenu::create();
+    exitMenu->setID("exit-menu"_spr);
+
     exitMenu->addChild(exitButton);
     exitMenu->setPosition({24, winSize.height - 23});
-    exitMenu->setID("exit-menu"_spr);
 
     addChild(exitMenu);
 
 
-    // Temp randomizer button
-    ButtonSprite* randomizerButtonSprite = ButtonSprite::create("Random", 0.3f);
-    CCMenuItemSpriteExtra* randomizerButton = CCMenuItemSpriteExtra::create(
-        randomizerButtonSprite,
-        this,
-        menu_selector(WheelLayer::onRandomizerButton)
-    );
+    // Picker wheel
+    CCMenu* pickerWheel = PickerWheel::create(_list);
+    pickerWheel->setID("picker-wheel"_spr);
 
-    CCMenu* const randomizerMenu = CCMenu::create();
-    randomizerMenu->addChild(randomizerButton);
-    randomizerMenu->setPosition({winSize.width / 2, winSize.height / 2});
-    randomizerMenu->setID("randomizer-menu"_spr);
+    pickerWheel->setPosition({winSize.width / 2, winSize.height / 2});
 
-    addChild(randomizerMenu);
+    addChild(pickerWheel);
 
     return true;
 }
@@ -112,13 +109,4 @@ void WheelLayer::keyBackClicked()
 void WheelLayer::onBack(CCObject*)
 {
     keyBackClicked();
-}
-
-void WheelLayer::onRandomizerButton(CCObject*)
-{
-    GJGameLevel* levelPicked = typeinfo_cast<LevelCell*>(_levels->randomObject())->m_level;
-
-    CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
-    CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
-    CCDirector::sharedDirector()->pushScene(transitionFade);
 }
