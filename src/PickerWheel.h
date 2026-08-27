@@ -27,6 +27,8 @@ private:
     // Number of segments to use for drawing circles, also used to determine when a slice is small enough to instead use a triangle
     static constexpr unsigned int CircleSegmentCount = 65;
 
+    static constexpr float MaxFontScale = 1.f;
+
     explicit PickerWheel(const GJLevelList* list);
 
     void spinWheel(CCObject*);

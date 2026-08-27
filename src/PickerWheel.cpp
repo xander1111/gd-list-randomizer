@@ -53,18 +53,16 @@ bool PickerWheel::init()
 PickerWheel::PickerWheel(const GJLevelList* list)
 {
     CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
-    bool firstSlice = true;
     bool evenSlice = true;
     for (auto [key, level] : levels) {
         PickerWheelSlice newSlice = {
             .level = level,
-            .weight = firstSlice ? 100u : 1u,  // TODO undo temp test
+            .weight = 1u,
             .color = evenSlice ? _defaultSliceColorA : _defaultSliceColorB
         };
 
         _slices.emplace_back(newSlice);
 
-        firstSlice = false;
         evenSlice = !evenSlice;
     }
 }
@@ -103,16 +101,22 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float windowHeight) const
         totalWeight += slice.weight;
 
     for (const auto & slice : _slices) {
+        // Node for both the wheel slice and the text to go under
+        CCNode* sliceNode = CCNode::create();
+
         const float angleDeg = 360.f * (static_cast<float>(slice.weight) / static_cast<float>(totalWeight));
+        const float angleRad = kmDegreesToRadians(angleDeg);
+
         CCDrawNode* arc = CCDrawNode::create();
         std::vector<CCPoint> points;
         points.reserve(CircleSegmentCount + 3);
         points.emplace_back(0.f, 0.f);
 
+        // Calculate arc points
         const int arcSegments = std::max(1, static_cast<int>(std::ceil((angleDeg / 360.f) * CircleSegmentCount)));
         for (int s = 0; s <= arcSegments; ++s) {
             const float t = static_cast<float>(s) / static_cast<float>(arcSegments);
-            const float a = kmDegreesToRadians(angleDeg * t);
+            const float a = angleRad * t;
             points.emplace_back(radius * cos(a), radius * sin(a));
         }
         points.emplace_back(0.f, 0.f);
@@ -126,15 +130,38 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float windowHeight) const
             BorderAlignment::Center
         );
 
-        // ~1 degree is where it's pretty much impossible to even tell that there's text
+        arc->setID("slice-background"_spr);
+        arc->setZOrder(-1);
+        sliceNode->addChild(arc);
+
+        // ~1 degree is where it's nearly impossible to even tell that there's text. Larger angles might still be unreadable, but you'd be able to tell the text is missing
         if (angleDeg > 1.f) {
-            // TODO add level name text to the slice
+            CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "goldFont.fnt");
+            label->setID("slice-label"_spr);
+
+            float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+
+            float minY = 0.f;
+            float maxY = 0.f;
+            for (const auto& point : points) {
+                minY = std::min(minY, point.y);
+                maxY = std::max(maxY, point.y);
+            }
+            const float sliceHeight = maxY - minY;
+            labelScale = std::min(labelScale, sliceHeight * 0.5f / label->getContentSize().height);
+            label->setScale(labelScale);
+            label->setRotation(angleDeg / -2.f);
+            label->setPosition({radius * 0.95f * cos(angleRad / 2.f), radius * 0.95f * sin(angleRad / 2.f)});
+            label->setAnchorPoint({1.f, 0.45f});
+            label->setZOrder(1);
+
+            sliceNode->addChild(label);
         }
 
-        arc->setRotation(currentRotation);
+        sliceNode->setRotation(currentRotation);
         currentRotation -= angleDeg;
 
-        wheelSlices->addChild(arc);
+        wheelSlices->addChild(sliceNode);
     }
 
     return wheelSlices;
