@@ -2,6 +2,7 @@
 
 ccColor4F* PickerWheel::_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
 ccColor4F* PickerWheel::_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
+ccColor4F* PickerWheel::_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
 
 PickerWheel* PickerWheel::create(GJLevelList* list)
 {
@@ -35,15 +36,39 @@ bool PickerWheel::init()
     spinButtonMenu->addChild(spinButton);
     spinButtonMenu->setPosition({0, 0});
     spinButtonMenu->setID("randomizer-menu"_spr);
+    spinButtonMenu->setZOrder(1);
 
     addChild(spinButtonMenu);
 
 
     // Wheel slices
-    CCNode* wheelSlices = generateWheelSliceNodes(winSize.height);
+    const float radius = winSize.height * 0.4f;;
+
+    CCNode* wheelSlices = generateWheelSliceNodes(radius);
     wheelSlices->setPosition({0, 0});
     wheelSlices->setZOrder(-1);
     addChild(wheelSlices);
+
+    // Wheel outline
+    CCDrawNode* outline = CCDrawNode::create();
+    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *_defaultOutlineColor, CircleSegmentCount);
+    outline->setZOrder(1);
+    outline->setID("wheel-outline"_spr);
+
+    addChild(outline);
+
+    // If the last slice uses color 1
+    if (_slices.size() > 2 && _slices.size() % 2 == 1) {
+        log::debug("Last slice uses same color as first slice, generating separator line");
+
+        CCDrawNode* line = CCDrawNode::create();
+        const float lineThickness = _slices.size() > 50 ? 0.3f : 0.5f;
+
+        line->drawSegment({0, 0}, {radius, 0}, lineThickness, *_defaultSliceColorB);
+        line->setID("end-separator"_spr);
+
+        addChild(line);
+    }
 
     return true;
 }
@@ -107,11 +132,10 @@ CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor
     return sliceNode;
 }
 
-CCMenu* PickerWheel::generateWheelSliceNodes(const float windowHeight) const
+CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
 {
     CCMenu* wheelSlices = CCMenu::create();
-
-    const float radius = windowHeight * 0.4f;
+    wheelSlices->setID("wheel-slices"_spr);
 
     switch (_slices.size()) {
     case 0: {
