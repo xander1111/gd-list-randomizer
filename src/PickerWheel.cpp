@@ -78,24 +78,62 @@ void PickerWheel::spinWheel(CCObject*)
     }
 }
 
+CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor4F* color, const char* levelName)
+{
+    CCNode* sliceNode = CCNode::create();
+
+    CCDrawNode* circle = CCDrawNode::create();
+    circle->drawCircle({0, 0}, radius, *color, 0.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, CircleSegmentCount);
+
+    circle->setID("slice-background"_spr);
+    circle->setZOrder(-1);
+    sliceNode->addChild(circle);
+
+    CCLabelBMFont* label = CCLabelBMFont::create(levelName, "goldFont.fnt");
+    label->setID("slice-label"_spr);
+
+    const float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+    label->setScale(labelScale);
+    label->setRotation(0.f);
+    label->setPosition({radius * 0.95f, 0});
+    label->setAnchorPoint({1.f, 0.45f});
+    label->setZOrder(1);
+
+    sliceNode->addChild(label);
+
+    return sliceNode;
+}
+
 CCMenu* PickerWheel::generateWheelSliceNodes(const float windowHeight) const
 {
     CCMenu* wheelSlices = CCMenu::create();
 
+    const float radius = windowHeight * 0.4f;
+
     switch (_slices.size()) {
-    case 0:
-        // TODO add circle and maybe placeholder text
-        break;
-    case 1:
-        // TODO just add a circle
-        break;
+    case 0: {
+        // When we have no levels, draw a placeholder wheel
+        log::debug("No slices, generating placeholder wheel");
+
+        wheelSlices->addChild(generatePickerWheelCircle(radius, _defaultSliceColorA, "No levels"));
+
+        return wheelSlices;
+    }
+    case 1: {
+        // When we only have one level in the list, we can just draw a circle
+        log::debug("1 slice, generating circle wheel");
+
+        wheelSlices->addChild(generatePickerWheelCircle(radius, _defaultSliceColorA, _slices[0].level->m_levelName.c_str()));
+
+        return wheelSlices;
+    }
     default:
+        log::debug(">1 slices, generating arc segments");
         break;
     }
 
     unsigned int totalWeight = 0;
     float currentRotation = 0.f;
-    const float radius = windowHeight * 0.4f;
 
     for (const auto & slice : _slices)
         totalWeight += slice.weight;

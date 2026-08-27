@@ -31,6 +31,8 @@ private:
 
     explicit PickerWheel(GJLevelList* list);
 
+    static CCNode* generatePickerWheelCircle(float radius, const ccColor4F* color, const char* levelName);
+
     void spinWheel(CCObject*);
 
     [[nodiscard]] CCMenu* generateWheelSliceNodes(float windowHeight) const;
