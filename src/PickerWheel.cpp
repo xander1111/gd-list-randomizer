@@ -1,5 +1,7 @@
 #include "PickerWheel.h"
 
+#include "EaseWheelSpin.h"
+
 ccColor4F* PickerWheel::_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
 ccColor4F* PickerWheel::_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
 ccColor4F* PickerWheel::_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
@@ -10,8 +12,7 @@ PickerWheel* PickerWheel::create(GJLevelList* list)
     if (menu && menu->init()) {
         menu->autorelease();
     } else {
-        delete menu;
-        menu = nullptr;
+        CC_SAFE_DELETE(menu);
     }
 
     return menu;
@@ -41,13 +42,21 @@ bool PickerWheel::init()
     addChild(spinButtonMenu);
 
 
+    // Wheel
+    _wheelMenu = CCMenu::create();
+    _wheelMenu->setID("wheel-menu"_spr);
+    _wheelMenu->setPosition({0, 0});
+    _wheelMenu->setAnchorPoint({0, 0});
+    _wheelMenu->setZOrder(0);
+
+
     // Wheel slices
     const float radius = winSize.height * 0.4f;;
 
     CCNode* wheelSlices = generateWheelSliceNodes(radius);
     wheelSlices->setPosition({0, 0});
     wheelSlices->setZOrder(-1);
-    addChild(wheelSlices);
+    _wheelMenu->addChild(wheelSlices);
 
     // Wheel outline
     CCDrawNode* outline = CCDrawNode::create();
@@ -55,7 +64,7 @@ bool PickerWheel::init()
     outline->setZOrder(1);
     outline->setID("wheel-outline"_spr);
 
-    addChild(outline);
+    _wheelMenu->addChild(outline);
 
     // If the last slice uses color 1
     if (_slices.size() > 2 && _slices.size() % 2 == 1) {
@@ -67,8 +76,10 @@ bool PickerWheel::init()
         line->drawSegment({0, 0}, {radius, 0}, lineThickness, *_defaultSliceColorB);
         line->setID("end-separator"_spr);
 
-        addChild(line);
+        _wheelMenu->addChild(line);
     }
+
+    addChild(_wheelMenu);
 
     return true;
 }
@@ -97,10 +108,23 @@ void PickerWheel::spinWheel(CCObject*)
     if (_slices.empty())
         return;
 
+    // For now, just apply a random rotation, actually picking the level that gets landed on will be implemented later
+    const float rotateAngle = random::generate(360.f * 4.f, 360.f * 6.f);
+    CCRotateBy* rotate = CCRotateBy::create(6.f, rotateAngle);
+    EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
+
     if (GJGameLevel* levelPicked = random::choice(_slices).level) {
-        CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
-        CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
-        CCDirector::sharedDirector()->pushScene(transitionFade);
+        const auto loadLevel = CallFuncExt::create([levelPicked]
+        {
+            // Load level page
+            CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
+            CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
+            CCDirector::sharedDirector()->pushScene(transitionFade);
+        });
+
+        CCSequence* seq = CCSequence::create(rotateEase, loadLevel, nullptr);
+
+        _wheelMenu->runAction(seq);
     } else {
         log::error("LevelListLayer::onRandomizerButton - random object picked is not of type GJGameLevel*");
     }

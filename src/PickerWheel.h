@@ -25,7 +25,9 @@ private:
     static ccColor4F* _defaultOutlineColor;
     std::vector<PickerWheelSlice> _slices;
 
-    // Number of segments to use for drawing circles, also used to determine when a slice is small enough to instead use a triangle
+    CCMenu* _wheelMenu = nullptr;
+
+    // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
 
     static constexpr float MaxFontScale = 1.f;
@@ -36,5 +38,5 @@ private:
 
     void spinWheel(CCObject*);
 
-    [[nodiscard]] CCMenu* generateWheelSliceNodes(float windowHeight) const;
+    [[nodiscard]] CCMenu* generateWheelSliceNodes(float radius) const;
 };

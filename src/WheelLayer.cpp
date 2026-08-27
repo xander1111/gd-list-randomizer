@@ -10,8 +10,7 @@ WheelLayer* WheelLayer::create(GJLevelList* list)
     if (layer && layer->init()) {
         layer->autorelease();
     } else {
-        delete layer;
-        layer = nullptr;
+        CC_SAFE_DELETE(layer);
     }
 
     return layer;
