@@ -29,7 +29,7 @@ private:
 
     static constexpr float MaxFontScale = 1.f;
 
-    explicit PickerWheel(const GJLevelList* list);
+    explicit PickerWheel(GJLevelList* list);
 
     void spinWheel(CCObject*);
 
