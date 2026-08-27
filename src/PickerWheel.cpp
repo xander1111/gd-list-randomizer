@@ -69,6 +69,9 @@ PickerWheel::PickerWheel(GJLevelList* list)
 
 void PickerWheel::spinWheel(CCObject*)
 {
+    if (_slices.empty())
+        return;
+
     if (GJGameLevel* levelPicked = random::choice(_slices).level) {
         CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
         CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
