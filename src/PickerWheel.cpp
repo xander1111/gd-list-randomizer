@@ -2,6 +2,7 @@
 
 #include "EaseWheelSpin.h"
 #include "SliceSelectedPopup.h"
+#include "Utils.h"
 
 ccColor4F* PickerWheel::m_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
 ccColor4F* PickerWheel::m_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
@@ -82,6 +83,8 @@ bool PickerWheel::init()
 
     addChild(m_wheelMenu);
 
+    schedule(schedule_selector(PickerWheel::updateAudio));
+
     return true;
 }
 
@@ -134,16 +137,38 @@ void PickerWheel::spinWheel(CCObject*)
     {
         SliceSelectedPopup::create(slicePicked)->show();
 
-        FMODAudioEngine* fmod = FMODAudioEngine::get();
-        fmod->m_globalChannel->setPaused(false);
-
-        const std::filesystem::path selectLevelAudioPath = Mod::get()->getResourcesDir() / "selectLevel.ogg";
-        fmod->playEffectAsync(string::pathToString(selectLevelAudioPath));
+        Utils::playResourceSound("selectLevel.ogg");
     });
 
     CCSequence* seq = CCSequence::create(rotateEase, showLevelPopup, nullptr);
 
     m_wheelMenu->runAction(seq);
+}
+
+void PickerWheel::updateAudio(float dt)
+{
+    static float timeSinceLastPlay = 0.f;
+    timeSinceLastPlay += dt;
+
+    if (timeSinceLastPlay < TimePerTickSound)
+        return;
+
+    bool playTick = false;
+
+    // Find the first slice we are in the angle range of. Repeatedly checks incase we pass over multiple slices in one frame
+    const float currentRotation = fmod(m_wheelMenu->getRotation(), 360.f);
+
+    // While outside the angle range of the current slice
+    while (currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation) {
+        // We are pointing to a different slice than we were last frame, play a tick noise to indicate this
+        playTick = true;
+        timeSinceLastPlay = 0.f;
+
+        m_currentlyPointedAtSlice = (m_currentlyPointedAtSlice + 1) % m_slices.size();
+    }
+
+    if (playTick)
+        Utils::playResourceSound("tick.ogg");
 }
 
 CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor4F* color, const char* levelName)

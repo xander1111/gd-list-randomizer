@@ -15,5 +15,8 @@
         "files": [
             "resources/audio/*.ogg"
         ]
+    },
+    "links": {
+        "source": "https://github.com/xander1111/gd-list-randomizer"
     }
 }

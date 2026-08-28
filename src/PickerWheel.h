@@ -31,16 +31,25 @@ private:
     // Doesn't need to be a `Ref` since it gets added as a child of `this`
     CCMenu* m_wheelMenu = nullptr;
 
+    // Tracks the index of the slice that the wheel ticker is currently pointing at
+    unsigned int m_currentlyPointedAtSlice = 0;
+
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
 
+    // Maximum text scale for text on wheel slices
     static constexpr float MaxFontScale = 1.f;
+
+    // Minimum time between playing a tick sound when the wheel spins
+    static constexpr float TimePerTickSound = 0.03f;
 
     explicit PickerWheel(GJLevelList* list);
 
-    static CCNode* generatePickerWheelCircle(float radius, const ccColor4F* color, const char* levelName);
-
     void spinWheel(CCObject*);
+
+    void updateAudio(float dt);
+
+    static CCNode* generatePickerWheelCircle(float radius, const ccColor4F* color, const char* levelName);
 
     /**
      * Generates the wheel visuals, including a circle with a section for each slice in `_slices`
