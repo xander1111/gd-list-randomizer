@@ -134,7 +134,11 @@ void PickerWheel::spinWheel(CCObject*)
     {
         SliceSelectedPopup::create(slicePicked)->show();
 
-        // TODO make sound
+        FMODAudioEngine* fmod = FMODAudioEngine::get();
+        fmod->m_globalChannel->setPaused(false);
+
+        const std::filesystem::path selectLevelAudioPath = Mod::get()->getResourcesDir() / "selectLevel.ogg";
+        fmod->playEffectAsync(string::pathToString(selectLevelAudioPath));
     });
 
     CCSequence* seq = CCSequence::create(rotateEase, showLevelPopup, nullptr);
