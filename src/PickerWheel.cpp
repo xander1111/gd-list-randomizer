@@ -108,26 +108,37 @@ void PickerWheel::spinWheel(CCObject*)
     if (_slices.empty())
         return;
 
-    // For now, just apply a random rotation, actually picking the level that gets landed on will be implemented later
-    const float rotateAngle = random::generate(360.f * 4.f, 360.f * 6.f);
+    // Prevent repeated spins from causing wheel rotation to grow past float accuracy
+    _wheelMenu->setRotation(fmod(_wheelMenu->getRotation(), 360.f));
+
+    // Pick a random slice to land on
+    const PickerWheelSlice slicePicked = random::choice(_slices);
+    GJGameLevel* levelPicked = slicePicked.level;
+
+    // Pick a random angle within the selected slice's angle range, plus a number of full rotations
+    //
+    // Since we don't rotate to a target angle, but rather add an amount of rotation, we start from the current rotation
+    // to account for whatever rotation the wheel had before spinning
+    const float rotateAngle = -_wheelMenu->getRotation()
+        - random::generate(slicePicked.endAngleDeg, slicePicked.startAngleDeg)
+        - static_cast<float>(random::generate(20,  30)) * 360.f;
+
+    log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked.startAngleDeg, slicePicked.endAngleDeg, rotateAngle);
+
     CCRotateBy* rotate = CCRotateBy::create(6.f, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
-    if (GJGameLevel* levelPicked = random::choice(_slices).level) {
-        const auto loadLevel = CallFuncExt::create([levelPicked]
-        {
-            // Load level page
-            CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
-            CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
-            CCDirector::sharedDirector()->pushScene(transitionFade);
-        });
+    const auto loadLevel = CallFuncExt::create([levelPicked]
+    {
+        // Load level page
+        CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
+        CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
+        CCDirector::sharedDirector()->pushScene(transitionFade);
+    });
 
-        CCSequence* seq = CCSequence::create(rotateEase, loadLevel, nullptr);
+    CCSequence* seq = CCSequence::create(rotateEase, loadLevel, nullptr);
 
-        _wheelMenu->runAction(seq);
-    } else {
-        log::error("LevelListLayer::onRandomizerButton - random object picked is not of type GJGameLevel*");
-    }
+    _wheelMenu->runAction(seq);
 }
 
 CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor4F* color, const char* levelName)
@@ -184,7 +195,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
     }
 
     unsigned int totalWeight = 0;
-    float currentRotation = 0.f;
+    unsigned int processedSlicesWeight = 0;
 
     for (const auto & slice : _slices)
         totalWeight += slice.weight;
@@ -247,8 +258,15 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
             sliceNode->addChild(label);
         }
 
-        sliceNode->setRotation(currentRotation);
-        currentRotation -= angleDeg;
+        // Set slice angle and store its angle range
+        const float startAngle = static_cast<float>(processedSlicesWeight) / static_cast<float>(totalWeight) * -360.f;
+        const float endAngle = static_cast<float>(processedSlicesWeight + slice.weight) / static_cast<float>(totalWeight) * -360.f;
+
+        sliceNode->setRotation(startAngle);
+        slice.startAngleDeg = startAngle;
+        slice.endAngleDeg = endAngle;
+
+        processedSlicesWeight += slice.weight;
 
         wheelSlices->addChild(sliceNode);
     }
