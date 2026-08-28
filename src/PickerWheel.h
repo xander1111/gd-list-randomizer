@@ -7,12 +7,6 @@ using namespace geode::prelude;
 class PickerWheel : public CCMenu
 {
 public:
-
-    static PickerWheel* create(GJLevelList* list);
-
-    bool init() override;
-
-private:
     struct PickerWheelSlice
     {
         GJGameLevel* level;
@@ -23,6 +17,11 @@ private:
         mutable float endAngleDeg;
     };
 
+    static PickerWheel* create(GJLevelList* list);
+
+    bool init() override;
+
+private:
     static ccColor4F* _defaultSliceColorA;
     static ccColor4F* _defaultSliceColorB;
     static ccColor4F* _defaultOutlineColor;

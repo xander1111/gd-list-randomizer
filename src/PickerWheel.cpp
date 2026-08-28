@@ -1,6 +1,7 @@
 #include "PickerWheel.h"
 
 #include "EaseWheelSpin.h"
+#include "SliceSelectedPopup.h"
 
 ccColor4F* PickerWheel::_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
 ccColor4F* PickerWheel::_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
@@ -8,14 +9,14 @@ ccColor4F* PickerWheel::_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f)
 
 PickerWheel* PickerWheel::create(GJLevelList* list)
 {
-    auto menu = new PickerWheel(list);
-    if (menu && menu->init()) {
-        menu->autorelease();
+    auto ret = new PickerWheel(list);
+    if (ret && ret->init()) {
+        ret->autorelease();
     } else {
-        CC_SAFE_DELETE(menu);
+        CC_SAFE_DELETE(ret);
     }
 
-    return menu;
+    return ret;
 }
 
 bool PickerWheel::init()
@@ -112,31 +113,29 @@ void PickerWheel::spinWheel(CCObject*)
     _wheelMenu->setRotation(fmod(_wheelMenu->getRotation(), 360.f));
 
     // Pick a random slice to land on
-    const PickerWheelSlice slicePicked = random::choice(_slices);
-    GJGameLevel* levelPicked = slicePicked.level;
+    const int sliceIndexPicked = random::generate<int, int>(0, _slices.size());
+    PickerWheelSlice* slicePicked = &_slices[sliceIndexPicked];
+    GJGameLevel* levelPicked = slicePicked->level;
 
     // Pick a random angle within the selected slice's angle range, plus a number of full rotations
     //
     // Since we don't rotate to a target angle, but rather add an amount of rotation, we start from the current rotation
     // to account for whatever rotation the wheel had before spinning
     const float rotateAngle = -_wheelMenu->getRotation()
-        - random::generate(slicePicked.endAngleDeg, slicePicked.startAngleDeg)
+        - random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
         - static_cast<float>(random::generate(20,  30)) * 360.f;
 
-    log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked.startAngleDeg, slicePicked.endAngleDeg, rotateAngle);
+    log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
 
     CCRotateBy* rotate = CCRotateBy::create(6.f, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
-    const auto loadLevel = CallFuncExt::create([levelPicked]
+    const auto showLevelPopup = CallFuncExt::create([slicePicked]
     {
-        // Load level page
-        CCScene* levelScene = LevelInfoLayer::scene(levelPicked, false);
-        CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
-        CCDirector::sharedDirector()->pushScene(transitionFade);
+        SliceSelectedPopup::create(slicePicked)->show();
     });
 
-    CCSequence* seq = CCSequence::create(rotateEase, loadLevel, nullptr);
+    CCSequence* seq = CCSequence::create(rotateEase, showLevelPopup, nullptr);
 
     _wheelMenu->runAction(seq);
 }

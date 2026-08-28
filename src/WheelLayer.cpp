@@ -6,14 +6,14 @@ WheelLayer::WheelLayer(GJLevelList* list) : _list(list) {}
 
 WheelLayer* WheelLayer::create(GJLevelList* list)
 {
-    auto layer = new WheelLayer(list);
-    if (layer && layer->init()) {
-        layer->autorelease();
+    auto ret = new WheelLayer(list);
+    if (ret && ret->init()) {
+        ret->autorelease();
     } else {
-        CC_SAFE_DELETE(layer);
+        CC_SAFE_DELETE(ret);
     }
 
-    return layer;
+    return ret;
 }
 
 CCScene* WheelLayer::scene(GJLevelList* list)
