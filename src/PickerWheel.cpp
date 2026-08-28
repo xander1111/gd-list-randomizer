@@ -186,6 +186,9 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
 
         wheelSlices->addChild(generatePickerWheelCircle(radius, _defaultSliceColorA, _slices[0].level->m_levelName.c_str()));
 
+        _slices[0].startAngleDeg = 0.f;
+        _slices[0].endAngleDeg = -360.f;
+
         return wheelSlices;
     }
     default:
