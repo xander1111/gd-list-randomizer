@@ -45,9 +45,9 @@ void EaseWheelSpin::update(float time)
     time *= 8.f;
 
     if (time < 1) {
-        time = powf(time, 3.f);
+        time = powf(time, 3.f) / 5.2f;
     } else {
-        time = 3.f * powf(time - 8.f, 5.f) / 12005.f + 5.2f;
+        time = (3.f * powf(time - 8.f, 5.f) / 12005.f + 5.2f) / 5.2f;
     }
 
     m_pInner->update(time);
