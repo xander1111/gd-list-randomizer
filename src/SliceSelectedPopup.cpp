@@ -50,12 +50,12 @@ bool SliceSelectedPopup::init(PickerWheel::PickerWheelSlice* slice)
     return true;
 }
 
-SliceSelectedPopup::SliceSelectedPopup(PickerWheel::PickerWheelSlice* slice) : _slice(slice) {}
+SliceSelectedPopup::SliceSelectedPopup(PickerWheel::PickerWheelSlice* slice) : m_slice(slice) {}
 
 void SliceSelectedPopup::onViewLevel(CCObject*)
 {
     // Load level page
-    CCScene* levelScene = LevelInfoLayer::scene(_slice->level, false);
+    CCScene* levelScene = LevelInfoLayer::scene(m_slice->level, false);
     CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
     CCDirector::sharedDirector()->pushScene(transitionFade);
 }

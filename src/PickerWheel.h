@@ -9,6 +9,7 @@ class PickerWheel : public CCMenu
 public:
     struct PickerWheelSlice
     {
+        // I think this doesn't need to be a `Ref` since it's theoretically held by the `GJLevelList` we get it from
         GJGameLevel* level;
         unsigned int weight;
         ccColor4F* color;
@@ -22,12 +23,13 @@ public:
     bool init() override;
 
 private:
-    static ccColor4F* _defaultSliceColorA;
-    static ccColor4F* _defaultSliceColorB;
-    static ccColor4F* _defaultOutlineColor;
-    std::vector<PickerWheelSlice> _slices;
+    static ccColor4F* m_defaultSliceColorA;
+    static ccColor4F* m_defaultSliceColorB;
+    static ccColor4F* m_defaultOutlineColor;
+    std::vector<PickerWheelSlice> m_slices;
 
-    CCMenu* _wheelMenu = nullptr;
+    // Doesn't need to be a `Ref` since it gets added as a child of `this`
+    CCMenu* m_wheelMenu = nullptr;
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;

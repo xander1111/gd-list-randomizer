@@ -2,7 +2,7 @@
 
 #include "PickerWheel.h"
 
-WheelLayer::WheelLayer(GJLevelList* list) : _list(list) {}
+WheelLayer::WheelLayer(GJLevelList* list) : m_list(list) {}
 
 WheelLayer* WheelLayer::create(GJLevelList* list)
 {
@@ -90,7 +90,7 @@ bool WheelLayer::init()
 
 
     // Picker wheel
-    CCMenu* pickerWheel = PickerWheel::create(_list);
+    CCMenu* pickerWheel = PickerWheel::create(m_list);
     pickerWheel->setID("picker-wheel"_spr);
 
     pickerWheel->setPosition({winSize.width / 2, winSize.height / 2});

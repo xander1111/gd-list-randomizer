@@ -18,5 +18,5 @@ private:
 
     void onViewLevel(CCObject*);
 
-    PickerWheel::PickerWheelSlice* _slice;
+    PickerWheel::PickerWheelSlice* m_slice;
 };

@@ -3,9 +3,9 @@
 #include "EaseWheelSpin.h"
 #include "SliceSelectedPopup.h"
 
-ccColor4F* PickerWheel::_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
-ccColor4F* PickerWheel::_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
-ccColor4F* PickerWheel::_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
+ccColor4F* PickerWheel::m_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
+ccColor4F* PickerWheel::m_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
+ccColor4F* PickerWheel::m_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
 
 PickerWheel* PickerWheel::create(GJLevelList* list)
 {
@@ -44,11 +44,11 @@ bool PickerWheel::init()
 
 
     // Wheel
-    _wheelMenu = CCMenu::create();
-    _wheelMenu->setID("wheel-menu"_spr);
-    _wheelMenu->setPosition({0, 0});
-    _wheelMenu->setAnchorPoint({0, 0});
-    _wheelMenu->setZOrder(0);
+    m_wheelMenu = CCMenu::create();
+    m_wheelMenu->setID("wheel-menu"_spr);
+    m_wheelMenu->setPosition({0, 0});
+    m_wheelMenu->setAnchorPoint({0, 0});
+    m_wheelMenu->setZOrder(0);
 
 
     // Wheel slices
@@ -57,37 +57,37 @@ bool PickerWheel::init()
     CCNode* wheelSlices = generateWheelSliceNodes(radius);
     wheelSlices->setPosition({0, 0});
     wheelSlices->setZOrder(-1);
-    _wheelMenu->addChild(wheelSlices);
+    m_wheelMenu->addChild(wheelSlices);
 
     // Wheel outline
     CCDrawNode* outline = CCDrawNode::create();
-    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *_defaultOutlineColor, CircleSegmentCount);
+    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *m_defaultOutlineColor, CircleSegmentCount);
     outline->setZOrder(1);
     outline->setID("wheel-outline"_spr);
 
-    _wheelMenu->addChild(outline);
+    m_wheelMenu->addChild(outline);
 
     // If the last slice uses color 1
-    if (_slices.size() > 2 && _slices.size() % 2 == 1) {
+    if (m_slices.size() > 2 && m_slices.size() % 2 == 1) {
         log::debug("Last slice uses same color as first slice, generating separator line");
 
         CCDrawNode* line = CCDrawNode::create();
-        const float lineThickness = _slices.size() > 50 ? 0.3f : 0.5f;
+        const float lineThickness = m_slices.size() > 50 ? 0.3f : 0.5f;
 
-        line->drawSegment({0, 0}, {radius, 0}, lineThickness, *_defaultSliceColorB);
+        line->drawSegment({0, 0}, {radius, 0}, lineThickness, *m_defaultSliceColorB);
         line->setID("end-separator"_spr);
 
-        _wheelMenu->addChild(line);
+        m_wheelMenu->addChild(line);
     }
 
-    addChild(_wheelMenu);
+    addChild(m_wheelMenu);
 
     return true;
 }
 
 PickerWheel::PickerWheel(GJLevelList* list)
 {
-    _slices = std::vector<PickerWheelSlice>(list->totalLevels());
+    m_slices = std::vector<PickerWheelSlice>(list->totalLevels());
 
     CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
 
@@ -97,31 +97,31 @@ PickerWheel::PickerWheel(GJLevelList* list)
         const PickerWheelSlice newSlice = {
             .level = level,
             .weight = 1u,
-            .color = levelListIndex % 2 == 0 ? _defaultSliceColorA : _defaultSliceColorB
+            .color = levelListIndex % 2 == 0 ? m_defaultSliceColorA : m_defaultSliceColorB
         };
 
-        _slices[levelListIndex] = newSlice;
+        m_slices[levelListIndex] = newSlice;
     }
 }
 
 void PickerWheel::spinWheel(CCObject*)
 {
-    if (_slices.empty())
+    if (m_slices.empty())
         return;
 
     // Prevent repeated spins from causing wheel rotation to grow past float accuracy
-    _wheelMenu->setRotation(fmod(_wheelMenu->getRotation(), 360.f));
+    m_wheelMenu->setRotation(fmod(m_wheelMenu->getRotation(), 360.f));
 
     // Pick a random slice to land on
-    const int sliceIndexPicked = random::generate<int, int>(0, _slices.size());
-    PickerWheelSlice* slicePicked = &_slices[sliceIndexPicked];
+    const int sliceIndexPicked = random::generate<int, int>(0, m_slices.size());
+    PickerWheelSlice* slicePicked = &m_slices[sliceIndexPicked];
     GJGameLevel* levelPicked = slicePicked->level;
 
     // Pick a random angle within the selected slice's angle range, plus a number of full rotations
     //
     // Since we don't rotate to a target angle, but rather add an amount of rotation, we start from the current rotation
     // to account for whatever rotation the wheel had before spinning
-    const float rotateAngle = -_wheelMenu->getRotation()
+    const float rotateAngle = -m_wheelMenu->getRotation()
         - random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
         - static_cast<float>(random::generate(20,  30)) * 360.f;
 
@@ -133,11 +133,13 @@ void PickerWheel::spinWheel(CCObject*)
     const auto showLevelPopup = CallFuncExt::create([slicePicked]
     {
         SliceSelectedPopup::create(slicePicked)->show();
+
+        // TODO make sound
     });
 
     CCSequence* seq = CCSequence::create(rotateEase, showLevelPopup, nullptr);
 
-    _wheelMenu->runAction(seq);
+    m_wheelMenu->runAction(seq);
 }
 
 CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor4F* color, const char* levelName)
@@ -171,12 +173,12 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
     CCMenu* wheelSlices = CCMenu::create();
     wheelSlices->setID("wheel-slices"_spr);
 
-    switch (_slices.size()) {
+    switch (m_slices.size()) {
     case 0: {
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(radius, _defaultSliceColorA, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(radius, m_defaultSliceColorA, "No levels"));
 
         return wheelSlices;
     }
@@ -184,10 +186,10 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(radius, _defaultSliceColorA, _slices[0].level->m_levelName.c_str()));
+        wheelSlices->addChild(generatePickerWheelCircle(radius, m_defaultSliceColorA, m_slices[0].level->m_levelName.c_str()));
 
-        _slices[0].startAngleDeg = 0.f;
-        _slices[0].endAngleDeg = -360.f;
+        m_slices[0].startAngleDeg = 0.f;
+        m_slices[0].endAngleDeg = -360.f;
 
         return wheelSlices;
     }
@@ -199,10 +201,10 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
     unsigned int totalWeight = 0;
     unsigned int processedSlicesWeight = 0;
 
-    for (const auto & slice : _slices)
+    for (const auto & slice : m_slices)
         totalWeight += slice.weight;
 
-    for (const auto & slice : _slices) {
+    for (const auto & slice : m_slices) {
         // Node for both the wheel slice and the text to go under
         CCNode* sliceNode = CCNode::create();
 

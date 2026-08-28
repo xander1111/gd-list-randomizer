@@ -18,5 +18,5 @@ public:
 private:
     void onBack(CCObject*);
 
-    GJLevelList* _list;
+    GJLevelList* m_list;
 };
