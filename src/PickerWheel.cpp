@@ -282,17 +282,27 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
             CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "goldFont.fnt");
             label->setID("slice-label"_spr);
 
-            float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+            // Find maximum possible scale to fit the text into the slice
+            // Calculation explanations/visualizations here: https://www.desmos.com/calculator/qkrhzaq1fo
 
-            float minY = 0.f;
-            float maxY = 0.f;
-            for (const auto& point : points) {
-                minY = std::min(minY, point.y);
-                maxY = std::max(maxY, point.y);
+            const CCPoint* maxYPoint = &points[0];
+            for (auto& point : points) {
+                if (maxYPoint->y < point.y)
+                    maxYPoint = &point;
             }
-            const float sliceHeight = maxY - minY;
-            labelScale = std::min(labelScale, sliceHeight * 0.5f / label->getContentSize().height);
+
+            // Highest Y value is not directly above the other end of the arc, and the 'height' I want is actually the
+            // base of the isosceles triangle that fills the arc
+            const float sliceHeight = sqrt(powf(maxYPoint->y, 2.f) + powf(radius - maxYPoint->x, 2.f));
+
+            const float maxWidth = sliceHeight / (sliceHeight / radius + label->getContentHeight() / label->getContentWidth());
+            const float maxScale = maxWidth / label->getContentWidth();
+
+            // Futher limit the width of the text so it doesn't run into the 'spin' button
+            float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+            labelScale = std::min(labelScale, maxScale);
             label->setScale(labelScale);
+
             label->setRotation(angleDeg / -2.f);
             label->setPosition({radius * 0.95f * cos(angleRad / 2.f), radius * 0.95f * sin(angleRad / 2.f)});
             label->setAnchorPoint({1.f, 0.45f});
