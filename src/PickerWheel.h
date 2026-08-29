@@ -22,6 +22,8 @@ public:
 
     bool init() override;
 
+    void update(float dt);
+
 private:
     static ccColor4F* m_defaultSliceColorA;
     static ccColor4F* m_defaultSliceColorB;
@@ -34,6 +36,9 @@ private:
     // Tracks the index of the slice that the wheel ticker is currently pointing at
     unsigned int m_currentlyPointedAtSlice = 0;
 
+    // Set to `true` to enable the slow idle spin animation
+    bool m_idleSpin = true;
+
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
 
@@ -43,11 +48,14 @@ private:
     // Minimum time between playing a tick sound when the wheel spins
     static constexpr float TimePerTickSound = 0.03f;
 
+    // Number of degrees to rotate per second when idly spinning
+    static constexpr float IdleRotateRate = 6.0f;
+
     explicit PickerWheel(GJLevelList* list);
 
     void spinWheel(CCObject*);
 
-    void updateAudio(float dt);
+    void updateAudio(float);
 
     static CCNode* generatePickerWheelCircle(float radius, const ccColor4F* color, const char* levelName);
 

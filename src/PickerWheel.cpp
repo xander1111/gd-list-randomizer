@@ -84,8 +84,15 @@ bool PickerWheel::init()
     addChild(m_wheelMenu);
 
     schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
+    scheduleUpdate();
 
     return true;
+}
+
+void PickerWheel::update(float dt)
+{
+    if (m_idleSpin && !m_slices.empty())
+        m_wheelMenu->setRotation(m_wheelMenu->getRotation() - IdleRotateRate * dt);
 }
 
 PickerWheel::PickerWheel(GJLevelList* list)
@@ -111,6 +118,9 @@ void PickerWheel::spinWheel(CCObject*)
 {
     if (m_slices.empty())
         return;
+
+    // Once the user has spun the wheel, disable the idle spin animation
+    m_idleSpin = false;
 
     // Prevent repeated spins from causing wheel rotation to grow past float accuracy
     m_wheelMenu->setRotation(fmod(m_wheelMenu->getRotation(), 360.f));
@@ -145,8 +155,15 @@ void PickerWheel::spinWheel(CCObject*)
     m_wheelMenu->runAction(seq);
 }
 
-void PickerWheel::updateAudio(float dt)
+void PickerWheel::updateAudio(float)
 {
+    if (m_idleSpin)
+        // Don't play ticks when the wheel is just idly spinning
+        return;
+
+    if (m_slices.empty())
+        return;
+
     bool playTick = false;
 
     // Find the first slice we are in the angle range of. Repeatedly checks incase we pass over multiple slices in one frame
@@ -226,7 +243,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
     for (const auto & slice : m_slices)
         totalWeight += slice.weight;
 
-    for (const auto & slice : m_slices) {
+    for (auto & slice : m_slices) {
         // Node for both the wheel slice and the text to go under
         CCNode* sliceNode = CCNode::create();
 
