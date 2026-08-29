@@ -26,7 +26,6 @@ bool PickerWheel::init()
 
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
-    // TODO Temp spin button sprite, will make this look better later
     // Spin button
     ButtonSprite* spinButtonSprite = ButtonSprite::create("Spin", 0.5f);
     CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
@@ -43,13 +42,22 @@ bool PickerWheel::init()
 
     addChild(spinButtonMenu);
 
+    // Wheel outer menu, used to rotate the wheel without messing up any internal angle calculations
+    CCMenu* wheelOuterMenu = CCMenu::create();
+    wheelOuterMenu->setID("wheel-outer-menu"_spr);
+    wheelOuterMenu->setPosition({0, 0});
+    wheelOuterMenu->setAnchorPoint({0, 0});
+    wheelOuterMenu->setZOrder(0);
+
+    // Rotate to make the selected slice be at the top of the wheel
+    wheelOuterMenu->setRotation(-90.f);
+
 
     // Wheel
     m_wheelMenu = CCMenu::create();
     m_wheelMenu->setID("wheel-menu"_spr);
     m_wheelMenu->setPosition({0, 0});
     m_wheelMenu->setAnchorPoint({0, 0});
-    m_wheelMenu->setZOrder(0);
 
 
     // Wheel slices
@@ -66,7 +74,7 @@ bool PickerWheel::init()
     outline->setZOrder(1);
     outline->setID("wheel-outline"_spr);
 
-    m_wheelMenu->addChild(outline);
+    wheelOuterMenu->addChild(outline);
 
     // If the last slice uses color 1
     if (m_slices.size() > 2 && m_slices.size() % 2 == 1) {
@@ -81,7 +89,9 @@ bool PickerWheel::init()
         m_wheelMenu->addChild(line);
     }
 
-    addChild(m_wheelMenu);
+    wheelOuterMenu->addChild(m_wheelMenu);
+
+    addChild(wheelOuterMenu);
 
     schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
     scheduleUpdate();
