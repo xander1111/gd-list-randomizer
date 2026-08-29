@@ -37,7 +37,7 @@ private:
     unsigned int m_currentlyPointedAtSlice = 0;
 
     // Set to `true` to enable the slow idle spin animation
-    bool m_idleSpin = true;
+    bool m_idleSpin = Mod::get()->getSettingValue<bool>("initial-spinning");
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
