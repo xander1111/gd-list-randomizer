@@ -83,7 +83,7 @@ bool PickerWheel::init()
 
     addChild(m_wheelMenu);
 
-    schedule(schedule_selector(PickerWheel::updateAudio));
+    schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
 
     return true;
 }
@@ -147,12 +147,6 @@ void PickerWheel::spinWheel(CCObject*)
 
 void PickerWheel::updateAudio(float dt)
 {
-    static float timeSinceLastPlay = 0.f;
-    timeSinceLastPlay += dt;
-
-    if (timeSinceLastPlay < TimePerTickSound)
-        return;
-
     bool playTick = false;
 
     // Find the first slice we are in the angle range of. Repeatedly checks incase we pass over multiple slices in one frame
@@ -160,9 +154,8 @@ void PickerWheel::updateAudio(float dt)
 
     // While outside the angle range of the current slice
     while (currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation) {
-        // We are pointing to a different slice than we were last frame, play a tick noise to indicate this
+        // We are pointing to a different slice than we were last update, play a tick noise to indicate this
         playTick = true;
-        timeSinceLastPlay = 0.f;
 
         m_currentlyPointedAtSlice = (m_currentlyPointedAtSlice + 1) % m_slices.size();
     }
