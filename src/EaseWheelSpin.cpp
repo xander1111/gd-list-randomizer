@@ -41,13 +41,15 @@ CCActionInterval* EaseWheelSpin::reverse()
 
 void EaseWheelSpin::update(float time)
 {
-    // Graph that I used to make this equation can be found here: https://www.desmos.com/calculator/pgxa9wqvrz
-    time *= 8.f;
+    // Graph that I used to make this equation can be found here: https://www.desmos.com/calculator/dxsofzkjq2
 
-    if (time < 1) {
-        time = powf(time, 3.f) / 5.2f;
-    } else {
-        time = (3.f * powf(time - 8.f, 5.f) / 12005.f + 5.2f) / 5.2f;
+    if (time < 0.2f) {
+        time = time / 0.2f;
+        time = powf(time, 2.f) * 0.6f;
+    }
+    else {
+        const float decelT = (time - 0.2f) / 0.8f;  // Normalizes `decelT` to 0 - 1 for values of `time` 0.2 - 1
+        time = 0.6f + 0.4f * (1.f - powf(1.f - decelT, 5.f));
     }
 
     m_pInner->update(time);
