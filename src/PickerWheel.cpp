@@ -4,8 +4,8 @@
 #include "SliceSelectedPopup.h"
 #include "Utils.h"
 
-ccColor4F* PickerWheel::m_defaultSliceColorA = new ccColor4F(0.4f, 0.4f, 0.4f, 1.f);
-ccColor4F* PickerWheel::m_defaultSliceColorB = new ccColor4F(0.8f, 0.8f, 0.8f, 1.f);
+ccColor4F* PickerWheel::m_defaultSliceColorA = new ccColor4F(161.f / 255.f, 88.f / 255.f, 44.f / 255.f, 1.f);
+ccColor4F* PickerWheel::m_defaultSliceColorB = new ccColor4F(194.f / 255.f, 114.f / 255.f, 62.f / 255.f, 1.f);
 ccColor4F* PickerWheel::m_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
 
 PickerWheel* PickerWheel::create(GJLevelList* list)

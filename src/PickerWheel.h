@@ -22,7 +22,7 @@ public:
 
     bool init() override;
 
-    void update(float dt);
+    void update(float dt) override;
 
 private:
     static ccColor4F* m_defaultSliceColorA;
