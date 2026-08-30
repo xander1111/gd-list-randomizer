@@ -1,23 +1,36 @@
-# list_randomizer
-This is where she makes a mod.
+# List Randomizer
 
 <img src="logo.png" width="150" alt="the mod's logo" />
 
-*Update logo.png to change your mod's icon (please)*
+A Geometry Dash mod that adds a wheel that can be spun to select a random level from an ingame list.
 
-## Getting started
-We recommend heading over to [the getting started section on our docs](https://docs.geode-sdk.org/getting-started/) for useful info on what to do next.
+
+## Features
+
+- A wheel that you can spin to randomly pick a level from a list
+
+
+### Planned Features
+
+- Allow levels to be assigned weights, affecting their probability of being chosen
+- Allow levels to be automatically assigned weight based on AREDL placement, GDDL ranking, or in-game difficulty rating
+- Customizable color theme
+- Customizable sounds
+- Hiding levels from the wheel, meaning they aren't an option to be selected
+- Allow filtering levels to be hidden. For example, automatically hiding all completed levels.
+
 
 ## Build instructions
-For more info, see [our docs](https://docs.geode-sdk.org/getting-started/create-mod#build)
+
+This mod is built with [Geode SDK](https://geode-sdk.org/install), which has installation instructions [here](https://docs.geode-sdk.org/).
+If you have the Geode SDK installed, you can run this command to build:
+
 ```sh
-# Assuming you have the Geode CLI set up already
 geode build
 ```
 
-# Resources
-* [Geode SDK Documentation](https://docs.geode-sdk.org/)
-* [Geode SDK Source Code](https://github.com/geode-sdk/geode/)
-* [Geode CLI](https://github.com/geode-sdk/cli)
-* [Bindings](https://github.com/geode-sdk/bindings/)
-* [Dev Tools](https://github.com/geode-sdk/DevTools)
+
+## Acknowledgements
+
+The audio files [selectLevel.ogg](resources/audio/selectLevel.ogg) and [tick.ogg](resources/audio/tick.ogg) are taken from Geometry Dash's own sound effect library, I did not create them nor do I own them.
+I assume that their presence in the sound effect library means it's OK for me to use them in this way, but wanted to clarify anyway.
