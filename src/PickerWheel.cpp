@@ -1,0 +1,365 @@
+#include "PickerWheel.h"
+
+#include "EaseWheelSpin.h"
+#include "SliceSelectedPopup.h"
+#include "Utils.h"
+
+ccColor4F* PickerWheel::m_defaultSliceColorA = new ccColor4F(161.f / 255.f, 88.f / 255.f, 44.f / 255.f, 1.f);
+ccColor4F* PickerWheel::m_defaultSliceColorB = new ccColor4F(194.f / 255.f, 114.f / 255.f, 62.f / 255.f, 1.f);
+ccColor4F* PickerWheel::m_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
+
+PickerWheel* PickerWheel::create(GJLevelList* list)
+{
+    auto ret = new PickerWheel(list);
+    if (ret && ret->init()) {
+        ret->autorelease();
+    } else {
+        CC_SAFE_DELETE(ret);
+    }
+
+    return ret;
+}
+
+bool PickerWheel::init()
+{
+    if (!CCMenu::init()) return false;
+
+    setLayout(AnchorLayout::create());
+
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+
+    // Spin button
+    ButtonSprite* spinButtonSprite = ButtonSprite::create("Spin", 0.5f);
+    CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
+        spinButtonSprite,
+        this,
+        menu_selector(PickerWheel::spinWheel)
+    );
+
+    CCMenu* const spinButtonMenu = CCMenu::create();
+    spinButtonMenu->setID("randomizer-menu"_spr);
+    spinButtonMenu->addChild(spinButton);
+    spinButtonMenu->setPosition({0, 0});
+    spinButtonMenu->setZOrder(1);
+
+    addChildAtPosition(spinButtonMenu, Anchor::Center);
+
+    // Wheel outer menu, used to rotate the wheel without messing up any internal angle calculations
+    CCMenu* wheelOuterMenu = CCMenu::create();
+    wheelOuterMenu->setID("wheel-outer-menu"_spr);
+    wheelOuterMenu->setPosition({0, 0});
+    wheelOuterMenu->setAnchorPoint({0, 0});
+    wheelOuterMenu->setZOrder(0);
+
+    // Rotate to make the selected slice be at the top of the wheel
+    wheelOuterMenu->setRotation(-90.f);
+
+
+    // Wheel
+    m_wheelMenu = CCMenu::create();
+    m_wheelMenu->setID("wheel-menu"_spr);
+    m_wheelMenu->setPosition({0, 0});
+    m_wheelMenu->setAnchorPoint({0, 0});
+
+
+    // Wheel slices
+    const float radius = winSize.height * 0.4f;;
+
+    CCNode* wheelSlices = generateWheelSliceNodes(radius);
+    wheelSlices->setPosition({0, 0});
+    wheelSlices->setZOrder(-1);
+    m_wheelMenu->addChild(wheelSlices);
+
+    // If the last slice uses color 1
+    if (m_slices.size() > 2 && m_slices.size() % 2 == 1) {
+        log::debug("Last slice uses same color as first slice, generating separator line");
+
+        CCDrawNode* line = CCDrawNode::create();
+        line->setID("end-separator"_spr);
+        const float lineThickness = m_slices.size() > 50 ? 0.3f : 0.5f;
+
+        line->drawSegment({0, 0}, {radius, 0}, lineThickness, *m_defaultSliceColorB);
+
+        m_wheelMenu->addChild(line);
+    }
+
+    wheelOuterMenu->addChild(m_wheelMenu);
+
+    // Wheel outline
+    CCDrawNode* outline = CCDrawNode::create();
+    outline->setID("wheel-outline"_spr);
+    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *m_defaultOutlineColor, CircleSegmentCount);
+    outline->setZOrder(1);
+
+    wheelOuterMenu->addChild(outline);
+
+    // Ticker
+    CCDrawNode* ticker = CCDrawNode::create();
+    ticker->setID("ticker"_spr);
+
+    CCPoint tickerPoints[] = {
+        {0.f, 4.f},
+        {10.f, 0.f},
+        {0.f, -4.f}
+    };
+    ticker->drawPolygon(
+        tickerPoints,
+        3,
+        *m_defaultSliceColorA,
+        0.5f,
+        *m_defaultOutlineColor
+    );
+    ticker->setPosition({14.f, 0.f});
+    ticker->setZOrder(1);
+
+    wheelOuterMenu->addChild(ticker);
+
+    addChildAtPosition(wheelOuterMenu, Anchor::Center);
+
+    setContentSize({2.f * radius, 2.f * radius});
+
+    updateLayout();
+
+    schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
+    scheduleUpdate();
+
+    return true;
+}
+
+void PickerWheel::update(float dt)
+{
+    if (m_idleSpin && !m_slices.empty())
+        m_wheelMenu->setRotation(m_wheelMenu->getRotation() - IdleRotateRate * dt);
+}
+
+PickerWheel::PickerWheel(GJLevelList* list)
+{
+    m_slices = std::vector<PickerWheelSlice>(list->totalLevels());
+
+    CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
+
+    for (auto [key, level] : levels) {
+        const int levelListIndex = list->orderForLevel(level->m_levelID);
+
+        const PickerWheelSlice newSlice = {
+            .level = level,
+            .weight = 1u,
+            .color = levelListIndex % 2 == 0 ? m_defaultSliceColorA : m_defaultSliceColorB
+        };
+
+        m_slices[levelListIndex] = newSlice;
+    }
+}
+
+void PickerWheel::spinWheel(CCObject*)
+{
+    if (m_slices.empty())
+        return;
+
+    // Once the user has spun the wheel, disable the idle spin animation
+    m_idleSpin = false;
+
+    // Prevent repeated spins from causing wheel rotation to grow past float accuracy
+    m_wheelMenu->setRotation(fmod(m_wheelMenu->getRotation(), 360.f));
+
+    // Pick a random slice to land on
+    const int sliceIndexPicked = random::generate<int, int>(0, m_slices.size());
+    PickerWheelSlice* slicePicked = &m_slices[sliceIndexPicked];
+    GJGameLevel* levelPicked = slicePicked->level;
+
+    // Pick a random angle within the selected slice's angle range, plus a 10 full rotations
+    //
+    // Since we don't rotate to a target angle, but rather add an amount of rotation, we start from the current rotation
+    // to account for whatever rotation the wheel had before spinning
+    const float rotateAngle = -m_wheelMenu->getRotation()
+        - random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
+        - 7200.f;
+
+    log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
+
+    CCRotateBy* rotate = CCRotateBy::create(7.f, rotateAngle);
+    EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
+
+    const auto showLevelPopup = CallFuncExt::create([slicePicked]
+    {
+        SliceSelectedPopup::create(slicePicked)->show();
+
+        Utils::playResourceSound("selectLevel.ogg");
+    });
+
+    CCSequence* seq = CCSequence::create(rotateEase, showLevelPopup, nullptr);
+
+    m_wheelMenu->runAction(seq);
+}
+
+void PickerWheel::updateAudio(float)
+{
+    if (m_idleSpin)
+        // Don't play ticks when the wheel is just idly spinning
+        return;
+
+    if (m_slices.empty())
+        return;
+
+    bool playTick = false;
+
+    // Find the first slice we are in the angle range of. Repeatedly checks incase we pass over multiple slices in one frame
+    const float currentRotation = fmod(m_wheelMenu->getRotation(), 360.f);
+
+    // While outside the angle range of the current slice
+    while (currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation) {
+        // We are pointing to a different slice than we were last update, play a tick noise to indicate this
+        playTick = true;
+
+        m_currentlyPointedAtSlice = (m_currentlyPointedAtSlice + 1) % m_slices.size();
+    }
+
+    if (playTick)
+        Utils::playResourceSound("tick.ogg");
+}
+
+CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor4F* color, const char* levelName)
+{
+    CCNode* sliceNode = CCNode::create();
+
+    CCDrawNode* circle = CCDrawNode::create();
+    circle->setID("slice-background"_spr);
+    circle->drawCircle({0, 0}, radius, *color, 0.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, CircleSegmentCount);
+
+    circle->setZOrder(-1);
+    sliceNode->addChild(circle);
+
+    CCLabelBMFont* label = CCLabelBMFont::create(levelName, "goldFont.fnt");
+    label->setID("slice-label"_spr);
+
+    const float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+    label->setScale(labelScale);
+    label->setRotation(0.f);
+    label->setPosition({radius * 0.95f, 0});
+    label->setAnchorPoint({1.f, 0.45f});
+    label->setZOrder(1);
+
+    sliceNode->addChild(label);
+
+    return sliceNode;
+}
+
+CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
+{
+    CCMenu* wheelSlices = CCMenu::create();
+    wheelSlices->setID("wheel-slices"_spr);
+
+    switch (m_slices.size()) {
+    case 0: {
+        // When we have no levels, draw a placeholder wheel
+        log::debug("No slices, generating placeholder wheel");
+
+        wheelSlices->addChild(generatePickerWheelCircle(radius, m_defaultSliceColorA, "No levels"));
+
+        return wheelSlices;
+    }
+    case 1: {
+        // When we only have one level in the list, we can just draw a circle
+        log::debug("1 slice, generating circle wheel");
+
+        wheelSlices->addChild(generatePickerWheelCircle(radius, m_defaultSliceColorA, m_slices[0].level->m_levelName.c_str()));
+
+        m_slices[0].startAngleDeg = 0.f;
+        m_slices[0].endAngleDeg = -360.f;
+
+        return wheelSlices;
+    }
+    default:
+        log::debug(">1 slices, generating arc segments");
+        break;
+    }
+
+    unsigned int totalWeight = 0;
+    unsigned int processedSlicesWeight = 0;
+
+    for (const auto & slice : m_slices)
+        totalWeight += slice.weight;
+
+    for (auto & slice : m_slices) {
+        // Node for both the wheel slice and the text to go under
+        CCNode* sliceNode = CCNode::create();
+
+        const float angleDeg = 360.f * (static_cast<float>(slice.weight) / static_cast<float>(totalWeight));
+        const float angleRad = kmDegreesToRadians(angleDeg);
+
+        CCDrawNode* arc = CCDrawNode::create();
+        arc->setID("slice-background"_spr);
+        std::vector<CCPoint> points;
+        points.reserve(CircleSegmentCount + 3);
+        points.emplace_back(0.f, 0.f);
+
+        // Calculate arc points
+        const int arcSegments = std::max(1, static_cast<int>(std::ceil((angleDeg / 360.f) * CircleSegmentCount)));
+        for (int s = 0; s <= arcSegments; ++s) {
+            const float t = static_cast<float>(s) / static_cast<float>(arcSegments);
+            const float a = angleRad * t;
+            points.emplace_back(radius * cos(a), radius * sin(a));
+        }
+        points.emplace_back(0.f, 0.f);
+
+        arc->drawPolygon(
+            points.data(),
+            static_cast<unsigned int>(points.size()),
+            *slice.color,
+            0.f,
+            {.r = 0, .g = 0, .b = 0, .a = 1},
+            BorderAlignment::Center
+        );
+
+        arc->setZOrder(-1);
+        sliceNode->addChild(arc);
+
+        // ~1 degree is where it's nearly impossible to even tell that there's text. Larger angles might still be unreadable, but you'd be able to tell the text is missing
+        if (angleDeg > 1.f) {
+            CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "goldFont.fnt");
+            label->setID("slice-label"_spr);
+
+            // Find maximum possible scale to fit the text into the slice
+            // Calculation explanations/visualizations here: https://www.desmos.com/calculator/qkrhzaq1fo
+
+            const CCPoint* maxYPoint = &points[0];
+            for (auto& point : points) {
+                if (maxYPoint->y < point.y)
+                    maxYPoint = &point;
+            }
+
+            // Highest Y value is not directly above the other end of the arc, and the 'height' I want is actually the
+            // base of the isosceles triangle that fills the arc
+            const float sliceHeight = sqrt(powf(maxYPoint->y, 2.f) + powf(radius - maxYPoint->x, 2.f));
+
+            const float maxWidth = sliceHeight / (sliceHeight / radius + label->getContentHeight() / label->getContentWidth());
+            const float maxScale = maxWidth / label->getContentWidth();
+
+            // Futher limit the width of the text so it doesn't run into the 'spin' button
+            float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+            labelScale = std::min(labelScale, maxScale);
+            label->setScale(labelScale);
+
+            label->setRotation(angleDeg / -2.f);
+            label->setPosition({radius * 0.95f * cos(angleRad / 2.f), radius * 0.95f * sin(angleRad / 2.f)});
+            label->setAnchorPoint({1.f, 0.45f});
+            label->setZOrder(1);
+
+            sliceNode->addChild(label);
+        }
+
+        // Set slice angle and store its angle range
+        const float startAngle = static_cast<float>(processedSlicesWeight) / static_cast<float>(totalWeight) * -360.f;
+        const float endAngle = static_cast<float>(processedSlicesWeight + slice.weight) / static_cast<float>(totalWeight) * -360.f;
+
+        sliceNode->setRotation(startAngle);
+        slice.startAngleDeg = startAngle;
+        slice.endAngleDeg = endAngle;
+
+        processedSlicesWeight += slice.weight;
+
+        wheelSlices->addChild(sliceNode);
+    }
+
+    return wheelSlices;
+}
