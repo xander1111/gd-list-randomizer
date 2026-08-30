@@ -71,16 +71,27 @@ bool PickerWheel::init()
     m_wheelMenu->addChild(wheelSlices);
 
     // If the last slice uses color 1
-    if (m_slices.size() > 2 && m_slices.size() % 2 == 1) {
+    if (m_slices.size() > 1 && m_slices.size() % 2 == 1) {
         log::debug("Last slice uses same color as first slice, generating separator line");
 
-        CCDrawNode* line = CCDrawNode::create();
-        line->setID("end-separator"_spr);
-        const float lineThickness = m_slices.size() > 50 ? 0.3f : 0.5f;
+        // start - end instead of end - start used since all the rotations are negative
+        const float lastSliceAngle = m_slices[m_slices.size() - 1].startAngleDeg - m_slices[m_slices.size() - 1].endAngleDeg;
+        const float firstSliceAngle = m_slices[0].startAngleDeg - m_slices[0].endAngleDeg;
 
-        line->drawSegment({0, 0}, {radius, 0}, lineThickness, *m_defaultSliceColorB);
+        // Equation used means that a slice that is 1/100th of the wheel gives a thickness of 0.3,
+        // maximum thickness is ~0.5, and thickness goes below 0 when a slice is 1/250th of the wheel
+        const float lineThickness = std::min(
+            -0.002f * (360.f / firstSliceAngle) + 0.5f,
+            -0.002f * (360.f / lastSliceAngle) + 0.5f
+        );
 
-        m_wheelMenu->addChild(line);
+        if (lineThickness > 0.0f) {
+            CCDrawNode* line = CCDrawNode::create();
+            line->setID("end-separator"_spr);
+
+            line->drawSegment({0, 0}, {radius, 0}, lineThickness, *m_defaultSliceColorB);
+            m_wheelMenu->addChild(line);
+        }
     }
 
     wheelOuterMenu->addChild(m_wheelMenu);
