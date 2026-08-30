@@ -37,9 +37,9 @@ bool PickerWheel::init()
     );
 
     CCMenu* const spinButtonMenu = CCMenu::create();
+    spinButtonMenu->setID("randomizer-menu"_spr);
     spinButtonMenu->addChild(spinButton);
     spinButtonMenu->setPosition({0, 0});
-    spinButtonMenu->setID("randomizer-menu"_spr);
     spinButtonMenu->setZOrder(1);
 
     addChildAtPosition(spinButtonMenu, Anchor::Center);
@@ -72,29 +72,47 @@ bool PickerWheel::init()
 
     // Wheel outline
     CCDrawNode* outline = CCDrawNode::create();
+    outline->setID("wheel-outline"_spr);
     outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *m_defaultOutlineColor, CircleSegmentCount);
     outline->setZOrder(1);
-    outline->setID("wheel-outline"_spr);
 
     wheelOuterMenu->addChild(outline);
+
+    // Ticker
+    CCDrawNode* tickerOutline = CCDrawNode::create();
+    tickerOutline->setID("ticker"_spr);
+
+    CCPoint tickerPoints[] = {
+        {0.f, 4.f},
+        {10.f, 0.f},
+        {0.f, -4.f}
+    };
+    tickerOutline->drawPolygon(
+        tickerPoints,
+        3,
+        *m_defaultSliceColorA,
+        0.5f,
+        *m_defaultOutlineColor
+    );
+    tickerOutline->setPosition({14.f, 0.f});
+    tickerOutline->setZOrder(1);
+
+    wheelOuterMenu->addChild(tickerOutline);
 
     // If the last slice uses color 1
     if (m_slices.size() > 2 && m_slices.size() % 2 == 1) {
         log::debug("Last slice uses same color as first slice, generating separator line");
 
         CCDrawNode* line = CCDrawNode::create();
+        line->setID("end-separator"_spr);
         const float lineThickness = m_slices.size() > 50 ? 0.3f : 0.5f;
 
         line->drawSegment({0, 0}, {radius, 0}, lineThickness, *m_defaultSliceColorB);
-        line->setID("end-separator"_spr);
 
         m_wheelMenu->addChild(line);
     }
 
     wheelOuterMenu->addChild(m_wheelMenu);
-
-    // TODO
-    //   Ticker
 
     addChildAtPosition(wheelOuterMenu, Anchor::Center);
 
@@ -205,9 +223,9 @@ CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor
     CCNode* sliceNode = CCNode::create();
 
     CCDrawNode* circle = CCDrawNode::create();
+    circle->setID("slice-background"_spr);
     circle->drawCircle({0, 0}, radius, *color, 0.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, CircleSegmentCount);
 
-    circle->setID("slice-background"_spr);
     circle->setZOrder(-1);
     sliceNode->addChild(circle);
 
@@ -270,6 +288,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         const float angleRad = kmDegreesToRadians(angleDeg);
 
         CCDrawNode* arc = CCDrawNode::create();
+        arc->setID("slice-background"_spr);
         std::vector<CCPoint> points;
         points.reserve(CircleSegmentCount + 3);
         points.emplace_back(0.f, 0.f);
@@ -292,7 +311,6 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
             BorderAlignment::Center
         );
 
-        arc->setID("slice-background"_spr);
         arc->setZOrder(-1);
         sliceNode->addChild(arc);
 
