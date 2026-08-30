@@ -353,7 +353,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
 
             label->setRotation(angleDeg / -2.f);
             label->setPosition({radius * 0.95f * cos(angleRad / 2.f), radius * 0.95f * sin(angleRad / 2.f)});
-            label->setAnchorPoint({1.f, 0.45f});
+            label->setAnchorPoint({1.f, 0.4f});
             label->setZOrder(1);
 
             sliceNode->addChild(label);
