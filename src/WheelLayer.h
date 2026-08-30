@@ -18,5 +18,7 @@ public:
 private:
     void onBack(CCObject*);
 
+    void openProfile(CCObject*);
+
     GJLevelList* m_list;
 };

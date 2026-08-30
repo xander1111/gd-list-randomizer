@@ -145,6 +145,7 @@ bool WheelLayer::init()
 
     // List name
     CCLabelBMFont* listNameLabel = CCLabelBMFont::create(m_list->m_listName.c_str(), "bigFont.fnt");
+    listNameLabel->setID("title-label"_spr);
 
     const float listNameLabelScale = std::min(0.8f, 240.f / listNameLabel->getContentWidth());
     listNameLabel->setScale(listNameLabelScale);
@@ -157,7 +158,14 @@ bool WheelLayer::init()
     const float listCreatorLabelScale = std::min(0.8f, 90.f / listCreatorLabel->getContentWidth());
     listCreatorLabel->setScale(listCreatorLabelScale);
 
-    titleMenu->addChild(listCreatorLabel);
+    CCMenuItemSpriteExtra* listCreatorButton = CCMenuItemSpriteExtra::create(
+        listCreatorLabel,
+        this,
+        menu_selector(WheelLayer::openProfile)
+    );
+    listCreatorButton->setID("creator-name"_spr);
+
+    titleMenu->addChild(listCreatorButton);
 
     titleMenu->updateLayout();
 
@@ -176,4 +184,9 @@ void WheelLayer::keyBackClicked()
 void WheelLayer::onBack(CCObject*)
 {
     keyBackClicked();
+}
+
+void WheelLayer::openProfile(CCObject*)
+{
+    ProfilePage::create(m_list->m_accountID, false)->show();
 }
