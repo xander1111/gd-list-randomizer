@@ -70,35 +70,6 @@ bool PickerWheel::init()
     wheelSlices->setZOrder(-1);
     m_wheelMenu->addChild(wheelSlices);
 
-    // Wheel outline
-    CCDrawNode* outline = CCDrawNode::create();
-    outline->setID("wheel-outline"_spr);
-    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *m_defaultOutlineColor, CircleSegmentCount);
-    outline->setZOrder(1);
-
-    wheelOuterMenu->addChild(outline);
-
-    // Ticker
-    CCDrawNode* tickerOutline = CCDrawNode::create();
-    tickerOutline->setID("ticker"_spr);
-
-    CCPoint tickerPoints[] = {
-        {0.f, 4.f},
-        {10.f, 0.f},
-        {0.f, -4.f}
-    };
-    tickerOutline->drawPolygon(
-        tickerPoints,
-        3,
-        *m_defaultSliceColorA,
-        0.5f,
-        *m_defaultOutlineColor
-    );
-    tickerOutline->setPosition({14.f, 0.f});
-    tickerOutline->setZOrder(1);
-
-    wheelOuterMenu->addChild(tickerOutline);
-
     // If the last slice uses color 1
     if (m_slices.size() > 2 && m_slices.size() % 2 == 1) {
         log::debug("Last slice uses same color as first slice, generating separator line");
@@ -113,6 +84,35 @@ bool PickerWheel::init()
     }
 
     wheelOuterMenu->addChild(m_wheelMenu);
+
+    // Wheel outline
+    CCDrawNode* outline = CCDrawNode::create();
+    outline->setID("wheel-outline"_spr);
+    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *m_defaultOutlineColor, CircleSegmentCount);
+    outline->setZOrder(1);
+
+    wheelOuterMenu->addChild(outline);
+
+    // Ticker
+    CCDrawNode* ticker = CCDrawNode::create();
+    ticker->setID("ticker"_spr);
+
+    CCPoint tickerPoints[] = {
+        {0.f, 4.f},
+        {10.f, 0.f},
+        {0.f, -4.f}
+    };
+    ticker->drawPolygon(
+        tickerPoints,
+        3,
+        *m_defaultSliceColorA,
+        0.5f,
+        *m_defaultOutlineColor
+    );
+    ticker->setPosition({14.f, 0.f});
+    ticker->setZOrder(1);
+
+    wheelOuterMenu->addChild(ticker);
 
     addChildAtPosition(wheelOuterMenu, Anchor::Center);
 
