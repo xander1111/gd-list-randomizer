@@ -24,6 +24,8 @@ bool PickerWheel::init()
 {
     if (!CCMenu::init()) return false;
 
+    setLayout(AnchorLayout::create());
+
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
     // Spin button
@@ -40,7 +42,7 @@ bool PickerWheel::init()
     spinButtonMenu->setID("randomizer-menu"_spr);
     spinButtonMenu->setZOrder(1);
 
-    addChild(spinButtonMenu);
+    addChildAtPosition(spinButtonMenu, Anchor::Center);
 
     // Wheel outer menu, used to rotate the wheel without messing up any internal angle calculations
     CCMenu* wheelOuterMenu = CCMenu::create();
@@ -91,7 +93,14 @@ bool PickerWheel::init()
 
     wheelOuterMenu->addChild(m_wheelMenu);
 
-    addChild(wheelOuterMenu);
+    // TODO
+    //   Ticker
+
+    addChildAtPosition(wheelOuterMenu, Anchor::Center);
+
+    setContentSize({2.f * radius, 2.f * radius});
+
+    updateLayout();
 
     schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
     scheduleUpdate();

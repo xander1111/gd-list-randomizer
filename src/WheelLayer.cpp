@@ -1,6 +1,7 @@
 #include "WheelLayer.h"
 
 #include "PickerWheel.h"
+#include "Utils.h"
 
 WheelLayer::WheelLayer(GJLevelList* list) : m_list(list) {}
 
@@ -89,13 +90,80 @@ bool WheelLayer::init()
     addChild(exitMenu);
 
 
+    // Layout to space list title and wheel properly
+    CCMenu* wheelAndTitleMenu = CCMenu::create();
+    wheelAndTitleMenu->setID("wheel-and-title-menu"_spr);
+    wheelAndTitleMenu->setLayout(
+        ColumnLayout::create()
+            ->setAutoScale(false)
+            ->setGap(15.f)
+    );
+
+
     // Picker wheel
     CCMenu* pickerWheel = PickerWheel::create(m_list);
     pickerWheel->setID("picker-wheel"_spr);
 
-    pickerWheel->setPosition({winSize.width / 2, winSize.height / 2});
+    wheelAndTitleMenu->addChild(pickerWheel);
 
-    addChild(pickerWheel);
+
+    // List title
+    CCMenu* titleMenu = CCMenu::create();
+    titleMenu->setID("title-menu"_spr);
+    titleMenu->setLayout(
+        RowLayout::create()
+            ->setAutoScale(false)
+            ->setGap(10.f)
+    );
+
+    // Difficulty icon
+    CCMenu* difficultyIcon = CCMenu::create();
+    difficultyIcon->setID("difficulty-icon"_spr);
+    difficultyIcon->setLayout(AnchorLayout::create());
+    difficultyIcon->setContentSize({30.f, 30.f});
+
+    const gd::string difficultyFrame = Utils::getDifficultyIconFrame(m_list->m_difficulty);
+
+    CCSprite* difficultySprite = CCSprite::createWithSpriteFrameName(difficultyFrame.c_str());
+    difficultySprite->setID("difficulty-sprite"_spr);
+    difficultySprite->setScale(0.8f);
+
+    difficultyIcon->addChildAtPosition(difficultySprite, Anchor::Center);
+
+    // Difficulty icon feature coin
+    if (m_list->m_featured) {
+        CCSprite* featureCoin = CCSprite::createWithSpriteFrameName("GJ_featuredCoin_001.png");
+        featureCoin->setID("feature-coin"_spr);
+        featureCoin->setScale(0.8f);
+        featureCoin->setZOrder(-1);
+
+        difficultyIcon->addChildAtPosition(featureCoin, Anchor::Center, {0.f, -4.8f});
+    }
+
+    difficultyIcon->updateLayout();
+    titleMenu->addChild(difficultyIcon);
+
+    // List name
+    CCLabelBMFont* listNameLabel = CCLabelBMFont::create(m_list->m_listName.c_str(), "bigFont.fnt");
+
+    const float listNameLabelScale = std::min(0.8f, 240.f / listNameLabel->getContentWidth());
+    listNameLabel->setScale(listNameLabelScale);
+
+    titleMenu->addChild(listNameLabel);
+
+    // List creator
+    CCLabelBMFont* listCreatorLabel = CCLabelBMFont::create(m_list->m_creatorName.c_str(), "goldFont.fnt");
+
+    const float listCreatorLabelScale = std::min(0.8f, 90.f / listCreatorLabel->getContentWidth());
+    listCreatorLabel->setScale(listCreatorLabelScale);
+
+    titleMenu->addChild(listCreatorLabel);
+
+    titleMenu->updateLayout();
+
+    wheelAndTitleMenu->addChild(titleMenu);
+    wheelAndTitleMenu->updateLayout();
+    addChild(wheelAndTitleMenu);
 
     return true;
 }
