@@ -1,5 +1,6 @@
 #pragma once
 
+#include <alphalaneous.alphas-ui-pack/include/nodes/scroll/AdvancedScrollLayer.hpp>
 #include <Geode/Geode.hpp>
 
 #include "../PickerWheel.h"
@@ -16,7 +17,11 @@ public:
 private:
     explicit WheelEditMenu(std::vector<PickerWheel::PickerWheelSlice>* slices, float width, float height);
 
+    void updateSearch(std::string const& input) const;
+
     std::vector<PickerWheel::PickerWheelSlice>* m_slices;
     float m_width;
     float m_height;
+    alpha::ui::AdvancedScrollLayer* m_levelListLayer = nullptr;
+    CCMenu* m_levelListContent = nullptr;
 };

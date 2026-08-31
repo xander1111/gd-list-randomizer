@@ -26,5 +26,5 @@ private:
 
     WheelEditMenu* m_wheelEditMenu = nullptr;
 
-    bool m_editMenuOpen = true;  // TODO update to false once button to open edit menu is added
+    bool m_editMenuOpen = true;  // TODO default to false once button to open edit menu is added
 };

@@ -13,6 +13,8 @@ public:
 
     bool init() override;
 
+    [[nodiscard]] PickerWheel::PickerWheelSlice* getSlice() const { return m_slice; }
+
 private:
     explicit WheelEditEntry(PickerWheel::PickerWheelSlice* slice, ccColor4F* color, float width, float height = 30.f);
 
