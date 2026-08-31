@@ -4,9 +4,9 @@
 #include "SliceSelectedPopup.h"
 #include "Utils.h"
 
-PickerWheel* PickerWheel::create(GJLevelList* list)
+PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
 {
-    auto ret = new PickerWheel(list);
+    auto ret = new PickerWheel(list, radius);
     if (ret && ret->init()) {
         ret->autorelease();
     } else {
@@ -57,14 +57,11 @@ bool PickerWheel::init()
     m_wheelMenu->setPosition({0, 0});
     m_wheelMenu->setAnchorPoint({0, 0});
 
-
     // Wheel slices
-    const float radius = winSize.height * 0.4f;;
-
-    CCNode* wheelSlices = generateWheelSliceNodes(radius);
-    wheelSlices->setPosition({0, 0});
-    wheelSlices->setZOrder(-1);
-    m_wheelMenu->addChild(wheelSlices);
+    m_slicesNode = generateWheelSliceNodes();
+    m_slicesNode->setPosition({0, 0});
+    m_slicesNode->setZOrder(-1);
+    m_wheelMenu->addChild(m_slicesNode);
 
     // If the last slice uses color 1
     if (m_slices.size() > 1 && m_slices.size() % 2 == 1) {
@@ -85,7 +82,7 @@ bool PickerWheel::init()
             CCDrawNode* line = CCDrawNode::create();
             line->setID("end-separator"_spr);
 
-            line->drawSegment({0, 0}, {radius, 0}, lineThickness, *Utils::DefaultListColorB);
+            line->drawSegment({0, 0}, {m_radius, 0}, lineThickness, *Utils::DefaultListColorB);
             m_wheelMenu->addChild(line);
         }
     }
@@ -95,7 +92,7 @@ bool PickerWheel::init()
     // Wheel outline
     CCDrawNode* outline = CCDrawNode::create();
     outline->setID("wheel-outline"_spr);
-    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *Utils::DefaultOutlineColor, CircleSegmentCount);
+    outline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *Utils::DefaultOutlineColor, CircleSegmentCount);
     outline->setZOrder(1);
 
     wheelOuterMenu->addChild(outline);
@@ -123,7 +120,7 @@ bool PickerWheel::init()
 
     addChildAtPosition(wheelOuterMenu, Anchor::Center);
 
-    setContentSize({2.f * radius, 2.f * radius});
+    setContentSize({2.f * m_radius, 2.f * m_radius});
 
     updateLayout();
 
@@ -139,7 +136,21 @@ void PickerWheel::update(float dt)
         m_wheelMenu->setRotation(m_wheelMenu->getRotation() - IdleRotateRate * dt);
 }
 
-PickerWheel::PickerWheel(GJLevelList* list)
+void PickerWheel::redrawSlices()
+{
+    if (m_wheelMenu == nullptr || m_slicesNode == nullptr)
+        return;
+
+    m_wheelMenu->removeChild(m_slicesNode, true);
+
+    m_slicesNode = generateWheelSliceNodes();
+    m_slicesNode->setPosition({0, 0});
+    m_slicesNode->setZOrder(-1);
+    m_wheelMenu->addChild(m_slicesNode);
+}
+
+PickerWheel::PickerWheel(GJLevelList* list, const float radius)
+    : m_radius(radius)
 {
     m_slices = std::vector<PickerWheelSlice>(list->totalLevels());
 
@@ -225,13 +236,13 @@ void PickerWheel::updateAudio(float)
         Utils::playResourceSound("tick.ogg");
 }
 
-CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor4F* color, const char* levelName)
+CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const
 {
     CCNode* sliceNode = CCNode::create();
 
     CCDrawNode* circle = CCDrawNode::create();
     circle->setID("slice-background"_spr);
-    circle->drawCircle({0, 0}, radius, *color, 0.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, CircleSegmentCount);
+    circle->drawCircle({0, 0}, m_radius, *color, 0.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, CircleSegmentCount);
 
     circle->setZOrder(-1);
     sliceNode->addChild(circle);
@@ -239,10 +250,10 @@ CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor
     CCLabelBMFont* label = CCLabelBMFont::create(levelName, "goldFont.fnt");
     label->setID("slice-label"_spr);
 
-    const float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+    const float labelScale = std::min(MaxFontScale, m_radius * 0.7f / label->getContentSize().width);
     label->setScale(labelScale);
     label->setRotation(0.f);
-    label->setPosition({radius * 0.95f, 0});
+    label->setPosition({m_radius * 0.95f, 0});
     label->setAnchorPoint({1.f, 0.45f});
     label->setZOrder(1);
 
@@ -251,7 +262,7 @@ CCNode* PickerWheel::generatePickerWheelCircle(const float radius, const ccColor
     return sliceNode;
 }
 
-CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
+CCMenu* PickerWheel::generateWheelSliceNodes() const
 {
     CCMenu* wheelSlices = CCMenu::create();
     wheelSlices->setID("wheel-slices"_spr);
@@ -261,7 +272,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(radius, Utils::DefaultListColorA, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, "No levels"));
 
         return wheelSlices;
     }
@@ -269,7 +280,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(radius, Utils::DefaultListColorA, m_slices[0].level->m_levelName.c_str()));
+        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, m_slices[0].level->m_levelName.c_str()));
 
         m_slices[0].startAngleDeg = 0.f;
         m_slices[0].endAngleDeg = -360.f;
@@ -305,7 +316,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         for (int s = 0; s <= arcSegments; ++s) {
             const float t = static_cast<float>(s) / static_cast<float>(arcSegments);
             const float a = angleRad * t;
-            points.emplace_back(radius * cos(a), radius * sin(a));
+            points.emplace_back(m_radius * cos(a), m_radius * sin(a));
         }
         points.emplace_back(0.f, 0.f);
 
@@ -337,18 +348,18 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
 
             // Highest Y value is not directly above the other end of the arc, and the 'height' I want is actually the
             // base of the isosceles triangle that fills the arc
-            const float sliceHeight = sqrt(powf(maxYPoint->y, 2.f) + powf(radius - maxYPoint->x, 2.f));
+            const float sliceHeight = sqrt(powf(maxYPoint->y, 2.f) + powf(m_radius - maxYPoint->x, 2.f));
 
-            const float maxWidth = sliceHeight / (sliceHeight / radius + label->getContentHeight() / label->getContentWidth());
+            const float maxWidth = sliceHeight / (sliceHeight / m_radius + label->getContentHeight() / label->getContentWidth());
             const float maxScale = maxWidth / label->getContentWidth();
 
             // Further limit the width of the text so it doesn't run into the 'spin' button
-            float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
+            float labelScale = std::min(MaxFontScale, m_radius * 0.7f / label->getContentSize().width);
             labelScale = std::min(labelScale, maxScale);
             label->setScale(labelScale);
 
             label->setRotation(angleDeg / -2.f);
-            label->setPosition({radius * 0.95f * cos(angleRad / 2.f), radius * 0.95f * sin(angleRad / 2.f)});
+            label->setPosition({m_radius * 0.95f * cos(angleRad / 2.f), m_radius * 0.95f * sin(angleRad / 2.f)});
             label->setAnchorPoint({1.f, 0.4f});
             label->setZOrder(1);
 

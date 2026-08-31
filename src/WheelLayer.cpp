@@ -106,7 +106,7 @@ bool WheelLayer::init()
     wheelAndEditMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(10.f));
 
     // Picker wheel
-    PickerWheel* pickerWheel = PickerWheel::create(m_list);
+    PickerWheel* pickerWheel = PickerWheel::create(m_list, winSize.height * 0.4f);
     pickerWheel->setID("picker-wheel"_spr);
 
     wheelAndEditMenu->addChild(pickerWheel);

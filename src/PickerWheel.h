@@ -18,7 +18,7 @@ public:
         mutable float endAngleDeg;
     };
 
-    static PickerWheel* create(GJLevelList* list);
+    static PickerWheel* create(GJLevelList* list, float radius);
 
     bool init() override;
 
@@ -26,8 +26,12 @@ public:
 
     std::vector<PickerWheelSlice>* getSlices() { return &m_slices; }
 
+    void redrawSlices();
+
 private:
     std::vector<PickerWheelSlice> m_slices;
+
+    CCNode* m_slicesNode = nullptr;
 
     // Doesn't need to be a `Ref` since it gets added as a child of `this`
     CCMenu* m_wheelMenu = nullptr;
@@ -37,6 +41,8 @@ private:
 
     // Set to `true` to enable the slow idle spin animation
     bool m_idleSpin = Mod::get()->getSettingValue<bool>("initial-spinning");
+
+    float m_radius;
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
@@ -50,13 +56,13 @@ private:
     // Number of degrees to rotate per second when idly spinning
     static constexpr float IdleRotateRate = 6.0f;
 
-    explicit PickerWheel(GJLevelList* list);
+    explicit PickerWheel(GJLevelList* list, float radius);
 
     void spinWheel(CCObject*);
 
     void updateAudio(float);
 
-    static CCNode* generatePickerWheelCircle(float radius, const ccColor4F* color, const char* levelName);
+    CCNode* generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const;
 
     /**
      * Generates the wheel visuals, including a circle with a section for each slice in `_slices`
@@ -64,8 +70,7 @@ private:
      * @remarks Additionally sets the `angleStartDeg` and `angleEndDeg` values of each slice in `_slices` to match the
      * angle range that particular slice occupies
      *
-     * @param radius radius of the wheel
      * @return a CCMenu object that contains the wheel slices
      */
-    [[nodiscard]] CCMenu* generateWheelSliceNodes(float radius) const;
+    [[nodiscard]] CCMenu* generateWheelSliceNodes() const;
 };
