@@ -4,10 +4,6 @@
 #include "SliceSelectedPopup.h"
 #include "Utils.h"
 
-ccColor4F* PickerWheel::m_defaultSliceColorA = new ccColor4F(161.f / 255.f, 88.f / 255.f, 44.f / 255.f, 1.f);
-ccColor4F* PickerWheel::m_defaultSliceColorB = new ccColor4F(194.f / 255.f, 114.f / 255.f, 62.f / 255.f, 1.f);
-ccColor4F* PickerWheel::m_defaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
-
 PickerWheel* PickerWheel::create(GJLevelList* list)
 {
     auto ret = new PickerWheel(list);
@@ -89,7 +85,7 @@ bool PickerWheel::init()
             CCDrawNode* line = CCDrawNode::create();
             line->setID("end-separator"_spr);
 
-            line->drawSegment({0, 0}, {radius, 0}, lineThickness, *m_defaultSliceColorB);
+            line->drawSegment({0, 0}, {radius, 0}, lineThickness, *Utils::DefaultListColorB);
             m_wheelMenu->addChild(line);
         }
     }
@@ -99,7 +95,7 @@ bool PickerWheel::init()
     // Wheel outline
     CCDrawNode* outline = CCDrawNode::create();
     outline->setID("wheel-outline"_spr);
-    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *m_defaultOutlineColor, CircleSegmentCount);
+    outline->drawCircle({0, 0}, radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *Utils::DefaultOutlineColor, CircleSegmentCount);
     outline->setZOrder(1);
 
     wheelOuterMenu->addChild(outline);
@@ -116,9 +112,9 @@ bool PickerWheel::init()
     ticker->drawPolygon(
         tickerPoints,
         3,
-        *m_defaultSliceColorA,
+        *Utils::DefaultListColorB,
         0.5f,
-        *m_defaultOutlineColor
+        *Utils::DefaultOutlineColor
     );
     ticker->setPosition({14.f, 0.f});
     ticker->setZOrder(1);
@@ -155,7 +151,7 @@ PickerWheel::PickerWheel(GJLevelList* list)
         const PickerWheelSlice newSlice = {
             .level = level,
             .weight = 1u,
-            .color = levelListIndex % 2 == 0 ? m_defaultSliceColorA : m_defaultSliceColorB
+            .color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB
         };
 
         m_slices[levelListIndex] = newSlice;
@@ -265,7 +261,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(radius, m_defaultSliceColorA, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(radius, Utils::DefaultListColorA, "No levels"));
 
         return wheelSlices;
     }
@@ -273,7 +269,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(radius, m_defaultSliceColorA, m_slices[0].level->m_levelName.c_str()));
+        wheelSlices->addChild(generatePickerWheelCircle(radius, Utils::DefaultListColorA, m_slices[0].level->m_levelName.c_str()));
 
         m_slices[0].startAngleDeg = 0.f;
         m_slices[0].endAngleDeg = -360.f;
@@ -346,7 +342,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes(const float radius) const
             const float maxWidth = sliceHeight / (sliceHeight / radius + label->getContentHeight() / label->getContentWidth());
             const float maxScale = maxWidth / label->getContentWidth();
 
-            // Futher limit the width of the text so it doesn't run into the 'spin' button
+            // Further limit the width of the text so it doesn't run into the 'spin' button
             float labelScale = std::min(MaxFontScale, radius * 0.7f / label->getContentSize().width);
             labelScale = std::min(labelScale, maxScale);
             label->setScale(labelScale);

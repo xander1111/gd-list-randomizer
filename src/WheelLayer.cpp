@@ -100,11 +100,26 @@ bool WheelLayer::init()
     );
 
 
+    // Picker wheel and edit menu
+    CCMenu* wheelAndEditMenu = CCMenu::create();
+    wheelAndEditMenu->setID("wheel-and-edit-menu"_spr);
+    wheelAndEditMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(10.f));
+
     // Picker wheel
-    CCMenu* pickerWheel = PickerWheel::create(m_list);
+    PickerWheel* pickerWheel = PickerWheel::create(m_list);
     pickerWheel->setID("picker-wheel"_spr);
 
-    wheelAndTitleMenu->addChild(pickerWheel);
+    wheelAndEditMenu->addChild(pickerWheel);
+
+    // Wheel edit menu
+    m_wheelEditMenu = WheelEditMenu::create(pickerWheel->getSlices(), winSize.height * 0.8f, winSize.height * 0.8f);
+    m_wheelEditMenu->setID("wheel-edit-menu"_spr);
+    m_wheelEditMenu->setVisible(m_editMenuOpen);
+    wheelAndEditMenu->addChild(m_wheelEditMenu);
+
+
+    wheelAndEditMenu->updateLayout();
+    wheelAndTitleMenu->addChild(wheelAndEditMenu);
 
 
     // List title

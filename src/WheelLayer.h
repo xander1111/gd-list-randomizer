@@ -2,6 +2,8 @@
 
 #include <Geode/Geode.hpp>
 
+#include "WheelEditMenu/WheelEditMenu.h"
+
 using namespace geode::prelude;
 
 class WheelLayer : public CCLayer
@@ -21,4 +23,8 @@ private:
     void openProfile(CCObject*);
 
     GJLevelList* m_list;
+
+    WheelEditMenu* m_wheelEditMenu = nullptr;
+
+    bool m_editMenuOpen = true;  // TODO update to false once button to open edit menu is added
 };

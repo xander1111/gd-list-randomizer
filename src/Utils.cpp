@@ -1,7 +1,5 @@
 #include "Utils.h"
 
-#include <utility>
-
 void Utils::playSound(gd::string soundPath)
 {
     FMODAudioEngine* fmod = FMODAudioEngine::get();
@@ -12,7 +10,7 @@ void Utils::playSound(gd::string soundPath)
 
 void Utils::playResourceSound(const gd::string& soundFileName)
 {
-    playSound(geode::utils::string::pathToString(geode::Mod::get()->getResourcesDir() / soundFileName));
+    playSound(string::pathToString(Mod::get()->getResourcesDir() / soundFileName));
 }
 
 gd::string Utils::getDifficultyIconFrame(int difficulty)
@@ -24,6 +22,6 @@ gd::string Utils::getDifficultyIconFrame(int difficulty)
     if (0 <= difficulty && difficulty <= 10)
         return GJLevelList::frameForListDifficulty(difficulty, DifficultyIconType::NoText);
 
-    geode::log::debug("[Utils::getDifficultyIcon]: Unknown difficulty value: {}", difficulty);
+    log::debug("[Utils::getDifficultyIcon]: Unknown difficulty value: {}", difficulty);
     return "diffIcon_00_btn_001.png";
 }

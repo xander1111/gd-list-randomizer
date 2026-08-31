@@ -24,10 +24,9 @@ public:
 
     void update(float dt) override;
 
+    std::vector<PickerWheelSlice>* getSlices() { return &m_slices; }
+
 private:
-    static ccColor4F* m_defaultSliceColorA;
-    static ccColor4F* m_defaultSliceColorB;
-    static ccColor4F* m_defaultOutlineColor;
     std::vector<PickerWheelSlice> m_slices;
 
     // Doesn't need to be a `Ref` since it gets added as a child of `this`
