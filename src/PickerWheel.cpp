@@ -22,8 +22,6 @@ bool PickerWheel::init()
 
     setLayout(AnchorLayout::create());
 
-    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
-
     // Spin button
     ButtonSprite* spinButtonSprite = ButtonSprite::create("Spin", 0.5f);
     CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
@@ -147,6 +145,10 @@ void PickerWheel::redrawSlices()
     m_slicesNode->setPosition({0, 0});
     m_slicesNode->setZOrder(-1);
     m_wheelMenu->addChild(m_slicesNode);
+
+
+    log::debug("slice 0 start and end angles: {}, {}", m_slices[0].startAngleDeg, m_slices[0].endAngleDeg);
+    log::debug("slice 1 start and end angles: {}, {}", m_slices[1].startAngleDeg, m_slices[1].endAngleDeg);
 }
 
 PickerWheel::PickerWheel(GJLevelList* list, const float radius)
@@ -174,6 +176,8 @@ void PickerWheel::spinWheel(CCObject*)
     if (m_slices.empty())
         return;
 
+    m_spinning = true;
+
     // Once the user has spun the wheel, disable the idle spin animation
     m_idleSpin = false;
 
@@ -190,7 +194,7 @@ void PickerWheel::spinWheel(CCObject*)
     // Since we don't rotate to a target angle, but rather add an amount of rotation, we start from the current rotation
     // to account for whatever rotation the wheel had before spinning
     const float rotateAngle = -m_wheelMenu->getRotation()
-        - random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
+        + random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
         - 7200.f;
 
     log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
@@ -198,8 +202,10 @@ void PickerWheel::spinWheel(CCObject*)
     CCRotateBy* rotate = CCRotateBy::create(7.f, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
-    const auto showLevelPopup = CallFuncExt::create([slicePicked]
+    const auto showLevelPopup = CallFuncExt::create([slicePicked, this]
     {
+        this->m_spinning = false;
+
         SliceSelectedPopup::create(slicePicked)->show();
 
         Utils::playResourceSound("selectLevel.ogg");
@@ -212,25 +218,41 @@ void PickerWheel::spinWheel(CCObject*)
 
 void PickerWheel::updateAudio(float)
 {
-    if (m_idleSpin)
-        // Don't play ticks when the wheel is just idly spinning
+    if (!m_spinning)
+        // Don't play ticks when the wheel isn't actually being spun
         return;
 
     if (m_slices.empty())
         return;
 
+    if (m_wheelMenu->getRotation() > 0.f)
+        // This never happens normally, but it's been happening when I manually set the rotation using DevTools and it causes an infinite loop, freezing the game
+        return;
+
     bool playTick = false;
 
-    // Find the first slice we are in the angle range of. Repeatedly checks incase we pass over multiple slices in one frame
     const float currentRotation = fmod(m_wheelMenu->getRotation(), 360.f);
 
-    // While outside the angle range of the current slice
+    // If we are pointing to a different slice, find the slice we are pointing at
+    // Repeatedly checks instead of just incrementing as it is possible to pass over multiple slices in one frame
     while (currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation) {
         // We are pointing to a different slice than we were last update, play a tick noise to indicate this
         playTick = true;
 
+        // Find the slice we are now pointing at
         m_currentlyPointedAtSlice = (m_currentlyPointedAtSlice + 1) % m_slices.size();
     }
+
+    // The previous loop doesn't detect passing over one or more low-weight slices within one frame and ending up back
+    // on the same high-weight slice. To pass over other slices but still end up pointing at the same slice, we would
+    // have to have passed over the end of the wheel since the end of the wheel has to be between slices, and cannot be
+    // in the middle of a slice.
+    // To detect this edge case, we check if we rotated backwards, which actually means we looped around the end of the
+    // wheel.
+    if (m_lastRotation < currentRotation)
+        playTick = true;
+
+    m_lastRotation = currentRotation;
 
     if (playTick)
         Utils::playResourceSound("tick.ogg");
@@ -371,8 +393,11 @@ CCMenu* PickerWheel::generateWheelSliceNodes() const
         const float endAngle = static_cast<float>(processedSlicesWeight + slice.weight) / static_cast<float>(totalWeight) * -360.f;
 
         sliceNode->setRotation(startAngle);
-        slice.startAngleDeg = startAngle;
-        slice.endAngleDeg = endAngle;
+        // Because cocos2dx uses positive rotation to mean clockwise, which is opposite of what mathematics and thus, the
+        // `sin` and `cos` functions from `cmath` use (positive is CCW), we have to get the rotation in the opposite
+        // direction before using it when comparing to cocos2dx rotations (which is what these fields are used for)
+        slice.startAngleDeg = -endAngle - 360.f;
+        slice.endAngleDeg = -startAngle - 360.f;
 
         processedSlicesWeight += slice.weight;
 

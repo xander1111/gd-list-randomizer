@@ -39,8 +39,14 @@ private:
     // Tracks the index of the slice that the wheel ticker is currently pointing at
     unsigned int m_currentlyPointedAtSlice = 0;
 
+    // Tracks the absolute (mod 360 degrees) wheel rotation at last update
+    float m_lastRotation = 0.0f;
+
     // Set to `true` to enable the slow idle spin animation
     bool m_idleSpin = Mod::get()->getSettingValue<bool>("initial-spinning");
+
+    // True when the wheel is currently being spun to select a level
+    bool m_spinning = false;
 
     float m_radius;
 
