@@ -50,6 +50,8 @@ private:
 
     float m_radius;
 
+    unsigned int m_totalWeight;
+
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
 
@@ -78,5 +80,5 @@ private:
      *
      * @return a CCMenu object that contains the wheel slices
      */
-    [[nodiscard]] CCMenu* generateWheelSliceNodes() const;
+    [[nodiscard]] CCMenu* generateWheelSliceNodes();
 };

@@ -185,7 +185,22 @@ void PickerWheel::spinWheel(CCObject*)
     m_wheelMenu->setRotation(fmod(m_wheelMenu->getRotation(), 360.f));
 
     // Pick a random slice to land on
-    const int sliceIndexPicked = random::generate<int, int>(0, m_slices.size());
+    const double roll = random::generate<double, double>(0., 1.);
+
+    // Linear search to find the slice with probability range that includes `roll`
+    int sliceIndexPicked = 0;
+    double cumulativeProb = 0.;
+
+    while (sliceIndexPicked < m_slices.size()) {
+        const double sliceProbability = static_cast<double>(m_slices[sliceIndexPicked].weight) / static_cast<double>(m_totalWeight);
+
+        if (cumulativeProb + sliceProbability > roll)
+            break;
+
+        cumulativeProb += sliceProbability;
+        sliceIndexPicked++;
+    }
+
     PickerWheelSlice* slicePicked = &m_slices[sliceIndexPicked];
     GJGameLevel* levelPicked = slicePicked->level;
 
@@ -284,7 +299,7 @@ CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const cha
     return sliceNode;
 }
 
-CCMenu* PickerWheel::generateWheelSliceNodes() const
+CCMenu* PickerWheel::generateWheelSliceNodes()
 {
     CCMenu* wheelSlices = CCMenu::create();
     wheelSlices->setID("wheel-slices"_spr);
@@ -314,17 +329,17 @@ CCMenu* PickerWheel::generateWheelSliceNodes() const
         break;
     }
 
-    unsigned int totalWeight = 0;
+    m_totalWeight = 0;
     unsigned int processedSlicesWeight = 0;
 
     for (const auto & slice : m_slices)
-        totalWeight += slice.weight;
+        m_totalWeight += slice.weight;
 
     for (auto & slice : m_slices) {
         // Node for both the wheel slice and the text to go under
         CCNode* sliceNode = CCNode::create();
 
-        const float angleDeg = 360.f * (static_cast<float>(slice.weight) / static_cast<float>(totalWeight));
+        const float angleDeg = 360.f * (static_cast<float>(slice.weight) / static_cast<float>(m_totalWeight));
         const float angleRad = kmDegreesToRadians(angleDeg);
 
         CCDrawNode* arc = CCDrawNode::create();
@@ -389,8 +404,8 @@ CCMenu* PickerWheel::generateWheelSliceNodes() const
         }
 
         // Set slice angle and store its angle range
-        const float startAngle = static_cast<float>(processedSlicesWeight) / static_cast<float>(totalWeight) * -360.f;
-        const float endAngle = static_cast<float>(processedSlicesWeight + slice.weight) / static_cast<float>(totalWeight) * -360.f;
+        const float startAngle = static_cast<float>(processedSlicesWeight) / static_cast<float>(m_totalWeight) * -360.f;
+        const float endAngle = static_cast<float>(processedSlicesWeight + slice.weight) / static_cast<float>(m_totalWeight) * -360.f;
 
         sliceNode->setRotation(startAngle);
         // Because cocos2dx uses positive rotation to mean clockwise, which is opposite of what mathematics and thus, the
