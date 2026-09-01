@@ -1,6 +1,6 @@
 #include "SliceSelectedPopup.h"
 
-SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::PickerWheelSlice* slice)
+SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::Slice* slice)
 {
     auto ret = new SliceSelectedPopup(slice);
     if (ret && ret->init()) {
@@ -50,7 +50,7 @@ bool SliceSelectedPopup::init()
     return true;
 }
 
-SliceSelectedPopup::SliceSelectedPopup(PickerWheel::PickerWheelSlice* slice) : m_slice(slice) {}
+SliceSelectedPopup::SliceSelectedPopup(PickerWheel::Slice* slice) : m_slice(slice) {}
 
 void SliceSelectedPopup::onViewLevel(CCObject*)
 {

@@ -2,7 +2,7 @@
 
 #include "../Utils.h"
 
-WheelEditEntry* WheelEditEntry::create(PickerWheel::PickerWheelSlice* slice, ccColor4F* color, const float width, const float height)
+WheelEditEntry* WheelEditEntry::create(PickerWheel::Slice* slice, ccColor4F* color, const float width, const float height)
 {
     auto ret = new WheelEditEntry(slice, color, width, height);
     if (ret && ret->init()) {
@@ -53,7 +53,7 @@ bool WheelEditEntry::init()
     // Level weight field
     TextInput* weightField = TextInput::create(45.f, "Weight");
     weightField->setID("weight-field"_spr);
-    weightField->setString(std::to_string(m_slice->weight));
+    weightField->setString(std::to_string(m_slice->settings.weight));
     weightField->setCommonFilter(CommonFilter::Uint);
     weightField->setMaxCharCount(6);  // int limits are higher, but the text starts to get hard to see
     weightField->setScale(0.75f * m_height / weightField->getContentHeight());
@@ -70,7 +70,7 @@ bool WheelEditEntry::init()
     return true;
 }
 
-WheelEditEntry::WheelEditEntry(PickerWheel::PickerWheelSlice* slice, ccColor4F* color, const float width, const float height)
+WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width, const float height)
     : m_slice(slice),
     m_width(width),
     m_height(height),
@@ -82,7 +82,7 @@ void WheelEditEntry::updateWeight(std::string const& text) const
         return;
 
     try {
-        m_slice->weight = stoi(text);
+        m_slice->settings.weight = stoi(text);
         const auto pickerWheel = typeinfo_cast<PickerWheel*>(CCScene::get()->getChildByIDRecursive("picker-wheel"_spr));
         pickerWheel->redrawSlices();
     } catch (const std::exception& e) {

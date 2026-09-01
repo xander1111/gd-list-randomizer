@@ -10,16 +10,16 @@ using namespace geode::prelude;
 class WheelEditMenu : public CCMenu
 {
 public:
-    static WheelEditMenu* create(std::vector<PickerWheel::PickerWheelSlice>* slices, float width, float height);
+    static WheelEditMenu* create(std::vector<PickerWheel::Slice>* slices, float width, float height);
 
     bool init() override;
 
 private:
-    explicit WheelEditMenu(std::vector<PickerWheel::PickerWheelSlice>* slices, float width, float height);
+    explicit WheelEditMenu(std::vector<PickerWheel::Slice>* slices, float width, float height);
 
     void updateSearch(std::string const& input) const;
 
-    std::vector<PickerWheel::PickerWheelSlice>* m_slices;
+    std::vector<PickerWheel::Slice>* m_slices;
     float m_width;
     float m_height;
     alpha::ui::AdvancedScrollLayer* m_levelListLayer = nullptr;

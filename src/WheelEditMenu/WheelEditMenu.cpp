@@ -4,7 +4,7 @@
 #include "../Utils.h"
 #include "alphalaneous.alphas-ui-pack/include/nodes/scroll/Scroll.hpp"
 
-WheelEditMenu* WheelEditMenu::create(std::vector<PickerWheel::PickerWheelSlice>* slices, const float width, const float height)
+WheelEditMenu* WheelEditMenu::create(std::vector<PickerWheel::Slice>* slices, const float width, const float height)
 {
     auto ret = new WheelEditMenu(slices, width, height);
     if (ret && ret->init()) {
@@ -92,7 +92,7 @@ bool WheelEditMenu::init()
     return true;
 }
 
-WheelEditMenu::WheelEditMenu(std::vector<PickerWheel::PickerWheelSlice>* slices, const float width, const float height) : m_slices(slices), m_width(width), m_height(height) {}
+WheelEditMenu::WheelEditMenu(std::vector<PickerWheel::Slice>* slices, const float width, const float height) : m_slices(slices), m_width(width), m_height(height) {}
 
 void WheelEditMenu::updateSearch(std::string const& input) const
 {

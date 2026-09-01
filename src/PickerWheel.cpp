@@ -4,6 +4,8 @@
 #include "SliceSelectedPopup.h"
 #include "Utils.h"
 
+#include <cvolton.level-id-api/include/EditorIDs.hpp>
+
 PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
 {
     auto ret = new PickerWheel(list, radius);
@@ -125,6 +127,8 @@ bool PickerWheel::init()
     schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
     scheduleUpdate();
 
+    saveSettings();
+
     return true;
 }
 
@@ -146,25 +150,41 @@ void PickerWheel::redrawSlices()
     m_slicesNode->setZOrder(-1);
     m_wheelMenu->addChild(m_slicesNode);
 
-
-    log::debug("slice 0 start and end angles: {}, {}", m_slices[0].startAngleDeg, m_slices[0].endAngleDeg);
-    log::debug("slice 1 start and end angles: {}, {}", m_slices[1].startAngleDeg, m_slices[1].endAngleDeg);
+    saveSettings();
 }
 
 PickerWheel::PickerWheel(GJLevelList* list, const float radius)
-    : m_radius(radius)
+    : m_list(list), m_radius(radius)
 {
-    m_slices = std::vector<PickerWheelSlice>(list->totalLevels());
+    m_slices = std::vector<Slice>(list->totalLevels());
 
     CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
+
+    std::map<std::string, SliceSettings> settings;
+    if (m_list->m_listType == GJLevelType::Editor)
+        settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>("editor-" + std::to_string(EditorIDs::getID(m_list)), {});
+    else
+        settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>(m_list->m_listName, {});
 
     for (auto [key, level] : levels) {
         const int levelListIndex = list->orderForLevel(level->m_levelID);
 
-        const PickerWheelSlice newSlice = {
+        SliceSettings sliceSettings{};
+        if (settings.contains(std::to_string(level->m_levelID))) {
+            sliceSettings = settings[std::to_string(level->m_levelID)];
+
+            if (sliceSettings.color == nullptr)
+                sliceSettings.color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB;
+        } else {
+            sliceSettings = SliceSettings {
+                .weight = 1u,
+                .color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB
+            };
+        }
+
+        const Slice newSlice = {
             .level = level,
-            .weight = 1u,
-            .color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB
+            .settings = sliceSettings
         };
 
         m_slices[levelListIndex] = newSlice;
@@ -192,7 +212,7 @@ void PickerWheel::spinWheel(CCObject*)
     double cumulativeProb = 0.;
 
     while (sliceIndexPicked < m_slices.size()) {
-        const double sliceProbability = static_cast<double>(m_slices[sliceIndexPicked].weight) / static_cast<double>(m_totalWeight);
+        const double sliceProbability = static_cast<double>(m_slices[sliceIndexPicked].settings.weight) / static_cast<double>(m_totalWeight);
 
         if (cumulativeProb + sliceProbability > roll)
             break;
@@ -201,7 +221,7 @@ void PickerWheel::spinWheel(CCObject*)
         sliceIndexPicked++;
     }
 
-    PickerWheelSlice* slicePicked = &m_slices[sliceIndexPicked];
+    Slice* slicePicked = &m_slices[sliceIndexPicked];
     GJGameLevel* levelPicked = slicePicked->level;
 
     // Pick a random angle within the selected slice's angle range, plus a 10 full rotations
@@ -273,6 +293,19 @@ void PickerWheel::updateAudio(float)
         Utils::playResourceSound("tick.ogg");
 }
 
+void PickerWheel::saveSettings() const
+{
+    auto allSettings = std::map<std::string, SliceSettings>();
+
+    for (auto slice : m_slices)
+        allSettings[std::to_string(slice.level->m_levelID)] = slice.settings;
+
+    if (m_list->m_listType == GJLevelType::Editor)
+        Mod::get()->setSavedValue("editor-" + std::to_string(EditorIDs::getID(m_list)), allSettings);
+    else
+        Mod::get()->setSavedValue(std::to_string(m_list->m_listID), allSettings);
+}
+
 CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const
 {
     CCNode* sliceNode = CCNode::create();
@@ -333,13 +366,13 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     unsigned int processedSlicesWeight = 0;
 
     for (const auto & slice : m_slices)
-        m_totalWeight += slice.weight;
+        m_totalWeight += slice.settings.weight;
 
     for (auto & slice : m_slices) {
         // Node for both the wheel slice and the text to go under
         CCNode* sliceNode = CCNode::create();
 
-        const float angleDeg = 360.f * (static_cast<float>(slice.weight) / static_cast<float>(m_totalWeight));
+        const float angleDeg = 360.f * (static_cast<float>(slice.settings.weight) / static_cast<float>(m_totalWeight));
         const float angleRad = kmDegreesToRadians(angleDeg);
 
         CCDrawNode* arc = CCDrawNode::create();
@@ -360,7 +393,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         arc->drawPolygon(
             points.data(),
             static_cast<unsigned int>(points.size()),
-            *slice.color,
+            *slice.settings.color,
             0.f,
             {.r = 0, .g = 0, .b = 0, .a = 1},
             BorderAlignment::Center
@@ -405,7 +438,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
 
         // Set slice angle and store its angle range
         const float startAngle = static_cast<float>(processedSlicesWeight) / static_cast<float>(m_totalWeight) * -360.f;
-        const float endAngle = static_cast<float>(processedSlicesWeight + slice.weight) / static_cast<float>(m_totalWeight) * -360.f;
+        const float endAngle = static_cast<float>(processedSlicesWeight + slice.settings.weight) / static_cast<float>(m_totalWeight) * -360.f;
 
         sliceNode->setRotation(startAngle);
         // Because cocos2dx uses positive rotation to mean clockwise, which is opposite of what mathematics and thus, the
@@ -414,10 +447,68 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         slice.startAngleDeg = -endAngle - 360.f;
         slice.endAngleDeg = -startAngle - 360.f;
 
-        processedSlicesWeight += slice.weight;
+        processedSlicesWeight += slice.settings.weight;
 
         wheelSlices->addChild(sliceNode);
     }
 
     return wheelSlices;
+}
+
+Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings>::fromJson(Value const& value)
+{
+    if (!value.isObject()) return Err("not an object");
+
+    unsigned int weight;
+    int colorId;
+
+    try {
+        GEODE_UNWRAP_INTO(weight, value["weight"].asUInt());
+    } catch (const std::exception&) {
+        log::info("Invalid slice wight data, using default value of 1");
+        weight = 1;
+    }
+
+    try {
+        // TODO store and retrieve colors properly
+        //   Colors will be able to be set to either one of four theme colors, or individually. If the color is set
+        //   individually, it needs to save the RGBA values instead of which theme color to point to
+        GEODE_UNWRAP_INTO(colorId, value["colorId"].asInt());
+    } catch (const std::exception&) {
+        log::info("Invalid slice colorId data, using default value of 0");
+        colorId = -1;
+    }
+
+    ccColor4F* color = nullptr;
+
+    switch (colorId) {
+    case 0:
+        color = Utils::DefaultListColorA;
+        break;
+    case 1:
+        color = Utils::DefaultListColorB;
+        break;
+    default:
+        color = nullptr;
+        break;
+    }
+
+    return Ok(PickerWheel::SliceSettings{ .weight = weight, .color = color });
+}
+
+matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWheel::SliceSettings const& value)
+{
+    auto obj = Value();
+
+    obj["weight"] = value.weight;
+
+    if (value.color == Utils::DefaultListColorA) {
+        obj["colorId"] = 0;
+    } else if (value.color == Utils::DefaultListColorB) {
+        obj["colorId"] = 1;
+    } else {
+        obj["colorId"] = -1;
+    }
+
+    return obj;
 }

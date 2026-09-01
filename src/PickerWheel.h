@@ -7,12 +7,17 @@ using namespace geode::prelude;
 class PickerWheel : public CCMenu
 {
 public:
-    struct PickerWheelSlice
+    struct SliceSettings
+    {
+        unsigned int weight;
+        ccColor4F* color;
+    };
+
+    struct Slice
     {
         // I think this doesn't need to be a `Ref` since it's theoretically held by the `GJLevelList` we get it from
         GJGameLevel* level;
-        unsigned int weight;
-        ccColor4F* color;
+        SliceSettings settings;
 
         mutable float startAngleDeg;
         mutable float endAngleDeg;
@@ -24,12 +29,14 @@ public:
 
     void update(float dt) override;
 
-    std::vector<PickerWheelSlice>* getSlices() { return &m_slices; }
+    std::vector<Slice>* getSlices() { return &m_slices; }
 
     void redrawSlices();
 
 private:
-    std::vector<PickerWheelSlice> m_slices;
+    GJLevelList* m_list;
+
+    std::vector<Slice> m_slices;
 
     CCNode* m_slicesNode = nullptr;
 
@@ -50,7 +57,7 @@ private:
 
     float m_radius;
 
-    unsigned int m_totalWeight;
+    unsigned int m_totalWeight = 0;
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
@@ -70,6 +77,8 @@ private:
 
     void updateAudio(float);
 
+    void saveSettings() const;
+
     CCNode* generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const;
 
     /**
@@ -81,4 +90,14 @@ private:
      * @return a CCMenu object that contains the wheel slices
      */
     [[nodiscard]] CCMenu* generateWheelSliceNodes();
+};
+
+
+// Wheel customization saving
+template<>
+struct matjson::Serialize<PickerWheel::SliceSettings>
+{
+    static Result<PickerWheel::SliceSettings> fromJson(Value const& value);
+
+    static Value toJson(PickerWheel::SliceSettings const& value);
 };
