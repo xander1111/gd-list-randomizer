@@ -44,8 +44,12 @@ private:
 
     CCNode* m_slicesNode = nullptr;
 
+    CCMenu* m_wheelOuterMenu = nullptr;
+
     // Doesn't need to be a `Ref` since it gets added as a child of `this`
     CCMenu* m_wheelMenu = nullptr;
+
+    CCDrawNode* m_ticker = nullptr;
 
     // Tracks the index of the slice that the wheel ticker is currently pointing at
     unsigned int m_currentlyPointedAtSlice = 0;
@@ -58,6 +62,9 @@ private:
 
     // True when the wheel is currently being spun to select a level
     bool m_spinning = false;
+
+    // Set to true to cause a tick sound to be played on the next audio update
+    bool m_playTick = false;
 
     float m_radius;
 
@@ -85,7 +92,11 @@ private:
 
     void updateAudio(float);
 
+    void updateCurrentlyPointedAtSlice();
+
     void saveSettings() const;
+
+    void redrawTicker();
 
     CCNode* generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const;
 
@@ -98,6 +109,8 @@ private:
      * @return a CCMenu object that contains the wheel slices
      */
     [[nodiscard]] CCMenu* generateWheelSliceNodes();
+
+    void generateTicker();
 };
 
 
