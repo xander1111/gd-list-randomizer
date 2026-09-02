@@ -104,6 +104,12 @@ bool PickerWheel::init()
 
     setContentSize({2.f * m_radius, 2.f * m_radius});
 
+
+    // Rotate wheel if there is only 1 label on it so that one label is upright
+    if (m_slices.size() < 2)
+         m_wheelMenu->setRotation(-270.f);
+
+
     updateLayout();
 
     schedule(schedule_selector(PickerWheel::updateAudio), TimePerTickSound);
@@ -483,13 +489,17 @@ void PickerWheel::generateTicker()
         {10.f, 0.f},
         {0.f, -4.f}
     };
+
+    ccColor4F* color = !m_slices.empty() ? m_slices[m_currentlyPointedAtSlice].settings.color : Utils::DefaultListColorA;
+
     m_ticker->drawPolygon(
         tickerPoints,
         3,
-        *m_slices[m_currentlyPointedAtSlice].settings.color,
+        *color,
         0.5f,
         *Utils::DefaultOutlineColor
     );
+
     m_ticker->setPosition({14.f, 0.f});
     m_ticker->setZOrder(1);
 
