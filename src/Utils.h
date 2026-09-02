@@ -24,5 +24,6 @@ public:
     // Default GD colors
     inline static auto DefaultListColorA = new ccColor4F(161.f / 255.f, 88.f / 255.f, 44.f / 255.f, 1.f);
     inline static auto DefaultListColorB = new ccColor4F(194.f / 255.f, 114.f / 255.f, 62.f / 255.f, 1.f);
-    inline static auto DefaultOutlineColor = new ccColor4F(0.f, 0.f, 0.f, 1.f);
+    inline static auto DefaultOutlineColorA = new ccColor4F(0.f, 0.f, 0.f, 1.f);
+    inline static auto DefaultOutlineColorB = new ccColor4F(1.f, 1.f, 1.f, 1.f);
 };
