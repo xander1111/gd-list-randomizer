@@ -20,11 +20,15 @@ public:
 private:
     void onBack(CCObject*);
 
-    void openProfile(CCObject*);
+    void onProfileClicked(CCObject*);
+
+    void onEdit(CCObject*);
 
     GJLevelList* m_list;
 
+    CCMenu* m_wheelAndEditMenu = nullptr;
+
     WheelEditMenu* m_wheelEditMenu = nullptr;
 
-    bool m_editMenuOpen = true;  // TODO default to false once button to open edit menu is added
+    bool m_editMenuOpen = false;
 };

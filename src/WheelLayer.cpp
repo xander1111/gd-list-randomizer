@@ -72,6 +72,18 @@ bool WheelLayer::init()
     addChild(rightCorner);
 
 
+    // Top of screen back button and edit button menu
+    CCMenu* const topMenu = CCMenu::create();
+    topMenu->setID("top-menu"_spr);
+    topMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setPadding(Padding::horizontal(8.f))
+        ->setAxisAlignment(AxisAlignment::Between)
+    );
+    topMenu->setPosition({0, winSize.height - 23});
+    topMenu->setAnchorPoint({0.f, 0.5f});
+
     // Back button
     CCMenuItemSpriteExtra* exitButton = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
@@ -80,14 +92,25 @@ bool WheelLayer::init()
     );
     exitButton->setID("exit-button"_spr);
 
+    topMenu->addChild(exitButton);
 
-    CCMenu* const exitMenu = CCMenu::create();
-    exitMenu->setID("exit-menu"_spr);
+    // Open edit menu button
+    // TODO
+    CCSprite* editButtonSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+    editButtonSprite->setScale(0.6f);
 
-    exitMenu->addChild(exitButton);
-    exitMenu->setPosition({24, winSize.height - 23});
+    CCMenuItemSpriteExtra* editButton = CCMenuItemSpriteExtra::create(
+        editButtonSprite,
+        this,
+        menu_selector(WheelLayer::onEdit)
+    );
+    editButton->setID("edit-button"_spr);
 
-    addChild(exitMenu);
+    topMenu->addChild(editButton);
+
+    topMenu->updateLayout();
+
+    addChild(topMenu);
 
 
     // Layout to space list title and wheel properly
@@ -100,26 +123,25 @@ bool WheelLayer::init()
     );
 
 
-    // Picker wheel and edit menu
-    CCMenu* wheelAndEditMenu = CCMenu::create();
-    wheelAndEditMenu->setID("wheel-and-edit-menu"_spr);
-    wheelAndEditMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(10.f));
+    m_wheelAndEditMenu = CCMenu::create();
+    m_wheelAndEditMenu->setID("wheel-and-edit-menu"_spr);
+    m_wheelAndEditMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(10.f));
 
     // Picker wheel
     PickerWheel* pickerWheel = PickerWheel::create(m_list, winSize.height * 0.4f);
     pickerWheel->setID("picker-wheel"_spr);
 
-    wheelAndEditMenu->addChild(pickerWheel);
+    m_wheelAndEditMenu->addChild(pickerWheel);
 
     // Wheel edit menu
     m_wheelEditMenu = WheelEditMenu::create(pickerWheel->getSlices(), winSize.height * 0.8f, winSize.height * 0.8f);
     m_wheelEditMenu->setID("wheel-edit-menu"_spr);
     m_wheelEditMenu->setVisible(m_editMenuOpen);
-    wheelAndEditMenu->addChild(m_wheelEditMenu);
+    m_wheelAndEditMenu->addChild(m_wheelEditMenu);
 
 
-    wheelAndEditMenu->updateLayout();
-    wheelAndTitleMenu->addChild(wheelAndEditMenu);
+    m_wheelAndEditMenu->updateLayout();
+    wheelAndTitleMenu->addChild(m_wheelAndEditMenu);
 
 
     // List title
@@ -176,7 +198,7 @@ bool WheelLayer::init()
     CCMenuItemSpriteExtra* listCreatorButton = CCMenuItemSpriteExtra::create(
         listCreatorLabel,
         this,
-        menu_selector(WheelLayer::openProfile)
+        menu_selector(WheelLayer::onProfileClicked)
     );
     listCreatorButton->setID("creator-name"_spr);
 
@@ -201,7 +223,16 @@ void WheelLayer::onBack(CCObject*)
     keyBackClicked();
 }
 
-void WheelLayer::openProfile(CCObject*)
+void WheelLayer::onProfileClicked(CCObject*)
 {
     ProfilePage::create(m_list->m_accountID, false)->show();
+}
+
+void WheelLayer::onEdit(CCObject*)
+{
+    m_editMenuOpen = !m_editMenuOpen;
+
+    // TODO make edit menu appearing have an animation
+    m_wheelEditMenu->setVisible(m_editMenuOpen);
+    m_wheelAndEditMenu->updateLayout();
 }
