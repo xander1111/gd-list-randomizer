@@ -33,6 +33,10 @@ public:
 
     void redrawSlices();
 
+    void addOnWheelSpin(const std::function<void()>& function);
+
+    void addOnWheelSpinEnd(const std::function<void()>& function);
+
 private:
     GJLevelList* m_list;
 
@@ -58,6 +62,10 @@ private:
     float m_radius;
 
     unsigned int m_totalWeight = 0;
+
+    std::vector<std::function<void()>> m_onWheelSpinFuncs;
+
+    std::vector<std::function<void()>> m_onWheelSpinEndFuncs;
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;

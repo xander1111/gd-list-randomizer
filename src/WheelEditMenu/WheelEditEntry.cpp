@@ -51,17 +51,16 @@ bool WheelEditEntry::init()
 
     optionsMenu->addChild(levelNameLabel);
 
-    // Level weight field
-    TextInput* weightField = TextInput::create(45.f, "Weight");
-    weightField->setID("weight-field"_spr);
-    weightField->setString(std::to_string(m_slice->settings.weight));
-    weightField->setCommonFilter(CommonFilter::Uint);
-    weightField->setMaxCharCount(6);  // int limits are higher, but the text starts to get hard to see
-    weightField->setScale(0.75f * m_height / weightField->getContentHeight());
+    m_weightField = TextInput::create(45.f, "Weight");
+    m_weightField->setID("weight-field"_spr);
+    m_weightField->setString(std::to_string(m_slice->settings.weight));
+    m_weightField->setCommonFilter(CommonFilter::Uint);
+    m_weightField->setMaxCharCount(6);  // int limits are higher, but the text starts to get hard to see
+    m_weightField->setScale(0.75f * m_height / m_weightField->getContentHeight());
 
-    weightField->setCallback(std::bind_front(&WheelEditEntry::updateWeight, this));
+    m_weightField->setCallback(std::bind_front(&WheelEditEntry::updateWeight, this));
 
-    optionsMenu->addChild(weightField);
+    optionsMenu->addChild(m_weightField);
 
 
     optionsMenu->updateLayout();
@@ -69,6 +68,11 @@ bool WheelEditEntry::init()
     addChildAtPosition(optionsMenu, Anchor::Center);
 
     return true;
+}
+
+void WheelEditEntry::setEnabled(const bool enabled) const
+{
+    m_weightField->setEnabled(enabled);
 }
 
 WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width, const float height)

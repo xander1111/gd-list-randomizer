@@ -153,6 +153,16 @@ void PickerWheel::redrawSlices()
     saveSettings();
 }
 
+void PickerWheel::addOnWheelSpin(const std::function<void()>& function)
+{
+    m_onWheelSpinFuncs.emplace_back(function);
+}
+
+void PickerWheel::addOnWheelSpinEnd(const std::function<void()>& function)
+{
+    m_onWheelSpinEndFuncs.emplace_back(function);
+}
+
 PickerWheel::PickerWheel(GJLevelList* list, const float radius)
     : m_list(list), m_radius(radius)
 {
@@ -198,6 +208,9 @@ void PickerWheel::onSpinWheel(CCObject*)
 
     m_spinning = true;
 
+    for (const auto& func : m_onWheelSpinFuncs)
+        func();
+
     // Once the user has spun the wheel, disable the idle spin animation
     m_idleSpin = false;
 
@@ -237,16 +250,19 @@ void PickerWheel::onSpinWheel(CCObject*)
     CCRotateBy* rotate = CCRotateBy::create(7.f, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
-    const auto showLevelPopup = CallFuncExt::create([slicePicked, this]
+    const auto onSpinEnd = CallFuncExt::create([slicePicked, this]
     {
         this->m_spinning = false;
 
         SliceSelectedPopup::create(slicePicked)->show();
 
         Utils::playResourceSound("selectLevel.ogg");
+
+        for (const auto& func : m_onWheelSpinEndFuncs)
+            func();
     });
 
-    CCSequence* seq = CCSequence::create(rotateEase, showLevelPopup, nullptr);
+    CCSequence* seq = CCSequence::create(rotateEase, onSpinEnd, nullptr);
 
     m_wheelMenu->runAction(seq);
 }

@@ -73,8 +73,12 @@ bool WheelEditMenu::init()
     m_levelListContent->setAnchorPoint({0.f, 0.f});
 
     int i = 0;
-    for (auto & slice : *m_slices)
-        m_levelListContent->addChild(WheelEditEntry::create(&slice, i++ % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB, m_width - padding));
+    for (auto & slice : *m_slices) {
+        WheelEditEntry* entry = WheelEditEntry::create(&slice, i++ % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB, m_width - padding);
+
+        m_levelListContent->addChild(entry);
+        m_entries.emplace_back(entry);
+    }
 
     m_levelListContent->updateLayout();
 
@@ -92,12 +96,24 @@ bool WheelEditMenu::init()
     return true;
 }
 
+void WheelEditMenu::onWheelSpin() const
+{
+    for (const auto entry : m_entries)
+        entry->setEnabled(false);
+}
+
+void WheelEditMenu::onWheelSpinEnd() const
+{
+    for (const auto entry : m_entries)
+        entry->setEnabled(true);
+}
+
 WheelEditMenu::WheelEditMenu(std::vector<PickerWheel::Slice>* slices, const float width, const float height) : m_slices(slices), m_width(width), m_height(height) {}
 
 void WheelEditMenu::updateSearch(std::string const& input) const
 {
     if (input.empty()) {
-        for (const auto entry : m_levelListContent->getChildren()->asExt<WheelEditEntry>())
+        for (const auto entry : m_entries)
             entry->setVisible(true);
 
         m_levelListContent->updateLayout();
@@ -107,7 +123,7 @@ void WheelEditMenu::updateSearch(std::string const& input) const
 
     const std::string inputLower = string::toLower(input);
 
-    for (const auto entry : m_levelListContent->getChildren()->asExt<WheelEditEntry>()) {
+    for (const auto entry : m_entries) {
         GJGameLevel* level = entry->getSlice()->level;
         const std::string levelNameLower = string::toLower(level->m_levelName);
         const std::string creatorNameLower = string::toLower(level->m_creatorName);

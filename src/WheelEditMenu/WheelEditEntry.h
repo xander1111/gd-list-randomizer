@@ -15,6 +15,8 @@ public:
 
     [[nodiscard]] PickerWheel::Slice* getSlice() const { return m_slice; }
 
+    void setEnabled(bool enabled) const;
+
 private:
     explicit WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, float width, float height = 30.f);
 
@@ -26,4 +28,5 @@ private:
     ccColor4F* m_color;
 
     CCLayerColor* m_background = nullptr;
+    TextInput* m_weightField = nullptr;
 };

@@ -144,6 +144,9 @@ bool WheelLayer::init()
     // Start the edit menu off the side of the screen so it can be animated moving in later
     m_wheelEditMenu->setPosition({winSize.width + m_wheelEditMenu->getContentWidth(), m_wheelAndEditMenu->getContentHeight() / 2.f});
 
+    m_pickerWheel->addOnWheelSpin(std::bind_front(&WheelEditMenu::onWheelSpin, m_wheelEditMenu));
+    m_pickerWheel->addOnWheelSpinEnd(std::bind_front(&WheelEditMenu::onWheelSpinEnd, m_wheelEditMenu));
+
     m_wheelAndEditMenu->addChild(m_wheelEditMenu);
 
     wheelAndTitleMenu->addChild(m_wheelAndEditMenu);
