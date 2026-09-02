@@ -41,14 +41,14 @@ bool PickerWheel::init()
     addChildAtPosition(spinButtonMenu, Anchor::Center);
 
     // Wheel outer menu, used to rotate the wheel without messing up any internal angle calculations
-    CCMenu* wheelOuterMenu = CCMenu::create();
-    wheelOuterMenu->setID("wheel-outer-menu"_spr);
-    wheelOuterMenu->setPosition({0, 0});
-    wheelOuterMenu->setAnchorPoint({0, 0});
-    wheelOuterMenu->setZOrder(0);
+    m_wheelOuterMenu = CCMenu::create();
+    m_wheelOuterMenu->setID("wheel-outer-menu"_spr);
+    m_wheelOuterMenu->setPosition({0, 0});
+    m_wheelOuterMenu->setAnchorPoint({0, 0});
+    m_wheelOuterMenu->setZOrder(0);
 
     // Rotate to make the selected slice be at the top of the wheel
-    wheelOuterMenu->setRotation(-90.f);
+    m_wheelOuterMenu->setRotation(-90.f);
 
 
     // Wheel
@@ -87,7 +87,7 @@ bool PickerWheel::init()
         }
     }
 
-    wheelOuterMenu->addChild(m_wheelMenu);
+    m_wheelOuterMenu->addChild(m_wheelMenu);
 
     // Wheel outline
     CCDrawNode* outline = CCDrawNode::create();
@@ -95,30 +95,12 @@ bool PickerWheel::init()
     outline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *Utils::DefaultOutlineColor, CircleSegmentCount);
     outline->setZOrder(1);
 
-    wheelOuterMenu->addChild(outline);
+    m_wheelOuterMenu->addChild(outline);
 
     // Ticker
-    CCDrawNode* ticker = CCDrawNode::create();
-    ticker->setID("ticker"_spr);
+    generateTicker();
 
-    CCPoint tickerPoints[] = {
-        {0.f, 4.f},
-        {10.f, 0.f},
-        {0.f, -4.f}
-    };
-    ticker->drawPolygon(
-        tickerPoints,
-        3,
-        *Utils::DefaultListColorB,
-        0.5f,
-        *Utils::DefaultOutlineColor
-    );
-    ticker->setPosition({14.f, 0.f});
-    ticker->setZOrder(1);
-
-    wheelOuterMenu->addChild(ticker);
-
-    addChildAtPosition(wheelOuterMenu, Anchor::Center);
+    addChildAtPosition(m_wheelOuterMenu, Anchor::Center);
 
     setContentSize({2.f * m_radius, 2.f * m_radius});
 
@@ -136,6 +118,13 @@ void PickerWheel::update(float dt)
 {
     if (m_idleSpin && !m_slices.empty())
         m_wheelMenu->setRotation(m_wheelMenu->getRotation() - IdleRotateRate * dt);
+
+    if (!m_spinning)
+        return;
+
+    redrawTicker();
+
+    updateCurrentlyPointedAtSlice();
 }
 
 void PickerWheel::redrawSlices()
@@ -276,14 +265,20 @@ void PickerWheel::updateAudio(float)
         // Don't play ticks when the wheel isn't actually being spun
         return;
 
+    if (m_playTick)
+        Utils::playResourceSound("tick.ogg");
+
+    m_playTick = false;
+}
+
+void PickerWheel::updateCurrentlyPointedAtSlice()
+{
     if (m_slices.empty())
         return;
 
     if (m_wheelMenu->getRotation() > 0.f)
         // This never happens normally, but it's been happening when I manually set the rotation using DevTools and it causes an infinite loop, freezing the game
-        return;
-
-    bool playTick = false;
+            return;
 
     const float currentRotation = fmod(m_wheelMenu->getRotation(), 360.f);
 
@@ -291,7 +286,7 @@ void PickerWheel::updateAudio(float)
     // Repeatedly checks instead of just incrementing as it is possible to pass over multiple slices in one frame
     while (currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation) {
         // We are pointing to a different slice than we were last update, play a tick noise to indicate this
-        playTick = true;
+        m_playTick = true;
 
         // Find the slice we are now pointing at
         m_currentlyPointedAtSlice = (m_currentlyPointedAtSlice + 1) % m_slices.size();
@@ -304,12 +299,9 @@ void PickerWheel::updateAudio(float)
     // To detect this edge case, we check if we rotated backwards, which actually means we looped around the end of the
     // wheel.
     if (m_lastRotation < currentRotation)
-        playTick = true;
+        m_playTick = true;
 
     m_lastRotation = currentRotation;
-
-    if (playTick)
-        Utils::playResourceSound("tick.ogg");
 }
 
 void PickerWheel::saveSettings() const
@@ -323,6 +315,13 @@ void PickerWheel::saveSettings() const
         Mod::get()->setSavedValue("editor-" + std::to_string(EditorIDs::getID(m_list)), allSettings);
     else
         Mod::get()->setSavedValue(std::to_string(m_list->m_listID), allSettings);
+}
+
+void PickerWheel::redrawTicker()
+{
+    m_wheelOuterMenu->removeChild(m_ticker, true);
+
+    generateTicker();
 }
 
 CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const
@@ -472,6 +471,29 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     }
 
     return wheelSlices;
+}
+
+void PickerWheel::generateTicker()
+{
+    m_ticker = CCDrawNode::create();
+    m_ticker->setID("ticker"_spr);
+
+    CCPoint tickerPoints[] = {
+        {0.f, 4.f},
+        {10.f, 0.f},
+        {0.f, -4.f}
+    };
+    m_ticker->drawPolygon(
+        tickerPoints,
+        3,
+        *m_slices[m_currentlyPointedAtSlice].settings.color,
+        0.5f,
+        *Utils::DefaultOutlineColor
+    );
+    m_ticker->setPosition({14.f, 0.f});
+    m_ticker->setZOrder(1);
+
+    m_wheelOuterMenu->addChild(m_ticker);
 }
 
 Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings>::fromJson(Value const& value)
