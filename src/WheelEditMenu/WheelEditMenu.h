@@ -24,10 +24,11 @@ private:
 
     void updateSearch(std::string const& input) const;
 
+    void setListLayerContentSize() const;
+
     std::vector<PickerWheel::Slice>* m_slices;
     float m_width;
     float m_height;
     alpha::ui::AdvancedScrollLayer* m_levelListLayer = nullptr;
     std::vector<WheelEditEntry*> m_entries = {};
-    CCMenu* m_levelListContent = nullptr;
 };

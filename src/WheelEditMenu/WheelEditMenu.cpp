@@ -60,30 +60,18 @@ bool WheelEditMenu::init()
     m_levelListLayer = alpha::ui::AdvancedScrollLayer::create({m_width - padding, levelListHeight});
     m_levelListLayer->setID("level-list"_spr);
 
-    m_levelListContent = CCMenu::create();
-    m_levelListContent->setID("level-list-content"_spr);
-    m_levelListContent->setLayout(
-        ColumnLayout::create()
-        ->setAutoScale(false)
-        ->setGap(0.f)
-        ->setAutoGrowAxis(0.f)
-        ->setAxisReverse(true)
-    );
-    m_levelListContent->setPosition({0.f, 0.f});
-    m_levelListContent->setAnchorPoint({0.f, 0.f});
+    for (int i = 0; i < m_slices->size() ; i++) {
+        auto slice = m_slices->at(i);
 
-    int i = 0;
-    for (auto & slice : *m_slices) {
-        WheelEditEntry* entry = WheelEditEntry::create(&slice, i++ % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB, m_width - padding);
+        WheelEditEntry* entry = WheelEditEntry::create(&slice, i % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB, m_width - padding);
+        entry->setPositionY(static_cast<float>(m_slices->size() - 1 - i) * WheelEditEntry::Height);
 
-        m_levelListContent->addChild(entry);
+        m_levelListLayer->addChild(entry);
         m_entries.emplace_back(entry);
     }
 
-    m_levelListContent->updateLayout();
-
-    m_levelListLayer->addChild(m_levelListContent);
-    m_levelListLayer->setInnerContentSize(m_levelListContent->getContentSize());
+    if (!m_entries.empty())
+        setListLayerContentSize();
 
     content->addChild(m_levelListLayer);
 
@@ -116,8 +104,8 @@ void WheelEditMenu::updateSearch(std::string const& input) const
         for (const auto entry : m_entries)
             entry->setVisible(true);
 
-        m_levelListContent->updateLayout();
-        m_levelListLayer->setInnerContentSize(m_levelListContent->getContentSize());
+        m_levelListLayer->updateLayout();
+        setListLayerContentSize();
         return;
     }
 
@@ -146,6 +134,16 @@ void WheelEditMenu::updateSearch(std::string const& input) const
         }
     }
 
-    m_levelListContent->updateLayout();
-    m_levelListLayer->setInnerContentSize(m_levelListContent->getContentSize());
+    setListLayerContentSize();
+}
+
+void WheelEditMenu::setListLayerContentSize() const
+{
+    if (!m_entries.empty())
+        m_levelListLayer->setInnerContentSize({
+            m_entries[0]->getContentWidth(),
+            m_entries[0]->getContentHeight() * static_cast<float>(m_entries.size())
+        });
+    else
+        m_levelListLayer->setInnerContentSize({0.f, 0.f});
 }
