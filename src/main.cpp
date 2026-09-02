@@ -20,10 +20,11 @@ class $modify(RandomizerLevelListLayer, LevelListLayer) {
 			menu_selector(RandomizerLevelListLayer::onButton)
 		);
 
-	    // The server delete button is part of the button-menu instead of the right-side-menu for whatever reason.
-	    // This causes an extra button added to the right-side-menu to overlap with it, so it has to be handled differently.
-        const bool serverDeleteVisible = list->m_accountID == GJAccountManager::get()->m_accountID;
-		CCNode* menuLocation = this->getChildByID(serverDeleteVisible ? "left-side-menu" : "right-side-menu");
+        // The 'claim-button' at the end of the left-side-menu on a featured list isn't quite sized properly, so we need
+        // to add a bit of spacing to not overlap with that button
+        randomizerButton->setLayoutOptions(AxisLayoutOptions::create()->setNextGap(15.f));
+
+        CCNode* menuLocation = getChildByID("left-side-menu");
 
 		menuLocation->addChild(randomizerButton);
 		randomizerButton->setID("random-button"_spr);
