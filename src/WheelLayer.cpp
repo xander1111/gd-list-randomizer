@@ -122,25 +122,30 @@ bool WheelLayer::init()
             ->setGap(15.f)
     );
 
-
     m_wheelAndEditMenu = CCMenu::create();
     m_wheelAndEditMenu->setID("wheel-and-edit-menu"_spr);
-    m_wheelAndEditMenu->setLayout(RowLayout::create()->setAutoScale(false)->setGap(10.f));
+
+    // Set size to fit both the wheel and the edit menu, plus a gap of 10
+    m_wheelAndEditMenu->setContentSize({winSize.height * 0.8f * 2.f + 10.f, winSize.height * 0.8f});
 
     // Picker wheel
-    PickerWheel* pickerWheel = PickerWheel::create(m_list, winSize.height * 0.4f);
-    pickerWheel->setID("picker-wheel"_spr);
+    m_pickerWheel = PickerWheel::create(m_list, winSize.height * 0.4f);
+    m_pickerWheel->setID("picker-wheel"_spr);
+    m_pickerWheel->setPosition({m_wheelAndEditMenu->getContentWidth() / 2.f, m_wheelAndEditMenu->getContentHeight() / 2.f});
 
-    m_wheelAndEditMenu->addChild(pickerWheel);
+    m_wheelAndEditMenu->addChild(m_pickerWheel);
 
     // Wheel edit menu
-    m_wheelEditMenu = WheelEditMenu::create(pickerWheel->getSlices(), winSize.height * 0.8f, winSize.height * 0.8f);
+    m_editMenuOpen = false;
+
+    m_wheelEditMenu = WheelEditMenu::create(m_pickerWheel->getSlices(), winSize.height * 0.8f, winSize.height * 0.8f);
     m_wheelEditMenu->setID("wheel-edit-menu"_spr);
-    m_wheelEditMenu->setVisible(m_editMenuOpen);
+    m_wheelEditMenu->setVisible(false);
+    // Start the edit menu off the side of the screen so it can be animated moving in later
+    m_wheelEditMenu->setPosition({winSize.width + m_wheelEditMenu->getContentWidth(), m_wheelAndEditMenu->getContentHeight() / 2.f});
+
     m_wheelAndEditMenu->addChild(m_wheelEditMenu);
 
-
-    m_wheelAndEditMenu->updateLayout();
     wheelAndTitleMenu->addChild(m_wheelAndEditMenu);
 
 
@@ -232,7 +237,32 @@ void WheelLayer::onEdit(CCObject*)
 {
     m_editMenuOpen = !m_editMenuOpen;
 
-    // TODO make edit menu appearing have an animation
-    m_wheelEditMenu->setVisible(m_editMenuOpen);
-    m_wheelAndEditMenu->updateLayout();
+    // Edit menu should be made visible before moving on screen, but shouldn't be made invisible before moving off screen
+    if (m_editMenuOpen)
+        m_wheelEditMenu->setVisible(true);
+
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+
+    // Find where the menus will end up
+    const CCPoint wheelEndPoint = {
+        m_editMenuOpen ? m_pickerWheel->getContentWidth() / 2.f : m_wheelAndEditMenu->getContentWidth() / 2.f,
+        m_wheelAndEditMenu->getContentHeight() / 2.f
+    };
+    const CCPoint editEndPoint = {
+        m_editMenuOpen ? m_wheelAndEditMenu->getContentWidth() - m_wheelEditMenu->getContentWidth() / 2.f : winSize.width + m_wheelEditMenu->getContentWidth(),
+        m_wheelAndEditMenu->getContentHeight() / 2.f
+    };
+
+    CCEaseInOut* wheelMove = CCEaseInOut::create(CCMoveTo::create(.5f, wheelEndPoint), 2.0f);
+    CCEaseInOut* editMove = CCEaseInOut::create(CCMoveTo::create(.5f, editEndPoint), 2.0f);
+
+    const auto updateEditMenuVisibility = CallFuncExt::create([this]
+    {
+        // Edit menu should be made invisible after moving off screen
+        m_wheelEditMenu->setVisible(m_editMenuOpen);
+    });
+    CCSequence* editMoveSeq = CCSequence::create(editMove, updateEditMenuVisibility, nullptr);
+
+    m_pickerWheel->runAction(wheelMove);
+    m_wheelEditMenu->runAction(editMoveSeq);
 }

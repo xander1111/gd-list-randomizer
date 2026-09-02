@@ -1,6 +1,7 @@
 #include "WheelEditEntry.h"
 
 #include "../Utils.h"
+#include "../WheelLayer.h"
 
 WheelEditEntry* WheelEditEntry::create(PickerWheel::Slice* slice, ccColor4F* color, const float width, const float height)
 {
@@ -83,7 +84,7 @@ void WheelEditEntry::updateWeight(std::string const& text) const
 
     try {
         m_slice->settings.weight = stoi(text);
-        const auto pickerWheel = typeinfo_cast<PickerWheel*>(CCScene::get()->getChildByIDRecursive("picker-wheel"_spr));
+        PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
         pickerWheel->redrawSlices();
     } catch (const std::exception& e) {
         log::debug("[WheelEditEntry::updateWeight]: Exception occurred when updating weight: {}", e.what());

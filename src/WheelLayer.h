@@ -17,6 +17,8 @@ public:
     bool init() override;
     void keyBackClicked() override;
 
+    PickerWheel* m_pickerWheel = nullptr;
+
 private:
     void onBack(CCObject*);
 
