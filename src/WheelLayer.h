@@ -2,6 +2,8 @@
 
 #include <Geode/Geode.hpp>
 
+#include "WheelEditMenu/WheelEditMenu.h"
+
 using namespace geode::prelude;
 
 class WheelLayer : public CCLayer
@@ -15,10 +17,20 @@ public:
     bool init() override;
     void keyBackClicked() override;
 
+    PickerWheel* m_pickerWheel = nullptr;
+
 private:
     void onBack(CCObject*);
 
-    void openProfile(CCObject*);
+    void onProfileClicked(CCObject*);
+
+    void onEdit(CCObject*);
 
     GJLevelList* m_list;
+
+    CCMenu* m_wheelAndEditMenu = nullptr;
+
+    WheelEditMenu* m_wheelEditMenu = nullptr;
+
+    bool m_editMenuOpen = false;
 };

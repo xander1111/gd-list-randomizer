@@ -72,6 +72,18 @@ bool WheelLayer::init()
     addChild(rightCorner);
 
 
+    // Top of screen back button and edit button menu
+    CCMenu* const topMenu = CCMenu::create();
+    topMenu->setID("top-menu"_spr);
+    topMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setPadding(Padding::horizontal(8.f))
+        ->setAxisAlignment(AxisAlignment::Between)
+    );
+    topMenu->setPosition({0, winSize.height - 23});
+    topMenu->setAnchorPoint({0.f, 0.5f});
+
     // Back button
     CCMenuItemSpriteExtra* exitButton = CCMenuItemSpriteExtra::create(
         CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
@@ -80,14 +92,25 @@ bool WheelLayer::init()
     );
     exitButton->setID("exit-button"_spr);
 
+    topMenu->addChild(exitButton);
 
-    CCMenu* const exitMenu = CCMenu::create();
-    exitMenu->setID("exit-menu"_spr);
+    // Open edit menu button
+    // TODO
+    CCSprite* editButtonSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+    editButtonSprite->setScale(0.6f);
 
-    exitMenu->addChild(exitButton);
-    exitMenu->setPosition({24, winSize.height - 23});
+    CCMenuItemSpriteExtra* editButton = CCMenuItemSpriteExtra::create(
+        editButtonSprite,
+        this,
+        menu_selector(WheelLayer::onEdit)
+    );
+    editButton->setID("edit-button"_spr);
 
-    addChild(exitMenu);
+    topMenu->addChild(editButton);
+
+    topMenu->updateLayout();
+
+    addChild(topMenu);
 
 
     // Layout to space list title and wheel properly
@@ -99,12 +122,34 @@ bool WheelLayer::init()
             ->setGap(15.f)
     );
 
+    m_wheelAndEditMenu = CCMenu::create();
+    m_wheelAndEditMenu->setID("wheel-and-edit-menu"_spr);
+
+    // Set size to fit both the wheel and the edit menu, plus a gap of 10
+    m_wheelAndEditMenu->setContentSize({winSize.height * 0.8f * 2.f + 10.f, winSize.height * 0.8f});
 
     // Picker wheel
-    CCMenu* pickerWheel = PickerWheel::create(m_list);
-    pickerWheel->setID("picker-wheel"_spr);
+    m_pickerWheel = PickerWheel::create(m_list, winSize.height * 0.4f);
+    m_pickerWheel->setID("picker-wheel"_spr);
+    m_pickerWheel->setPosition({m_wheelAndEditMenu->getContentWidth() / 2.f, m_wheelAndEditMenu->getContentHeight() / 2.f});
 
-    wheelAndTitleMenu->addChild(pickerWheel);
+    m_wheelAndEditMenu->addChild(m_pickerWheel);
+
+    // Wheel edit menu
+    m_editMenuOpen = false;
+
+    m_wheelEditMenu = WheelEditMenu::create(m_pickerWheel->getSlices(), winSize.height * 0.8f, winSize.height * 0.8f);
+    m_wheelEditMenu->setID("wheel-edit-menu"_spr);
+    m_wheelEditMenu->setVisible(false);
+    // Start the edit menu off the side of the screen so it can be animated moving in later
+    m_wheelEditMenu->setPosition({winSize.width + m_wheelEditMenu->getContentWidth(), m_wheelAndEditMenu->getContentHeight() / 2.f});
+
+    m_pickerWheel->addOnWheelSpin(std::bind_front(&WheelEditMenu::onWheelSpin, m_wheelEditMenu));
+    m_pickerWheel->addOnWheelSpinEnd(std::bind_front(&WheelEditMenu::onWheelSpinEnd, m_wheelEditMenu));
+
+    m_wheelAndEditMenu->addChild(m_wheelEditMenu);
+
+    wheelAndTitleMenu->addChild(m_wheelAndEditMenu);
 
 
     // List title
@@ -161,7 +206,7 @@ bool WheelLayer::init()
     CCMenuItemSpriteExtra* listCreatorButton = CCMenuItemSpriteExtra::create(
         listCreatorLabel,
         this,
-        menu_selector(WheelLayer::openProfile)
+        menu_selector(WheelLayer::onProfileClicked)
     );
     listCreatorButton->setID("creator-name"_spr);
 
@@ -186,7 +231,41 @@ void WheelLayer::onBack(CCObject*)
     keyBackClicked();
 }
 
-void WheelLayer::openProfile(CCObject*)
+void WheelLayer::onProfileClicked(CCObject*)
 {
     ProfilePage::create(m_list->m_accountID, false)->show();
+}
+
+void WheelLayer::onEdit(CCObject*)
+{
+    m_editMenuOpen = !m_editMenuOpen;
+
+    // Edit menu should be made visible before moving on screen, but shouldn't be made invisible before moving off screen
+    if (m_editMenuOpen)
+        m_wheelEditMenu->setVisible(true);
+
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+
+    // Find where the menus will end up
+    const CCPoint wheelEndPoint = {
+        m_editMenuOpen ? m_pickerWheel->getContentWidth() / 2.f : m_wheelAndEditMenu->getContentWidth() / 2.f,
+        m_wheelAndEditMenu->getContentHeight() / 2.f
+    };
+    const CCPoint editEndPoint = {
+        m_editMenuOpen ? m_wheelAndEditMenu->getContentWidth() - m_wheelEditMenu->getContentWidth() / 2.f : winSize.width + m_wheelEditMenu->getContentWidth(),
+        m_wheelAndEditMenu->getContentHeight() / 2.f
+    };
+
+    CCEaseInOut* wheelMove = CCEaseInOut::create(CCMoveTo::create(.5f, wheelEndPoint), 2.0f);
+    CCEaseInOut* editMove = CCEaseInOut::create(CCMoveTo::create(.5f, editEndPoint), 2.0f);
+
+    const auto updateEditMenuVisibility = CallFuncExt::create([this]
+    {
+        // Edit menu should be made invisible after moving off screen
+        m_wheelEditMenu->setVisible(m_editMenuOpen);
+    });
+    CCSequence* editMoveSeq = CCSequence::create(editMove, updateEditMenuVisibility, nullptr);
+
+    m_pickerWheel->runAction(wheelMove);
+    m_wheelEditMenu->runAction(editMoveSeq);
 }

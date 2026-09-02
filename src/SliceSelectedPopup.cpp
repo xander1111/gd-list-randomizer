@@ -1,9 +1,9 @@
 #include "SliceSelectedPopup.h"
 
-SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::PickerWheelSlice* slice)
+SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::Slice* slice)
 {
     auto ret = new SliceSelectedPopup(slice);
-    if (ret && ret->init(slice)) {
+    if (ret && ret->init()) {
         ret->autorelease();
     } else {
         CC_SAFE_DELETE(ret);
@@ -12,14 +12,14 @@ SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::PickerWheelSlice* sl
     return ret;
 }
 
-bool SliceSelectedPopup::init(PickerWheel::PickerWheelSlice* slice)
+bool SliceSelectedPopup::init()
 {
     if (!Popup::init(300.f, 100.f))
         return false;
 
-    this->setTitle(slice->level->m_levelName);
+    this->setTitle(m_slice->level->m_levelName);
 
-    CCLabelBMFont* creatorLabel = CCLabelBMFont::create(("By " + slice->level->m_creatorName).c_str(), "bigFont.fnt");
+    CCLabelBMFont* creatorLabel = CCLabelBMFont::create(("By " + m_slice->level->m_creatorName).c_str(), "bigFont.fnt");
     creatorLabel->setScale(0.4f);
     creatorLabel->setID("creator-label"_spr);
     m_mainLayer->addChildAtPosition(creatorLabel, Anchor::Top, {0.f, -40.f});
@@ -50,7 +50,7 @@ bool SliceSelectedPopup::init(PickerWheel::PickerWheelSlice* slice)
     return true;
 }
 
-SliceSelectedPopup::SliceSelectedPopup(PickerWheel::PickerWheelSlice* slice) : m_slice(slice) {}
+SliceSelectedPopup::SliceSelectedPopup(PickerWheel::Slice* slice) : m_slice(slice) {}
 
 void SliceSelectedPopup::onViewLevel(CCObject*)
 {
