@@ -90,12 +90,20 @@ bool PickerWheel::init()
     m_wheelOuterMenu->addChild(m_wheelMenu);
 
     // Wheel outline
-    CCDrawNode* outline = CCDrawNode::create();
-    outline->setID("wheel-outline"_spr);
-    outline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 1.f, *Utils::DefaultOutlineColor, CircleSegmentCount);
-    outline->setZOrder(1);
+    CCDrawNode* innerOutline = CCDrawNode::create();
+    innerOutline->setID("wheel-inner-outline"_spr);
+    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, *Utils::DefaultOutlineColorA, CircleSegmentCount);
+    innerOutline->setZOrder(1);
 
-    m_wheelOuterMenu->addChild(outline);
+    m_wheelOuterMenu->addChild(innerOutline);
+
+
+    CCDrawNode* outerOutline = CCDrawNode::create();
+    outerOutline->setID("wheel-outer-outline"_spr);
+    outerOutline->drawCircle({0, 0}, m_radius + 1.5f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, *Utils::DefaultOutlineColorB, CircleSegmentCount);
+    outerOutline->setZOrder(2);
+
+    m_wheelOuterMenu->addChild(outerOutline);
 
     // Ticker
     generateTicker();
@@ -497,7 +505,7 @@ void PickerWheel::generateTicker()
         3,
         *color,
         0.5f,
-        *Utils::DefaultOutlineColor
+        *Utils::DefaultOutlineColorA
     );
 
     m_ticker->setPosition({14.f, 0.f});
