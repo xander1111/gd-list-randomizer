@@ -29,7 +29,7 @@ bool PickerWheel::init()
     CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
         spinButtonSprite,
         this,
-        menu_selector(PickerWheel::spinWheel)
+        menu_selector(PickerWheel::onSpinWheel)
     );
 
     CCMenu* const spinButtonMenu = CCMenu::create();
@@ -191,7 +191,7 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
     }
 }
 
-void PickerWheel::spinWheel(CCObject*)
+void PickerWheel::onSpinWheel(CCObject*)
 {
     if (m_slices.empty())
         return;

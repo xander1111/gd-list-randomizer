@@ -73,7 +73,7 @@ private:
 
     explicit PickerWheel(GJLevelList* list, float radius);
 
-    void spinWheel(CCObject*);
+    void onSpinWheel(CCObject*);
 
     void updateAudio(float);
 
