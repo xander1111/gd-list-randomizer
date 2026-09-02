@@ -203,6 +203,9 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
 
 void PickerWheel::onSpinWheel(CCObject*)
 {
+    if (m_spinning)
+        return;
+
     if (m_slices.empty())
         return;
 
