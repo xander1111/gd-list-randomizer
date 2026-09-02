@@ -3,9 +3,9 @@
 #include "../Utils.h"
 #include "../WheelLayer.h"
 
-WheelEditEntry* WheelEditEntry::create(PickerWheel::Slice* slice, ccColor4F* color, const float width, const float height)
+WheelEditEntry* WheelEditEntry::create(PickerWheel::Slice* slice, ccColor4F* color, const float width)
 {
-    auto ret = new WheelEditEntry(slice, color, width, height);
+    auto ret = new WheelEditEntry(slice, color, width);
     if (ret && ret->init()) {
         ret->autorelease();
     } else {
@@ -20,12 +20,12 @@ bool WheelEditEntry::init()
     if (!CCNode::init())
         return false;
 
-    setContentSize({m_width, m_height});
+    setContentSize({m_width, Height});
     setLayout(AnchorLayout::create());
 
 
     // Background
-    m_background = CCLayerColor::create(ccc4BFromccc4F(*m_color), m_width, m_height);
+    m_background = CCLayerColor::create(ccc4BFromccc4F(*m_color), m_width, Height);
     m_background->setID("background"_spr);
     m_background->setZOrder(-1);
 
@@ -41,7 +41,7 @@ bool WheelEditEntry::init()
         ->setAxisAlignment(AxisAlignment::Between)
         ->setPadding(Padding::horizontal(5.f))
     );
-    optionsMenu->setContentSize({m_width, m_height});
+    optionsMenu->setContentSize({m_width, Height});
     optionsMenu->setPosition({0.f, 0.f});
 
     // Level name
@@ -56,7 +56,7 @@ bool WheelEditEntry::init()
     m_weightField->setString(std::to_string(m_slice->settings.weight));
     m_weightField->setCommonFilter(CommonFilter::Uint);
     m_weightField->setMaxCharCount(6);  // int limits are higher, but the text starts to get hard to see
-    m_weightField->setScale(0.75f * m_height / m_weightField->getContentHeight());
+    m_weightField->setScale(0.75f * Height / m_weightField->getContentHeight());
 
     m_weightField->setCallback(std::bind_front(&WheelEditEntry::updateWeight, this));
 
@@ -75,10 +75,9 @@ void WheelEditEntry::setEnabled(const bool enabled) const
     m_weightField->setEnabled(enabled);
 }
 
-WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width, const float height)
+WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width)
     : m_slice(slice),
     m_width(width),
-    m_height(height),
     m_color(color) {}
 
 void WheelEditEntry::updateWeight(std::string const& text) const
