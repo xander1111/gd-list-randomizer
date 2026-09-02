@@ -94,6 +94,15 @@ bool WheelLayer::init()
 
     topMenu->addChild(exitButton);
 
+    // Top-right menu, contains the wheel edit and theme edit buttons
+    CCMenu* const topRightMenu = CCMenu::create();
+    topRightMenu->setID("top-right-menu"_spr);
+    topRightMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAutoGrowAxis(0.f)
+    );
+
     // Open edit menu button
     CCSprite* editButtonSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     editButtonSprite->setScale(0.6f);
@@ -105,7 +114,25 @@ bool WheelLayer::init()
     );
     editButton->setID("edit-button"_spr);
 
-    topMenu->addChild(editButton);
+    topRightMenu->addChild(editButton);
+
+    // Edit theme button
+    CCSprite* themeButtonSprite = CCSprite::createWithSpriteFrameName("GJ_paintBtn_001.png");
+    themeButtonSprite->setScale(0.8f);
+
+    CCMenuItemSpriteExtra* themeButton = CCMenuItemSpriteExtra::create(
+        themeButtonSprite,
+        this,
+        menu_selector(WheelLayer::onThemeEdit)
+    );
+    themeButton->setID("theme-button"_spr);
+
+    topRightMenu->addChild(themeButton);
+
+
+    topRightMenu->updateLayout();
+
+    topMenu->addChild(topRightMenu);
 
     topMenu->updateLayout();
 
@@ -267,4 +294,9 @@ void WheelLayer::onEdit(CCObject*)
 
     m_pickerWheel->runAction(wheelMove);
     m_wheelEditMenu->runAction(editMoveSeq);
+}
+
+void WheelLayer::onThemeEdit(CCObject*)
+{
+    // TODO implement
 }

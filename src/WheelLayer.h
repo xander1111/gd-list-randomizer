@@ -26,6 +26,8 @@ private:
 
     void onEdit(CCObject*);
 
+    void onThemeEdit(CCObject*);
+
     GJLevelList* m_list;
 
     CCMenu* m_wheelAndEditMenu = nullptr;
