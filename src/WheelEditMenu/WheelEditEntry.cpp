@@ -56,6 +56,20 @@ bool WheelEditEntry::init()
     );
 
 
+    // Visibility toggle
+    CCMenuItemToggler* toggleButton = CCMenuItemToggler::createWithStandardSprites(
+        //CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        //CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this,
+        menu_selector(WheelEditEntry::onToggle),
+        1.f
+    );
+    toggleButton->setScale(0.75f * Height / toggleButton->getContentHeight());
+    toggleButton->toggle(true);
+
+    leftMenu->addChild(toggleButton);
+
+
     // Level name
     CCLabelBMFont* levelNameLabel = CCLabelBMFont::create(m_slice->level->m_levelName.c_str(), "bigFont.fnt");
     levelNameLabel->setID("level-name-label"_spr);
@@ -134,4 +148,14 @@ void WheelEditEntry::updateWeight(std::string const& text) const
     } catch (const std::exception& e) {
         log::debug("[WheelEditEntry::updateWeight]: Exception occurred when updating weight: {}", e.what());
     }
+}
+
+void WheelEditEntry::onToggle(CCObject* sender)
+{
+    auto* toggleButton = typeinfo_cast<CCMenuItemToggler*>(sender);
+    if (toggleButton == nullptr)
+        return;
+
+    // TODO show or hide level from the wheel
+    // use toggleButton->isToggled() to determine if toggled on or off
 }

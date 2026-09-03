@@ -28,6 +28,8 @@ private:
 
     void updateWeight(std::string const& text) const;
 
+    void onToggle(CCObject* sender);
+
     PickerWheel::Slice* m_slice;
     float m_width;
     ccColor4F* m_color;
