@@ -33,23 +33,46 @@ bool WheelEditEntry::init()
 
 
     // Level options menu
-    CCMenu* optionsMenu = CCMenu::create();
-    optionsMenu->setID("options-menu"_spr);
-    optionsMenu->setLayout(
+    m_optionsMenu = CCMenu::create();
+    m_optionsMenu->setID("options-menu"_spr);
+    m_optionsMenu->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Between)
         ->setPadding(Padding::horizontal(5.f))
     );
-    optionsMenu->setContentSize({m_width, Height});
-    optionsMenu->setPosition({0.f, 0.f});
+    m_optionsMenu->setContentSize({m_width, Height});
+    m_optionsMenu->setPosition({0.f, 0.f});
+
+
+    // Left align items
+    CCMenu* leftMenu = CCMenu::create();
+    leftMenu->setID("left"_spr);
+    leftMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setGap(5.f)
+        ->setAutoGrowAxis(0.f)
+    );
+
 
     // Level name
     CCLabelBMFont* levelNameLabel = CCLabelBMFont::create(m_slice->level->m_levelName.c_str(), "bigFont.fnt");
     levelNameLabel->setID("level-name-label"_spr);
     levelNameLabel->setScale(std::min(0.5f, 0.75f * m_width / levelNameLabel->getContentWidth()));
 
-    optionsMenu->addChild(levelNameLabel);
+    leftMenu->addChild(levelNameLabel);
+
+
+    // Right align items
+    CCMenu* rightMenu = CCMenu::create();
+    rightMenu->setID("right"_spr);
+    rightMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setGap(5.f)
+        ->setAutoGrowAxis(0.f)
+    );
 
     m_weightField = TextInput::create(45.f, "Weight");
     m_weightField->setID("weight-field"_spr);
@@ -60,12 +83,18 @@ bool WheelEditEntry::init()
 
     m_weightField->setCallback(std::bind_front(&WheelEditEntry::updateWeight, this));
 
-    optionsMenu->addChild(m_weightField);
+    rightMenu->addChild(m_weightField);
 
 
-    optionsMenu->updateLayout();
+    leftMenu->updateLayout();
+    rightMenu->updateLayout();
 
-    addChildAtPosition(optionsMenu, Anchor::Center);
+    m_optionsMenu->addChild(leftMenu);
+    m_optionsMenu->addChild(rightMenu);
+
+    m_optionsMenu->updateLayout();
+
+    addChildAtPosition(m_optionsMenu, Anchor::Center);
 
     return true;
 }
@@ -73,6 +102,19 @@ bool WheelEditEntry::init()
 void WheelEditEntry::setEnabled(const bool enabled) const
 {
     m_weightField->setEnabled(enabled);
+}
+
+void WheelEditEntry::setSearchVisible(const bool visible)
+{
+    m_searchVisible = visible;
+
+    // The entry's own visibility is managed by AdvancedScrollLayer's culling, so to make this not visible we can just
+    // move it on or off the side of the screen
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+    if (!visible)
+        setPositionX(winSize.width * 2.f);
+    else
+        setPositionX(0.f);
 }
 
 WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width)

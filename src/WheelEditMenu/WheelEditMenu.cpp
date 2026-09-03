@@ -33,51 +33,55 @@ bool WheelEditMenu::init()
 
 
     // Menu content
-    CCMenu* content = CCMenu::create();
-    content->setID("edit-menu-content"_spr);
-    content->setLayout(
+    m_content = CCMenu::create();
+    m_content->setID("edit-menu-content"_spr);
+    m_content->setLayout(
         ColumnLayout::create()
         ->setAutoScale(false)
         ->setGap(0.f)
         ->setAxisReverse(true)
     );
-    content->setContentSize({m_width, m_height});
+    m_content->setContentSize({m_width, m_height});
 
-    static const float padding = m_height / 16.0f;
+    m_padding = m_height / 16.0f;
 
     // Search box
-    TextInput* searchBox = TextInput::create(m_width - padding, "Search by name, creator, id");
+    TextInput* searchBox = TextInput::create(m_width - m_padding, "Search by name, creator, id");
     searchBox->setID("search-box"_spr);
     searchBox->setCommonFilter(CommonFilter::Name);
     searchBox->setMaxCharCount(20);
 
     searchBox->setCallback(std::bind_front(&WheelEditMenu::updateSearch, this));
 
-    content->addChild(searchBox);
+    m_content->addChild(searchBox);
 
     // Level list
-    float levelListHeight = (m_height - padding) * 5.f / 6.f;
-    m_levelListLayer = alpha::ui::AdvancedScrollLayer::create({m_width - padding, levelListHeight});
+    const float levelListHeight = (m_height - m_padding) * 5.f / 6.f;
+    m_levelListLayer = alpha::ui::AdvancedScrollLayer::create({m_width - m_padding, levelListHeight});
     m_levelListLayer->setID("level-list"_spr);
 
     for (int i = 0; i < m_slices->size() ; i++) {
-        auto slice = m_slices->at(i);
-
-        WheelEditEntry* entry = WheelEditEntry::create(&slice, i % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB, m_width - padding);
+        auto& slice = m_slices->at(i);
+        WheelEditEntry* entry = WheelEditEntry::create(&slice, i % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB, m_width - m_padding);
         entry->setPositionY(static_cast<float>(m_slices->size() - 1 - i) * WheelEditEntry::Height);
 
         m_levelListLayer->addChild(entry);
-        m_entries.emplace_back(entry);
+        m_entries.push_back(entry);
     }
 
     if (!m_entries.empty())
-        setListLayerContentSize();
+        m_levelListLayer->setInnerContentSize({
+            m_entries[0]->getContentWidth(),
+            m_entries[0]->getContentHeight() * static_cast<float>(m_entries.size())
+        });
+    else
+        m_levelListLayer->setInnerContentSize({0.f, 0.f});
 
-    content->addChild(m_levelListLayer);
+    m_content->addChild(m_levelListLayer);
 
-    content->updateLayout();
+    m_content->updateLayout();
 
-    addChildAtPosition(content, Anchor::Center);
+    addChildAtPosition(m_content, Anchor::Center);
 
     updateLayout();
 
@@ -98,25 +102,12 @@ void WheelEditMenu::onWheelSpinEnd() const
 
 WheelEditMenu::WheelEditMenu(std::vector<PickerWheel::Slice>* slices, const float width, const float height) : m_slices(slices), m_width(width), m_height(height) {}
 
-void WheelEditMenu::updateSearch(std::string const& input) const
+void WheelEditMenu::updateSearch(std::string const& input)
 {
-    if (input.empty()) {
-        for (const auto entry : m_entries)
-            entry->setVisible(true);
-
-        m_levelListLayer->updateLayout();
-        setListLayerContentSize();
-        return;
-    }
-
     const std::string inputLower = string::toLower(input);
 
-    for (const auto entry : m_entries) {
-        GJGameLevel* level = entry->getSlice()->level;
-        const std::string levelNameLower = string::toLower(level->m_levelName);
-        const std::string creatorNameLower = string::toLower(level->m_creatorName);
-        int levelId;
-
+    int levelId = 0;
+    if (!input.empty()) {
         try {
             levelId = stoi(input);
         } catch (std::invalid_argument&) {
@@ -124,25 +115,43 @@ void WheelEditMenu::updateSearch(std::string const& input) const
         } catch (std::out_of_range&) {
             levelId = 0;
         }
+    }
 
-        if (levelNameLower.contains(inputLower)
-            || creatorNameLower.contains(inputLower)
-            || level->m_levelID == levelId) {
-            entry->setVisible(true);
+    int visibleCount = 0;
+    for (const auto entry : m_entries) {
+        bool matches;
+
+        if (!input.empty()) {
+            GJGameLevel* level = entry->getSlice()->level;
+            const std::string levelNameLower = string::toLower(level->m_levelName);
+            const std::string creatorNameLower = string::toLower(level->m_creatorName);
+
+            matches = levelNameLower.contains(inputLower)
+                || creatorNameLower.contains(inputLower)
+                || level->m_levelID == levelId;
+
+            entry->setSearchVisible(matches);
         } else {
-            entry->setVisible(false);
+            matches = true;
+            entry->setSearchVisible(true);
+        }
+
+        if (matches)
+            visibleCount++;
+    }
+
+    int done = 0;
+    for (const auto entry : m_entries) {
+        if (entry->getSearchVisible()) {
+            entry->setPositionY(static_cast<float>(visibleCount - 1 - done) * WheelEditEntry::Height);
+            done++;
         }
     }
 
-    setListLayerContentSize();
-}
-
-void WheelEditMenu::setListLayerContentSize() const
-{
-    if (!m_entries.empty())
+    if (visibleCount > 0)
         m_levelListLayer->setInnerContentSize({
             m_entries[0]->getContentWidth(),
-            m_entries[0]->getContentHeight() * static_cast<float>(m_entries.size())
+            m_entries[0]->getContentHeight() * static_cast<float>(visibleCount)
         });
     else
         m_levelListLayer->setInnerContentSize({0.f, 0.f});

@@ -17,7 +17,11 @@ public:
 
     void setEnabled(bool enabled) const;
 
-    static constexpr float Height = 30.f;
+    void setSearchVisible(bool visible);
+
+    [[nodiscard]] bool getSearchVisible() const { return m_searchVisible; };
+
+    static constexpr float Height = 20.f;
 
 private:
     explicit WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, float width);
@@ -28,6 +32,9 @@ private:
     float m_width;
     ccColor4F* m_color;
 
+    bool m_searchVisible = true;
+
     CCLayerColor* m_background = nullptr;
+    CCMenu* m_optionsMenu = nullptr;
     TextInput* m_weightField = nullptr;
 };
