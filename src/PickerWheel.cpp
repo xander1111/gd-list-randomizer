@@ -189,7 +189,8 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
 
         const Slice newSlice = {
             .level = level,
-            .settings = sliceSettings
+            .settings = sliceSettings,
+            .color = nullptr  // Slice hasn't been drawn yet, so it's color isn't determined yet
         };
 
         m_slices[levelListIndex] = newSlice;
@@ -429,10 +430,16 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(m_firstEnabledSlice->settings.color != nullptr ? m_firstEnabledSlice->settings.color : Utils::DefaultListColorA, m_firstEnabledSlice->level->m_levelName.c_str()));
+        ccColor4F* renderColor = m_firstEnabledSlice->settings.color != nullptr
+            ? m_firstEnabledSlice->settings.color
+            : Utils::DefaultListColorA;
+
+        wheelSlices->addChild(generatePickerWheelCircle(renderColor, m_firstEnabledSlice->level->m_levelName.c_str()));
 
         m_firstEnabledSlice->startAngleDeg = 0.f;
         m_firstEnabledSlice->endAngleDeg = -360.f;
+
+        m_firstEnabledSlice->color = renderColor;
 
         return wheelSlices;
     }
