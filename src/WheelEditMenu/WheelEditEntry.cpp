@@ -65,7 +65,7 @@ bool WheelEditEntry::init()
         1.f
     );
     toggleButton->setScale(0.75f * Height / toggleButton->getContentHeight());
-    toggleButton->toggle(true);
+    toggleButton->toggle(m_slice->settings.enabled);
 
     leftMenu->addChild(toggleButton);
 
@@ -156,6 +156,7 @@ void WheelEditEntry::onToggle(CCObject* sender)
     if (toggleButton == nullptr)
         return;
 
-    // TODO show or hide level from the wheel
-    // use toggleButton->isToggled() to determine if toggled on or off
+    m_slice->settings.enabled = !toggleButton->isToggled();
+    PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
+    pickerWheel->redrawSlices();
 }

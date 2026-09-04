@@ -87,6 +87,8 @@ bool PickerWheel::init()
         }
     }
 
+    updateCurrentlyPointedAtSlice();
+
     m_wheelOuterMenu->addChild(m_wheelMenu);
 
     // Wheel outline
@@ -114,7 +116,7 @@ bool PickerWheel::init()
 
 
     // Rotate wheel if there is only 1 label on it so that one label is upright
-    if (m_slices.size() < 2)
+    if (m_enabledSliceCount < 2)
          m_wheelMenu->setRotation(-270.f);
 
 
@@ -152,6 +154,8 @@ void PickerWheel::redrawSlices()
     m_slicesNode->setPosition({0, 0});
     m_slicesNode->setZOrder(-1);
     m_wheelMenu->addChild(m_slicesNode);
+
+    updateCurrentlyPointedAtSlice();
 
     saveSettings();
 }
@@ -191,7 +195,8 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
         } else {
             sliceSettings = SliceSettings {
                 .weight = 1u,
-                .color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB
+                .color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB,
+                .enabled = true
             };
         }
 
@@ -209,7 +214,7 @@ void PickerWheel::onSpinWheel(CCObject*)
     if (m_spinning)
         return;
 
-    if (m_slices.empty())
+    if (m_enabledSliceCount == 0)
         return;
 
     m_spinning = true;
@@ -230,14 +235,16 @@ void PickerWheel::onSpinWheel(CCObject*)
     int sliceIndexPicked = 0;
     double cumulativeProb = 0.;
 
-    while (sliceIndexPicked < m_slices.size()) {
+    for (; sliceIndexPicked < m_slices.size(); sliceIndexPicked++) {
+        if (!m_slices[sliceIndexPicked].settings.enabled)
+            continue;
+
         const double sliceProbability = static_cast<double>(m_slices[sliceIndexPicked].settings.weight) / static_cast<double>(m_totalWeight);
 
         if (cumulativeProb + sliceProbability > roll)
             break;
 
         cumulativeProb += sliceProbability;
-        sliceIndexPicked++;
     }
 
     Slice* slicePicked = &m_slices[sliceIndexPicked];
@@ -298,9 +305,13 @@ void PickerWheel::updateCurrentlyPointedAtSlice()
 
     // If we are pointing to a different slice, find the slice we are pointing at
     // Repeatedly checks instead of just incrementing as it is possible to pass over multiple slices in one frame
-    while (currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation) {
-        // We are pointing to a different slice than we were last update, play a tick noise to indicate this
-        m_playTick = true;
+    while (!m_slices[m_currentlyPointedAtSlice].settings.enabled
+        || currentRotation < m_slices[m_currentlyPointedAtSlice].endAngleDeg
+        || m_slices[m_currentlyPointedAtSlice].startAngleDeg < currentRotation
+    ) {
+        // We are pointing to a different slice than we were last update, play a tick noise if the wheel is spinning
+        if (m_spinning)
+            m_playTick = true;
 
         // Find the slice we are now pointing at
         m_currentlyPointedAtSlice = (m_currentlyPointedAtSlice + 1) % m_slices.size();
@@ -369,7 +380,21 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     CCMenu* wheelSlices = CCMenu::create();
     wheelSlices->setID("wheel-slices"_spr);
 
-    switch (m_slices.size()) {
+    m_totalWeight = 0;
+    m_enabledSliceCount = 0;
+
+    const Slice* lastSlice = nullptr;
+
+    for (const auto & slice : m_slices) {
+        if (slice.settings.enabled) {
+            m_enabledSliceCount++;
+            m_totalWeight += slice.settings.weight;
+
+            lastSlice = &slice;
+        }
+    }
+
+    switch (m_enabledSliceCount) {
     case 0: {
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
@@ -382,10 +407,10 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, m_slices[0].level->m_levelName.c_str()));
+        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, lastSlice->level->m_levelName.c_str()));
 
-        m_slices[0].startAngleDeg = 0.f;
-        m_slices[0].endAngleDeg = -360.f;
+        lastSlice->startAngleDeg = 0.f;
+        lastSlice->endAngleDeg = -360.f;
 
         return wheelSlices;
     }
@@ -394,13 +419,12 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         break;
     }
 
-    m_totalWeight = 0;
     unsigned int processedSlicesWeight = 0;
 
-    for (const auto & slice : m_slices)
-        m_totalWeight += slice.settings.weight;
-
     for (auto & slice : m_slices) {
+        if (!slice.settings.enabled)
+            continue;
+
         // Node for both the wheel slice and the text to go under
         CCNode* sliceNode = CCNode::create();
 
@@ -520,6 +544,7 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
 
     unsigned int weight;
     int colorId;
+    bool enabled;
 
     try {
         GEODE_UNWRAP_INTO(weight, value["weight"].asUInt());
@@ -530,8 +555,9 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
 
     try {
         // TODO store and retrieve colors properly
-        //   Colors will be able to be set to either one of four theme colors, or individually. If the color is set
-        //   individually, it needs to save the RGBA values instead of which theme color to point to
+        //   Colors will be able to be set to either automatically follow the theme colors, or individually coloring
+        //   each slice. If the color is set individually, we need to save the RGBA values, otherwise we need to
+        //   indicate that the color should be determined by the theme
         GEODE_UNWRAP_INTO(colorId, value["colorId"].asInt());
     } catch (const std::exception&) {
         log::info("Invalid slice colorId data, using default value of 0");
@@ -552,7 +578,14 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
         break;
     }
 
-    return Ok(PickerWheel::SliceSettings{ .weight = weight, .color = color });
+    try {
+        GEODE_UNWRAP_INTO(enabled, value["enabled"].asBool());
+    } catch (const std::exception&) {
+        log::info("Invalid slice enabled data, using default value of true");
+        enabled = true;
+    }
+
+    return Ok(PickerWheel::SliceSettings{ .weight = weight, .color = color, .enabled = enabled });
 }
 
 matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWheel::SliceSettings const& value)
@@ -568,6 +601,8 @@ matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWhee
     } else {
         obj["colorId"] = -1;
     }
+
+    obj["enabled"] = value.enabled;
 
     return obj;
 }

@@ -11,6 +11,7 @@ public:
     {
         unsigned int weight;
         ccColor4F* color;
+        bool enabled;
     };
 
     struct Slice
@@ -69,6 +70,8 @@ private:
     float m_radius;
 
     unsigned int m_totalWeight = 0;
+
+    unsigned int m_enabledSliceCount = 0;
 
     std::vector<std::function<void()>> m_onWheelSpinFuncs;
 
