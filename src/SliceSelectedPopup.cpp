@@ -1,5 +1,7 @@
 #include "SliceSelectedPopup.h"
 
+#include "WheelLayer.h"
+
 SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::Slice* slice)
 {
     auto ret = new SliceSelectedPopup(slice);
@@ -24,20 +26,35 @@ bool SliceSelectedPopup::init()
     creatorLabel->setID("creator-label"_spr);
     m_mainLayer->addChildAtPosition(creatorLabel, Anchor::Top, {0.f, -40.f});
 
-    // View button
-    ButtonSprite* viewLevelButtonSprite = ButtonSprite::create("View", 56, false, "bigFont.fnt", "GJ_button_01-uhd.png", 30.f, 0.5f);
-    viewLevelButtonSprite->setContentSize({56, 30});
 
+    // Button menu
+    CCMenu* buttonMenu = CCMenu::create();
+    buttonMenu->setLayout(
+        RowLayout::create()
+        ->setGap(10.f)
+        ->setAutoGrowAxis(0.f)
+    );
+    buttonMenu->setAnchorPoint({0.5f, 0.f});
+
+    // Disable button
+    ButtonSprite* disableButtonSprite = ButtonSprite::create("Disable Level", 0, false, "bigFont.fnt", "GJ_button_01-uhd.png", 30.f, 0.5f);
+
+    CCMenuItemSpriteExtra* disableLevelButton = CCMenuItemSpriteExtra::create(
+        disableButtonSprite,
+        this,
+        menu_selector(SliceSelectedPopup::onDisableLevel)
+    );
+
+    buttonMenu->addChild(disableLevelButton);
+
+    // View button
+    ButtonSprite* viewLevelButtonSprite = ButtonSprite::create("View", 0, false, "bigFont.fnt", "GJ_button_01-uhd.png", 30.f, 0.5f);
 
     CCMenuItemSpriteExtra* viewLevelButton = CCMenuItemSpriteExtra::create(
         viewLevelButtonSprite,
         this,
         menu_selector(SliceSelectedPopup::onViewLevel)
     );
-
-    CCMenu* buttonMenu = CCMenu::create();
-    buttonMenu->setLayout(RowLayout::create());
-    buttonMenu->setAnchorPoint({0.5f, 0.f});
 
     buttonMenu->addChild(viewLevelButton);
 
@@ -58,4 +75,28 @@ void SliceSelectedPopup::onViewLevel(CCObject*)
     CCScene* levelScene = LevelInfoLayer::scene(m_slice->level, false);
     CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
     CCDirector::sharedDirector()->pushScene(transitionFade);
+}
+
+void SliceSelectedPopup::onDisableLevel(CCObject* btn)
+{
+    // Find entry
+    auto editMenu = typeinfo_cast<WheelEditMenu*>(CCScene::get()->getChildByIDRecursive("wheel-edit-menu"_spr));
+    if (editMenu == nullptr) {
+        log::debug("[SliceSelectedPopup::onDisableLevel]: Disabling level failed: could not find wheel edit menu");
+        onClose(btn);
+        return;
+    }
+
+    WheelEditEntry* entry = editMenu->entryForSlice(m_slice);
+    if (entry == nullptr) {
+        log::debug("[SliceSelectedPopup::onDisableLevel]: Disabling level failed: could not find entry for slice");
+        onClose(btn);
+        return;
+    }
+
+    // Disable entry
+    entry->toggle(false);
+
+    // Close menu
+    onClose(btn);
 }

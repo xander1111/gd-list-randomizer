@@ -95,7 +95,6 @@ bool WheelLayer::init()
     topMenu->addChild(exitButton);
 
     // Open edit menu button
-    // TODO
     CCSprite* editButtonSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     editButtonSprite->setScale(0.6f);
 

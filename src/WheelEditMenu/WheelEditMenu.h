@@ -19,16 +19,18 @@ public:
 
     void onWheelSpinEnd() const;
 
+    WheelEditEntry* entryForSlice(PickerWheel::Slice* slice) const;
+
 private:
     explicit WheelEditMenu(std::vector<PickerWheel::Slice>* slices, float width, float height);
 
-    void updateSearch(std::string const& input) const;
-
-    void setListLayerContentSize() const;
+    void updateSearch(std::string const& input);
 
     std::vector<PickerWheel::Slice>* m_slices;
     float m_width;
     float m_height;
+    float m_padding = 0.f;
     alpha::ui::AdvancedScrollLayer* m_levelListLayer = nullptr;
-    std::vector<WheelEditEntry*> m_entries = {};
+    CCArrayExt<WheelEditEntry*> m_entries = {};
+    CCMenu* m_content = nullptr;
 };

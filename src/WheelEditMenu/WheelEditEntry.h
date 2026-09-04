@@ -17,17 +17,29 @@ public:
 
     void setEnabled(bool enabled) const;
 
-    static constexpr float Height = 30.f;
+    void setSearchVisible(bool visible);
+
+    void toggle(bool enabled) const;
+
+    [[nodiscard]] bool getSearchVisible() const { return m_searchVisible; };
+
+    static constexpr float Height = 20.f;
 
 private:
     explicit WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, float width);
 
     void updateWeight(std::string const& text) const;
 
+    void onToggle(CCObject* sender);
+
     PickerWheel::Slice* m_slice;
     float m_width;
     ccColor4F* m_color;
 
+    bool m_searchVisible = true;
+
     CCLayerColor* m_background = nullptr;
+    CCMenu* m_optionsMenu = nullptr;
     TextInput* m_weightField = nullptr;
+    CCMenuItemToggler* m_toggleButton = nullptr;
 };
