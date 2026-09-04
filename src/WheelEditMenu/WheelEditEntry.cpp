@@ -132,6 +132,11 @@ void WheelEditEntry::setSearchVisible(const bool visible)
         setPositionX(0.f);
 }
 
+void WheelEditEntry::toggle(bool enabled) const
+{
+    m_toggleButton->toggleWithCallback(enabled);
+}
+
 WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width)
     : m_slice(slice),
     m_width(width),

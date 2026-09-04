@@ -100,6 +100,19 @@ void WheelEditMenu::onWheelSpinEnd() const
         entry->setEnabled(true);
 }
 
+WheelEditEntry* WheelEditMenu::entryForSlice(PickerWheel::Slice* slice) const
+{
+    WheelEditEntry* ret = nullptr;
+    for (auto entry : m_entries) {
+        if (entry->getSlice() == slice) {
+            ret = entry;
+            break;
+        }
+    }
+
+    return ret;
+}
+
 WheelEditMenu::WheelEditMenu(std::vector<PickerWheel::Slice>* slices, const float width, const float height) : m_slices(slices), m_width(width), m_height(height) {}
 
 void WheelEditMenu::updateSearch(std::string const& input)

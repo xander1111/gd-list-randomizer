@@ -19,6 +19,8 @@ public:
 
     void onWheelSpinEnd() const;
 
+    WheelEditEntry* entryForSlice(PickerWheel::Slice* slice) const;
+
 private:
     explicit WheelEditMenu(std::vector<PickerWheel::Slice>* slices, float width, float height);
 

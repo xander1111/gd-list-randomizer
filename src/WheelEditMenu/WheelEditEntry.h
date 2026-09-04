@@ -19,6 +19,8 @@ public:
 
     void setSearchVisible(bool visible);
 
+    void toggle(bool enabled) const;
+
     [[nodiscard]] bool getSearchVisible() const { return m_searchVisible; };
 
     static constexpr float Height = 20.f;
