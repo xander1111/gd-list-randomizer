@@ -144,7 +144,7 @@ void WheelEditEntry::updateWeight(std::string const& text) const
     try {
         m_slice->settings.weight = stoi(text);
         PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
-        pickerWheel->redrawSlices();
+        pickerWheel->redrawWheel();
     } catch (const std::exception& e) {
         log::debug("[WheelEditEntry::updateWeight]: Exception occurred when updating weight: {}", e.what());
     }
@@ -158,5 +158,5 @@ void WheelEditEntry::onToggle(CCObject* sender)
 
     m_slice->settings.enabled = !toggleButton->isToggled();
     PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
-    pickerWheel->redrawSlices();
+    pickerWheel->redrawWheel();
 }

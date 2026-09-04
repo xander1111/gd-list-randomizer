@@ -63,29 +63,8 @@ bool PickerWheel::init()
     m_slicesNode->setZOrder(-1);
     m_wheelMenu->addChild(m_slicesNode);
 
-    // If the last slice uses color 1
-    if (m_slices.size() > 1 && m_slices.size() % 2 == 1) {
-        log::debug("Last slice uses same color as first slice, generating separator line");
-
-        // start - end instead of end - start used since all the rotations are negative
-        const float lastSliceAngle = m_slices[m_slices.size() - 1].startAngleDeg - m_slices[m_slices.size() - 1].endAngleDeg;
-        const float firstSliceAngle = m_slices[0].startAngleDeg - m_slices[0].endAngleDeg;
-
-        // Equation used means that a slice that is 1/100th of the wheel gives a thickness of 0.3,
-        // maximum thickness is ~0.5, and thickness goes below 0 when a slice is 1/250th of the wheel
-        const float lineThickness = std::min(
-            -0.002f * (360.f / firstSliceAngle) + 0.5f,
-            -0.002f * (360.f / lastSliceAngle) + 0.5f
-        );
-
-        if (lineThickness > 0.0f) {
-            CCDrawNode* line = CCDrawNode::create();
-            line->setID("end-separator"_spr);
-
-            line->drawSegment({0, 0}, {m_radius, 0}, lineThickness, *Utils::DefaultListColorB);
-            m_wheelMenu->addChild(line);
-        }
-    }
+    // End separator
+    addEndSeparator();
 
     updateCurrentlyPointedAtSlice();
 
@@ -132,7 +111,7 @@ bool PickerWheel::init()
 
 void PickerWheel::update(float dt)
 {
-    if (m_idleSpin && !m_slices.empty())
+    if (m_idleSpin && m_enabledSliceCount > 0)
         m_wheelMenu->setRotation(m_wheelMenu->getRotation() - IdleRotateRate * dt);
 
     if (!m_spinning)
@@ -143,7 +122,7 @@ void PickerWheel::update(float dt)
     updateCurrentlyPointedAtSlice();
 }
 
-void PickerWheel::redrawSlices()
+void PickerWheel::redrawWheel()
 {
     if (m_wheelMenu == nullptr || m_slicesNode == nullptr)
         return;
@@ -155,7 +134,18 @@ void PickerWheel::redrawSlices()
     m_slicesNode->setZOrder(-1);
     m_wheelMenu->addChild(m_slicesNode);
 
+    if (m_endSeparator != nullptr) {
+        m_wheelMenu->removeChild(m_endSeparator, true);
+        m_endSeparator = nullptr;
+    }
+
+    addEndSeparator();
+
     updateCurrentlyPointedAtSlice();
+
+    // Rotate wheel if there is only 1 label on it so that one label is upright
+    if (m_enabledSliceCount < 2)
+        m_wheelMenu->setRotation(-270.f);
 
     saveSettings();
 }
@@ -189,13 +179,10 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
         SliceSettings sliceSettings{};
         if (settings.contains(std::to_string(level->m_levelID))) {
             sliceSettings = settings[std::to_string(level->m_levelID)];
-
-            if (sliceSettings.color == nullptr)
-                sliceSettings.color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB;
         } else {
             sliceSettings = SliceSettings {
                 .weight = 1u,
-                .color = levelListIndex % 2 == 0 ? Utils::DefaultListColorA : Utils::DefaultListColorB,
+                .color = nullptr,  // nullptr means use automatic theme colors
                 .enabled = true
             };
         }
@@ -294,7 +281,7 @@ void PickerWheel::updateAudio(float)
 
 void PickerWheel::updateCurrentlyPointedAtSlice()
 {
-    if (m_slices.empty())
+    if (m_enabledSliceCount == 0)
         return;
 
     if (m_wheelMenu->getRotation() > 0.f)
@@ -349,6 +336,37 @@ void PickerWheel::redrawTicker()
     generateTicker();
 }
 
+bool PickerWheel::needsEndSeparator() const
+{
+    return m_firstEnabledSlice != nullptr && m_lastEnabledSlice != nullptr
+        && m_firstEnabledSlice->color == m_lastEnabledSlice->color
+        && m_enabledSliceCount > 1;
+}
+
+void PickerWheel::addEndSeparator()
+{
+    if (needsEndSeparator()) {
+        // start - end instead of end - start used since all the rotations are negative
+        const float lastSliceAngle = m_lastEnabledSlice->startAngleDeg - m_lastEnabledSlice->endAngleDeg;
+        const float firstSliceAngle = m_firstEnabledSlice->startAngleDeg - m_firstEnabledSlice->endAngleDeg;
+
+        // Equation used means that a slice that is 1/100th of the wheel gives a thickness of 0.3,
+        // maximum thickness is ~0.5, and thickness goes below 0 when a slice is 1/250th of the wheel
+        const float lineThickness = std::min(
+            -0.002f * (360.f / firstSliceAngle) + 0.5f,
+            -0.002f * (360.f / lastSliceAngle) + 0.5f
+        );
+
+        if (lineThickness > 0.0f) {
+            m_endSeparator = CCDrawNode::create();
+            m_endSeparator->setID("end-separator"_spr);
+
+            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, *Utils::DefaultListColorB);
+            m_wheelMenu->addChild(m_endSeparator);
+        }
+    }
+}
+
 CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const
 {
     CCNode* sliceNode = CCNode::create();
@@ -383,14 +401,18 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     m_totalWeight = 0;
     m_enabledSliceCount = 0;
 
-    const Slice* lastSlice = nullptr;
+    m_firstEnabledSlice = nullptr;
+    m_lastEnabledSlice = nullptr;
 
-    for (const auto & slice : m_slices) {
+    for (auto & slice : m_slices) {
         if (slice.settings.enabled) {
+            if (m_firstEnabledSlice == nullptr)
+                m_firstEnabledSlice = &slice;
+
             m_enabledSliceCount++;
             m_totalWeight += slice.settings.weight;
 
-            lastSlice = &slice;
+            m_lastEnabledSlice = &slice;
         }
     }
 
@@ -407,10 +429,10 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, lastSlice->level->m_levelName.c_str()));
+        wheelSlices->addChild(generatePickerWheelCircle(m_firstEnabledSlice->settings.color != nullptr ? m_firstEnabledSlice->settings.color : Utils::DefaultListColorA, m_firstEnabledSlice->level->m_levelName.c_str()));
 
-        lastSlice->startAngleDeg = 0.f;
-        lastSlice->endAngleDeg = -360.f;
+        m_firstEnabledSlice->startAngleDeg = 0.f;
+        m_firstEnabledSlice->endAngleDeg = -360.f;
 
         return wheelSlices;
     }
@@ -420,6 +442,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     }
 
     unsigned int processedSlicesWeight = 0;
+    unsigned int processedSlicesCount = 0;
 
     for (auto & slice : m_slices) {
         if (!slice.settings.enabled)
@@ -446,10 +469,21 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         }
         points.emplace_back(0.f, 0.f);
 
+        ccColor4F* color = slice.settings.color != nullptr
+            ? slice.settings.color
+            : processedSlicesCount % 2 == 0
+                ? Utils::DefaultListColorA
+                : Utils::DefaultListColorB;
+
+        // Important distinction from `slice.settings.color`: `slice.color` stores the color that *was* used to render
+        // the slice, whereas `slice.settings.color` is a user set value that determines what color *should* be used to
+        // draw that slice.
+        slice.color = color;
+
         arc->drawPolygon(
             points.data(),
             static_cast<unsigned int>(points.size()),
-            *slice.settings.color,
+            *color,
             0.f,
             {.r = 0, .g = 0, .b = 0, .a = 1},
             BorderAlignment::Center
@@ -504,6 +538,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         slice.endAngleDeg = -startAngle - 360.f;
 
         processedSlicesWeight += slice.settings.weight;
+        processedSlicesCount++;
 
         wheelSlices->addChild(sliceNode);
     }
@@ -522,7 +557,7 @@ void PickerWheel::generateTicker()
         {0.f, -4.f}
     };
 
-    ccColor4F* color = !m_slices.empty() ? m_slices[m_currentlyPointedAtSlice].settings.color : Utils::DefaultListColorA;
+    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : Utils::DefaultListColorA;
 
     m_ticker->drawPolygon(
         tickerPoints,

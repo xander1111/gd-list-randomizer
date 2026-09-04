@@ -10,7 +10,7 @@ public:
     struct SliceSettings
     {
         unsigned int weight;
-        ccColor4F* color;
+        ccColor4F* color;  // Specifies a color to render the slice using. Set to nullptr to use theme colors
         bool enabled;
     };
 
@@ -19,6 +19,8 @@ public:
         // I think this doesn't need to be a `Ref` since it's theoretically held by the `GJLevelList` we get it from
         GJGameLevel* level;
         SliceSettings settings;
+
+        ccColor4F* color;  // The color that the slice was most recently rendered with
 
         mutable float startAngleDeg;
         mutable float endAngleDeg;
@@ -32,7 +34,7 @@ public:
 
     std::vector<Slice>* getSlices() { return &m_slices; }
 
-    void redrawSlices();
+    void redrawWheel();
 
     void addOnWheelSpin(const std::function<void()>& function);
 
@@ -51,6 +53,13 @@ private:
     CCMenu* m_wheelMenu = nullptr;
 
     CCDrawNode* m_ticker = nullptr;
+
+    // End separator node, may be nullptr if the end separator was not needed when the wheel was last drawn
+    CCDrawNode* m_endSeparator = nullptr;
+
+    // Mainly used for checking
+    Slice* m_firstEnabledSlice = nullptr;
+    Slice* m_lastEnabledSlice = nullptr;
 
     // Tracks the index of the slice that the wheel ticker is currently pointing at
     unsigned int m_currentlyPointedAtSlice = 0;
@@ -100,6 +109,10 @@ private:
     void saveSettings() const;
 
     void redrawTicker();
+
+    [[nodiscard]] bool needsEndSeparator() const;
+
+    void addEndSeparator();
 
     CCNode* generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const;
 
