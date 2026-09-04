@@ -57,17 +57,17 @@ bool WheelEditEntry::init()
 
 
     // Visibility toggle
-    CCMenuItemToggler* toggleButton = CCMenuItemToggler::createWithStandardSprites(
+    m_toggleButton = CCMenuItemToggler::createWithStandardSprites(
         //CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
         //CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
         this,
         menu_selector(WheelEditEntry::onToggle),
         1.f
     );
-    toggleButton->setScale(0.75f * Height / toggleButton->getContentHeight());
-    toggleButton->toggle(m_slice->settings.enabled);
+    m_toggleButton->setScale(0.75f * Height / m_toggleButton->getContentHeight());
+    m_toggleButton->toggle(m_slice->settings.enabled);
 
-    leftMenu->addChild(toggleButton);
+    leftMenu->addChild(m_toggleButton);
 
 
     // Level name
@@ -116,6 +116,7 @@ bool WheelEditEntry::init()
 void WheelEditEntry::setEnabled(const bool enabled) const
 {
     m_weightField->setEnabled(enabled);
+    m_toggleButton->setEnabled(enabled);
 }
 
 void WheelEditEntry::setSearchVisible(const bool visible)

@@ -39,4 +39,5 @@ private:
     CCLayerColor* m_background = nullptr;
     CCMenu* m_optionsMenu = nullptr;
     TextInput* m_weightField = nullptr;
+    CCMenuItemToggler* m_toggleButton = nullptr;
 };
