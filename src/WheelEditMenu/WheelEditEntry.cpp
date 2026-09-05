@@ -58,8 +58,6 @@ bool WheelEditEntry::init()
 
     // Visibility toggle
     m_toggleButton = CCMenuItemToggler::createWithStandardSprites(
-        //CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
-        //CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
         this,
         menu_selector(WheelEditEntry::onToggle),
         1.f

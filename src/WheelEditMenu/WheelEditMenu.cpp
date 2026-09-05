@@ -2,6 +2,7 @@
 
 #include "WheelEditEntry.h"
 #include "../Utils.h"
+#include "../WheelFilterLayer.h"
 #include "alphalaneous.alphas-ui-pack/include/nodes/scroll/Scroll.hpp"
 
 WheelEditMenu* WheelEditMenu::create(std::vector<PickerWheel::Slice>* slices, const float width, const float height)
@@ -45,6 +46,32 @@ bool WheelEditMenu::init()
 
     m_padding = m_height / 16.0f;
 
+    // WheelEditMenu::onOpenFilterMenu
+
+    // Top row of buttons
+    CCMenu* buttonMenu = CCMenu::create();
+    buttonMenu->setID("button-menu"_spr);
+    buttonMenu->setContentSize({m_width - m_padding, (m_height - m_padding) * 1.f / 6.f});
+    buttonMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Between)
+    );
+
+    // Filter menu button
+    CCMenuItemSpriteExtra* filterMenuButton = CCMenuItemSpriteExtra::create(
+        CCSprite::createWithSpriteFrameName("GJ_filterIcon_001.png"),
+        this,
+        menu_selector(WheelEditMenu::onOpenFilterMenu)
+    );
+
+    buttonMenu->addChild(filterMenuButton);
+
+    buttonMenu->updateLayout();
+
+    m_content->addChild(buttonMenu);
+
+
     // Search box
     TextInput* searchBox = TextInput::create(m_width - m_padding, "Search by name, creator, id");
     searchBox->setID("search-box"_spr);
@@ -56,7 +83,7 @@ bool WheelEditMenu::init()
     m_content->addChild(searchBox);
 
     // Level list
-    const float levelListHeight = (m_height - m_padding) * 5.f / 6.f;
+    const float levelListHeight = (m_height - m_padding) * 2.f / 3.f;
     m_levelListLayer = alpha::ui::AdvancedScrollLayer::create({m_width - m_padding, levelListHeight});
     m_levelListLayer->setID("level-list"_spr);
 
@@ -168,4 +195,10 @@ void WheelEditMenu::updateSearch(std::string const& input)
         });
     else
         m_levelListLayer->setInnerContentSize({0.f, 0.f});
+}
+
+void WheelEditMenu::onOpenFilterMenu(CCObject*)
+{
+    WheelFilterLayer* wheelFilterLayer = WheelFilterLayer::create(&m_entries);
+    wheelFilterLayer->show();
 }
