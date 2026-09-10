@@ -36,12 +36,14 @@ bool WheelEditMenu::init()
     // Menu content
     m_content = CCMenu::create();
     m_content->setID("edit-menu-content"_spr);
-    m_content->setLayout(
-        ColumnLayout::create()
+
+    AxisLayout* contentLayout = ColumnLayout::create()
         ->setAutoScale(false)
-        ->setGap(0.f)
+        ->setGap(3.f)
         ->setAxisReverse(true)
-    );
+        ->setPadding(Padding::vertical(10.f));
+
+    m_content->setLayout(contentLayout);
     m_content->setContentSize({m_width, m_height});
 
     m_padding = m_height / 16.0f;
@@ -86,6 +88,14 @@ bool WheelEditMenu::init()
     const float levelListHeight = (m_height - m_padding) * 2.f / 3.f;
     m_levelListLayer = alpha::ui::AdvancedScrollLayer::create({m_width - m_padding, levelListHeight});
     m_levelListLayer->setID("level-list"_spr);
+    m_levelListLayer->setContentHeight(
+        m_height
+        - buttonMenu->getContentHeight()
+        - searchBox->getContentHeight()
+        - contentLayout->getGap() * 2.f
+        - contentLayout->getPadding().top
+        - contentLayout->getPadding().bottom
+    );
 
     for (int i = 0; i < m_slices->size() ; i++) {
         auto& slice = m_slices->at(i);
