@@ -1,5 +1,6 @@
 #include "WheelFilterLayer.h"
 
+#include "DimmingButton.h"
 #include "TogglerWithLabel.h"
 #include "WheelLayer.h"
 
@@ -81,8 +82,8 @@ bool WheelFilterLayer::init()
     rowTwo->addChild(starRateToggler);
 
     TogglerWithLabel* featuredToggler = TogglerWithLabel::create(
-    [this] (const TogglerWithLabel* toggler) { m_filters[Featured] = toggler->m_toggled; },
-    "Featured"
+        [this] (const TogglerWithLabel* toggler) { m_filters[Featured] = toggler->m_toggled; },
+        "Featured"
     );
     featuredToggler->setID("featured-toggler"_spr);
     rowTwo->addChild(featuredToggler);
@@ -118,14 +119,126 @@ bool WheelFilterLayer::init()
     rowThree->addChild(legendaryToggler);
 
     TogglerWithLabel* mythicToggler = TogglerWithLabel::create(
-    [this] (const TogglerWithLabel* toggler) { m_filters[Mythic] = toggler->m_toggled; },
-    "Mythic"
+        [this] (const TogglerWithLabel* toggler) { m_filters[Mythic] = toggler->m_toggled; },
+        "Mythic"
     );
     mythicToggler->setID("mythic-toggler"_spr);
     rowThree->addChild(mythicToggler);
 
     rowThree->updateLayout();
     m_mainLayer->addChild(rowThree);
+
+
+    // Difficulty filters
+    CCMenu* difficultyMenu = CCMenu::create();
+    difficultyMenu->setID("difficulty-filters-menu"_spr);
+    difficultyMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Even)
+        ->setPadding(Padding::horizontal(10.f))
+    );
+    difficultyMenu->setContentWidth(m_menuWidth);
+    difficultyMenu->setPosition({m_menuWidth / 2.f, 110.f});
+
+    DimmingButton* naToggler = DimmingButton::create(
+        CCSprite::createWithSpriteFrameName("difficulty_00_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[NA] = button->isToggled(); }
+    );
+    naToggler->setID("na-toggler"_spr);
+    naToggler->setScale(0.8f);
+    difficultyMenu->addChild(naToggler);
+
+    DimmingButton* easyToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_01_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[Easy] = button->isToggled(); }
+    );
+    easyToggler->setID("easy-toggler"_spr);
+    easyToggler->setScale(0.8f);
+    difficultyMenu->addChild(easyToggler);
+
+    DimmingButton* normalToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_02_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[Normal] = button->isToggled(); }
+    );
+    normalToggler->setID("normal-toggler"_spr);
+    normalToggler->setScale(0.8f);
+    difficultyMenu->addChild(normalToggler);
+
+    DimmingButton* hardToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_03_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[Hard] = button->isToggled(); }
+    );
+    hardToggler->setID("hard-toggler"_spr);
+    hardToggler->setScale(0.8f);
+    difficultyMenu->addChild(hardToggler);
+
+    DimmingButton* harderToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_04_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[Harder] = button->isToggled(); }
+    );
+    harderToggler->setID("harder-toggler"_spr);
+    harderToggler->setScale(0.8f);
+    difficultyMenu->addChild(harderToggler);
+
+    DimmingButton* insaneToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_05_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[Insane] = button->isToggled(); }
+    );
+    insaneToggler->setID("insane-toggler"_spr);
+    insaneToggler->setScale(0.8f);
+    difficultyMenu->addChild(insaneToggler);
+
+    DimmingButton* easyDemonToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_07_btn2_001.png"),
+        [this] (const DimmingButton* button) { m_filters[EasyDemon] = button->isToggled(); }
+    );
+    easyDemonToggler->setID("easy-demon-toggler"_spr);
+    easyDemonToggler->setScale(0.8f);
+    difficultyMenu->addChild(easyDemonToggler);
+
+    DimmingButton* mediumDemonToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_08_btn2_001.png"),
+        [this] (const DimmingButton* button) { m_filters[MediumDemon] = button->isToggled(); }
+    );
+    mediumDemonToggler->setID("medium-demon-toggler"_spr);
+    mediumDemonToggler->setScale(0.8f);
+    difficultyMenu->addChild(mediumDemonToggler);
+
+    DimmingButton* hardDemonToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_06_btn2_001.png"),
+        [this] (const DimmingButton* button) { m_filters[HardDemon] = button->isToggled(); }
+    );
+    hardDemonToggler->setID("hard-demon-toggler"_spr);
+    hardDemonToggler->setScale(0.8f);
+    difficultyMenu->addChild(hardDemonToggler);
+
+    DimmingButton* insaneDemonToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_09_btn2_001.png"),
+        [this] (const DimmingButton* button) { m_filters[InsaneDemon] = button->isToggled(); }
+    );
+    insaneDemonToggler->setID("insane-demon-toggler"_spr);
+    insaneDemonToggler->setScale(0.8f);
+    difficultyMenu->addChild(insaneDemonToggler);
+
+    DimmingButton* extremeDemonToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_10_btn2_001.png"),
+        [this] (const DimmingButton* button) { m_filters[ExtremeDemon] = button->isToggled(); }
+    );
+    extremeDemonToggler->setID("extreme-demon-toggler"_spr);
+    extremeDemonToggler->setScale(0.8f);
+    difficultyMenu->addChild(extremeDemonToggler);
+
+    DimmingButton* autoToggler = DimmingButton::create(
+    CCSprite::createWithSpriteFrameName("difficulty_auto_btn_001.png"),
+        [this] (const DimmingButton* button) { m_filters[Auto] = button->isToggled(); }
+    );
+    autoToggler->setID("auto-toggler"_spr);
+    autoToggler->setScale(0.8f);
+    difficultyMenu->addChild(autoToggler);
+
+    difficultyMenu->updateLayout();
+    m_mainLayer->addChild(difficultyMenu);
 
 
     // Apply button
@@ -187,6 +300,54 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
 
             case Mythic:
                 enabled = enabled || level->m_isEpic == 3;
+                break;
+
+            case NA:
+                enabled = enabled || (level->getAverageDifficulty() == 0 && level->m_demon == 0);
+                break;
+
+            case Auto:
+                enabled = enabled || level->m_autoLevel;
+                break;
+
+            case Easy:
+                enabled = enabled || (level->getAverageDifficulty() == 1 && level->m_demon == 0 && !level->m_autoLevel);
+                break;
+
+            case Normal:
+                enabled = enabled || (level->getAverageDifficulty() == 2 && level->m_demon == 0);
+                break;
+
+            case Hard:
+                enabled = enabled || (level->getAverageDifficulty() == 3 && level->m_demon == 0);
+                break;
+
+            case Harder:
+                enabled = enabled || (level->getAverageDifficulty() == 4 && level->m_demon == 0);
+                break;
+
+            case Insane:
+                enabled = enabled || (level->getAverageDifficulty() == 5 && level->m_demon == 0);
+                break;
+
+            case EasyDemon:
+                enabled = enabled || (level->m_demonDifficulty == 3 && level->m_demon != 0);
+                break;
+
+            case MediumDemon:
+                enabled = enabled || (level->m_demonDifficulty == 4 && level->m_demon != 0);
+                break;
+
+            case HardDemon:
+                enabled = enabled || (level->m_demonDifficulty == 0 && level->m_demon != 0);
+                break;
+
+            case InsaneDemon:
+                enabled = enabled || (level->m_demonDifficulty == 5 && level->m_demon != 0);
+                break;
+
+            case ExtremeDemon:
+                enabled = enabled || (level->m_demonDifficulty == 6 && level->m_demon != 0);
                 break;
 
             default:

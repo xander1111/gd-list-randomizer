@@ -23,6 +23,19 @@ private:
         Epic,
         Legendary,
         Mythic,
+
+        NA,
+        Auto,
+        Easy,
+        Normal,
+        Hard,
+        Harder,
+        Insane,
+        EasyDemon,
+        MediumDemon,
+        HardDemon,
+        InsaneDemon,
+        ExtremeDemon,
     };
 
     // Same size as `MoreSearchLayer` (the advanced options menu on the search screen)
