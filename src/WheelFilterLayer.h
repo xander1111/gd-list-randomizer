@@ -17,7 +17,6 @@ private:
     enum FilterTypes {
         Completed,
         Uncompleted,
-        Coins,
         Unrated,
         StarRate,
         Featured,

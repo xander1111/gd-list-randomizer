@@ -50,13 +50,6 @@ bool WheelFilterLayer::init()
     uncompletedToggler->setID("uncompleted-toggler"_spr);
     rowOne->addChild(uncompletedToggler);
 
-    TogglerWithLabel* coinsToggler = TogglerWithLabel::create(
-    [this] (const TogglerWithLabel* toggler) { m_filters[Coins] = toggler->m_toggled; },
-    "Coins"
-);
-    coinsToggler->setID("coins-toggler"_spr);
-    rowOne->addChild(coinsToggler);
-
     rowOne->updateLayout();
     m_mainLayer->addChild(rowOne);
 
@@ -71,7 +64,7 @@ bool WheelFilterLayer::init()
         ->setPadding(Padding::horizontal(10.f))
     );
     rowTwo->setContentWidth(m_menuWidth);
-    rowTwo->setPosition({m_menuWidth / 2.f, m_menuHeight - 90.f});
+    rowTwo->setPosition({m_menuWidth / 2.f, m_menuHeight - 105.f});
 
     TogglerWithLabel* unratedToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Unrated] = toggler->m_toggled; },
@@ -90,7 +83,7 @@ bool WheelFilterLayer::init()
     TogglerWithLabel* featuredToggler = TogglerWithLabel::create(
     [this] (const TogglerWithLabel* toggler) { m_filters[Featured] = toggler->m_toggled; },
     "Featured"
-);
+    );
     featuredToggler->setID("featured-toggler"_spr);
     rowTwo->addChild(featuredToggler);
 
@@ -108,7 +101,7 @@ bool WheelFilterLayer::init()
         ->setPadding(Padding::horizontal(10.f))
     );
     rowThree->setContentWidth(m_menuWidth);
-    rowThree->setPosition({m_menuWidth / 2.f, m_menuHeight - 120.f});
+    rowThree->setPosition({m_menuWidth / 2.f, m_menuHeight - 135.f});
 
     TogglerWithLabel* epicToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Epic] = toggler->m_toggled; },
@@ -127,7 +120,7 @@ bool WheelFilterLayer::init()
     TogglerWithLabel* mythicToggler = TogglerWithLabel::create(
     [this] (const TogglerWithLabel* toggler) { m_filters[Mythic] = toggler->m_toggled; },
     "Mythic"
-);
+    );
     mythicToggler->setID("mythic-toggler"_spr);
     rowThree->addChild(mythicToggler);
 
@@ -155,7 +148,7 @@ WheelFilterLayer::WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries) : m_ent
 void WheelFilterLayer::onApplyFilters(CCObject* btn)
 {
     for (const auto & entry : *m_entries) {
-        bool enabled = true;
+        bool enabled = false;
 
         for (const auto& [filter, filterEnabled] : m_filters) {
             if (!filterEnabled)
@@ -165,39 +158,35 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
 
             switch(filter) {
             case Completed:
-                enabled = enabled && level->m_normalPercent == 100;
+                enabled = enabled || level->m_normalPercent == 100;
                 break;
 
             case Uncompleted:
-                enabled = enabled && level->m_normalPercent != 100;
-                break;
-
-            case Coins:
-                enabled = enabled && level->m_coins > 0;
+                enabled = enabled || level->m_normalPercent != 100;
                 break;
 
             case Unrated:
-                enabled = enabled && level->m_stars == 0;
+                enabled = enabled || level->m_stars == 0;
                 break;
 
             case StarRate:
-                enabled = enabled && level->m_stars > 0;
+                enabled = enabled || (level->m_stars > 0 && level->m_featured == 0);
                 break;
 
             case Featured:
-                enabled = enabled && level->m_featured > 0;
+                enabled = enabled || (level->m_featured > 0 && level->m_isEpic == 0);
                 break;
 
             case Epic:
-                enabled = enabled && level->m_isEpic > 0;
+                enabled = enabled || level->m_isEpic == 1;
                 break;
 
             case Legendary:
-                enabled = enabled && level->m_isEpic > 1;
+                enabled = enabled || level->m_isEpic == 2;
                 break;
 
             case Mythic:
-                enabled = enabled && level->m_isEpic > 2;
+                enabled = enabled || level->m_isEpic == 3;
                 break;
 
             default:
