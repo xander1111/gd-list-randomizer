@@ -23,15 +23,10 @@ bool WheelFilterLayer::init()
     setTitle("Filter enabled levels");
 
     // Filters
-    CCMenu* filtersMenu = CCMenu::create();
-    filtersMenu->setID("filters-menu"_spr);
-    filtersMenu->setContentSize({m_mainLayer->getContentWidth(), m_menuHeight * m_filtersMenuHeightRatio});
-    filtersMenu->setPosition({0.f, m_menuHeight * (m_filtersMenuHeightRatio / 2.f)});
-
 
     // First row
     CCMenu* rowOne = CCMenu::create();
-    rowOne->setID("row-one"_spr);
+    rowOne->setID("filters-row-one"_spr);
     rowOne->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
@@ -64,7 +59,78 @@ bool WheelFilterLayer::init()
     rowOne->updateLayout();
     m_mainLayer->addChild(rowOne);
 
-    m_mainLayer->addChild(filtersMenu);
+
+    // Second row
+    CCMenu* rowTwo = CCMenu::create();
+    rowTwo->setID("filters-row-two"_spr);
+    rowTwo->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Between)
+    );
+    rowTwo->setContentWidth(m_menuWidth * 0.8f);
+    rowTwo->setPosition({m_menuWidth / 2.f, m_menuHeight * m_filtersMenuHeightRatio - 30.f});
+
+    TogglerWithLabel* unratedToggler = TogglerWithLabel::create(
+        [this] (const TogglerWithLabel* toggler) { m_filters[Unrated] = toggler->m_toggled; },
+        "No Star"
+    );
+    unratedToggler->setID("unrated-toggler"_spr);
+    rowTwo->addChild(unratedToggler);
+
+    TogglerWithLabel* starRateToggler = TogglerWithLabel::create(
+        [this] (const TogglerWithLabel* toggler) { m_filters[StarRate] = toggler->m_toggled; },
+        "Star Rated"
+    );
+    starRateToggler->setID("star-rate-toggler"_spr);
+    rowTwo->addChild(starRateToggler);
+
+    TogglerWithLabel* featuredToggler = TogglerWithLabel::create(
+    [this] (const TogglerWithLabel* toggler) { m_filters[Featured] = toggler->m_toggled; },
+    "Featured"
+);
+    featuredToggler->setID("featured-toggler"_spr);
+    rowTwo->addChild(featuredToggler);
+
+    rowTwo->updateLayout();
+    m_mainLayer->addChild(rowTwo);
+
+
+    // Third row
+    CCMenu* rowThree = CCMenu::create();
+    rowThree->setID("filters-row-three"_spr);
+    rowThree->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Between)
+    );
+    rowThree->setContentWidth(m_menuWidth * 0.8f);
+    rowThree->setPosition({m_menuWidth / 2.f, m_menuHeight * m_filtersMenuHeightRatio - 60.f});
+
+    TogglerWithLabel* epicToggler = TogglerWithLabel::create(
+        [this] (const TogglerWithLabel* toggler) { m_filters[Epic] = toggler->m_toggled; },
+        "Epic"
+    );
+    epicToggler->setID("epic-toggler"_spr);
+    rowThree->addChild(epicToggler);
+
+    TogglerWithLabel* legendaryToggler = TogglerWithLabel::create(
+        [this] (const TogglerWithLabel* toggler) { m_filters[Legendary] = toggler->m_toggled; },
+        "Legendary"
+    );
+    legendaryToggler->setID("legendary-toggler"_spr);
+    rowThree->addChild(legendaryToggler);
+
+    TogglerWithLabel* mythicToggler = TogglerWithLabel::create(
+    [this] (const TogglerWithLabel* toggler) { m_filters[Mythic] = toggler->m_toggled; },
+    "Mythic"
+);
+    mythicToggler->setID("mythic-toggler"_spr);
+    rowThree->addChild(mythicToggler);
+
+    rowThree->updateLayout();
+    m_mainLayer->addChild(rowThree);
+
 
     // Apply button
     ButtonSprite* applyButtonSprite = ButtonSprite::create("Apply", 0.5f);
@@ -92,21 +158,47 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
             if (!filterEnabled)
                 continue;
 
+            GJGameLevel* level = entry->getSlice()->level;
+
             switch(filter) {
             case Completed:
-                enabled = enabled && entry->getSlice()->level->m_normalPercent == 100;
+                enabled = enabled && level->m_normalPercent == 100;
                 break;
 
             case Uncompleted:
-                enabled = enabled && entry->getSlice()->level->m_normalPercent != 100;
+                enabled = enabled && level->m_normalPercent != 100;
                 break;
 
             case Coins:
-                enabled = enabled && entry->getSlice()->level->m_coins > 0;
+                enabled = enabled && level->m_coins > 0;
+                break;
+
+            case Unrated:
+                enabled = enabled && level->m_stars == 0;
+                break;
+
+            case StarRate:
+                enabled = enabled && level->m_stars > 0;
+                break;
+
+            case Featured:
+                enabled = enabled && level->m_featured > 0;
+                break;
+
+            case Epic:
+                enabled = enabled && level->m_isEpic > 0;
+                break;
+
+            case Legendary:
+                enabled = enabled && level->m_isEpic > 1;
+                break;
+
+            case Mythic:
+                enabled = enabled && level->m_isEpic > 2;
                 break;
 
             default:
-                log::debug("Unimplemented filter type used");
+                log::debug("Unknown filter type used");
                 break;
             }
         }
