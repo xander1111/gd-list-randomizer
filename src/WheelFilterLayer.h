@@ -17,13 +17,13 @@ private:
     enum FilterTypes {
         Completed,
         Uncompleted,
+        Coins,
         Unrated,
         StarRate,
         Featured,
         Epic,
         Legendary,
         Mythic,
-        Coins
     };
 
     // Same size as `MoreSearchLayer` (the advanced options menu on the search screen)

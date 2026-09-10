@@ -54,6 +54,13 @@ bool WheelFilterLayer::init()
     uncompletedToggler->setID("uncompleted-toggler"_spr);
     rowOne->addChild(uncompletedToggler);
 
+    TogglerWithLabel* coinsToggler = TogglerWithLabel::create(
+    [this] (const TogglerWithLabel* toggler) { m_filters[Coins] = toggler->m_toggled; },
+    "Coins"
+);
+    coinsToggler->setID("coins-toggler"_spr);
+    rowOne->addChild(coinsToggler);
+
     rowOne->updateLayout();
     m_mainLayer->addChild(rowOne);
 
@@ -92,6 +99,10 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
 
             case Uncompleted:
                 enabled = enabled && entry->getSlice()->level->m_normalPercent != 100;
+                break;
+
+            case Coins:
+                enabled = enabled && entry->getSlice()->level->m_coins > 0;
                 break;
 
             default:
