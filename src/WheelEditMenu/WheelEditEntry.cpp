@@ -63,6 +63,8 @@ bool WheelEditEntry::init()
         1.f
     );
     m_toggleButton->setScale(0.75f * Height / m_toggleButton->getContentHeight());
+
+    m_toggled = m_slice->settings.enabled;
     m_toggleButton->toggle(m_slice->settings.enabled);
 
     leftMenu->addChild(m_toggleButton);
@@ -130,9 +132,17 @@ void WheelEditEntry::setSearchVisible(const bool visible)
         setPositionX(0.f);
 }
 
-void WheelEditEntry::toggle(bool enabled) const
+void WheelEditEntry::toggle(const bool enabled, const bool redrawWheel)
 {
-    m_toggleButton->toggleWithCallback(enabled);
+    m_toggleButton->toggle(enabled);
+
+    m_toggled = enabled;
+    m_slice->settings.enabled = m_toggled;
+
+    if (redrawWheel) {
+        PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
+        pickerWheel->redrawWheel();
+    }
 }
 
 WheelEditEntry::WheelEditEntry(PickerWheel::Slice* slice, ccColor4F* color, const float width)
@@ -154,13 +164,11 @@ void WheelEditEntry::updateWeight(std::string const& text) const
     }
 }
 
-void WheelEditEntry::onToggle(CCObject* sender)
+void WheelEditEntry::onToggle(CCObject*)
 {
-    auto* toggleButton = typeinfo_cast<CCMenuItemToggler*>(sender);
-    if (toggleButton == nullptr)
-        return;
+    m_toggled = !m_toggled;
+    m_slice->settings.enabled = m_toggled;
 
-    m_slice->settings.enabled = !toggleButton->isToggled();
     PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
     pickerWheel->redrawWheel();
 }
