@@ -241,6 +241,74 @@ bool WheelFilterLayer::init()
     m_mainLayer->addChild(difficultyMenu);
 
 
+    // Length filters
+    CCMenu* lengthMenu = CCMenu::create();
+    lengthMenu->setID("length-filters-menu"_spr);
+    lengthMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Between)
+        ->setPadding(Padding::horizontal(20.f))
+    );
+    lengthMenu->setContentWidth(m_menuWidth);
+    lengthMenu->setPosition({m_menuWidth / 2.f, 65.f});
+
+    CCSprite* clockIcon = CCSprite::createWithSpriteFrameName("GJ_timeIcon_001.png");
+    clockIcon->setID("clock-icon"_spr);
+    lengthMenu->addChild(clockIcon);
+
+    DimmingButton* tinyToggler = DimmingButton::create(
+    CCLabelBMFont::create("Tiny", "bigFont.fnt"),
+        [this] (const DimmingButton* button) { m_filters[Tiny] = button->isToggled(); }
+    );
+    tinyToggler->setID("tiny-toggler"_spr);
+    tinyToggler->setScale(0.5f);
+    lengthMenu->addChild(tinyToggler);
+
+    DimmingButton* shortToggler = DimmingButton::create(
+    CCLabelBMFont::create("Short", "bigFont.fnt"),
+        [this] (const DimmingButton* button) { m_filters[Short] = button->isToggled(); }
+    );
+    shortToggler->setID("short-toggler"_spr);
+    shortToggler->setScale(0.5f);
+    lengthMenu->addChild(shortToggler);
+
+    DimmingButton* mediumToggler = DimmingButton::create(
+    CCLabelBMFont::create("Medium", "bigFont.fnt"),
+        [this] (const DimmingButton* button) { m_filters[Medium] = button->isToggled(); }
+    );
+    mediumToggler->setID("medium-toggler"_spr);
+    mediumToggler->setScale(0.5f);
+    lengthMenu->addChild(mediumToggler);
+
+    DimmingButton* longToggler = DimmingButton::create(
+    CCLabelBMFont::create("Long", "bigFont.fnt"),
+        [this] (const DimmingButton* button) { m_filters[Long] = button->isToggled(); }
+    );
+    longToggler->setID("long-toggler"_spr);
+    longToggler->setScale(0.5f);
+    lengthMenu->addChild(longToggler);
+
+    DimmingButton* xlToggler = DimmingButton::create(
+    CCLabelBMFont::create("XL", "bigFont.fnt"),
+        [this] (const DimmingButton* button) { m_filters[XL] = button->isToggled(); }
+    );
+    xlToggler->setID("xl-toggler"_spr);
+    xlToggler->setScale(0.5f);
+    lengthMenu->addChild(xlToggler);
+
+    DimmingButton* platToggler = DimmingButton::create(
+    CCLabelBMFont::create("Plat", "bigFont.fnt"),
+        [this] (const DimmingButton* button) { m_filters[Plat] = button->isToggled(); }
+    );
+    platToggler->setID("plat-toggler"_spr);
+    platToggler->setScale(0.5f);
+    lengthMenu->addChild(platToggler);
+
+    lengthMenu->updateLayout();
+    m_mainLayer->addChild(lengthMenu);
+
+
     // Apply button
     ButtonSprite* applyButtonSprite = ButtonSprite::create("Apply", 0.5f);
     CCMenuItemSpriteExtra* applyButton = CCMenuItemSpriteExtra::create(
@@ -264,6 +332,7 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
         bool enabledCompletion = false;
         bool enabledRate = false;
         bool enabledDifficulty = false;
+        bool enabledLength = false;
 
         for (const auto& [filter, filterEnabled] : m_filters) {
             if (!filterEnabled)
@@ -354,13 +423,39 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
                 enabledDifficulty = enabledDifficulty || (level->m_demonDifficulty == 6 && level->m_demon != 0);
                 break;
 
+
+            case Tiny:
+                enabledLength = enabledLength || level->m_levelLength == 0;
+                break;
+
+            case Short:
+                enabledLength = enabledLength || level->m_levelLength == 1;
+                break;
+
+            case Medium:
+                enabledLength = enabledLength || level->m_levelLength == 2;
+                break;
+
+            case Long:
+                enabledLength = enabledLength || level->m_levelLength == 3;
+                break;
+
+            case XL:
+                enabledLength = enabledLength || level->m_levelLength == 4;
+                break;
+
+            case Plat:
+                enabledLength = enabledLength || level->m_levelLength == 5;
+                break;
+
+
             default:
                 log::debug("Unknown filter type used");
                 break;
             }
         }
 
-        entry->toggle(enabledCompletion && enabledRate && enabledDifficulty, false);
+        entry->toggle(enabledCompletion && enabledRate && enabledDifficulty && enabledLength, false);
     }
 
     PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;

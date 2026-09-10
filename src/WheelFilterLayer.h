@@ -15,8 +15,11 @@ public:
 
 private:
     enum FilterTypes {
+        // Completion
         Completed,
         Uncompleted,
+
+        // Rate type
         Unrated,
         StarRate,
         Featured,
@@ -24,6 +27,7 @@ private:
         Legendary,
         Mythic,
 
+        // Difficulty
         NA,
         Auto,
         Easy,
@@ -36,6 +40,14 @@ private:
         HardDemon,
         InsaneDemon,
         ExtremeDemon,
+
+        // Length
+        Tiny,
+        Short,
+        Medium,
+        Long,
+        XL,
+        Plat,
     };
 
     // Same size as `MoreSearchLayer` (the advanced options menu on the search screen)
