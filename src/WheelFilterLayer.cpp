@@ -261,7 +261,9 @@ WheelFilterLayer::WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries) : m_ent
 void WheelFilterLayer::onApplyFilters(CCObject* btn)
 {
     for (const auto & entry : *m_entries) {
-        bool enabled = false;
+        bool enabledCompletion = false;
+        bool enabledRate = false;
+        bool enabledDifficulty = false;
 
         for (const auto& [filter, filterEnabled] : m_filters) {
             if (!filterEnabled)
@@ -271,83 +273,85 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
 
             switch(filter) {
             case Completed:
-                enabled = enabled || level->m_normalPercent == 100;
+                enabledCompletion = enabledCompletion || level->m_normalPercent == 100;
                 break;
 
             case Uncompleted:
-                enabled = enabled || level->m_normalPercent != 100;
+                enabledCompletion = enabledCompletion || level->m_normalPercent != 100;
                 break;
 
+
             case Unrated:
-                enabled = enabled || level->m_stars == 0;
+                enabledRate = enabledRate || level->m_stars == 0;
                 break;
 
             case StarRate:
-                enabled = enabled || (level->m_stars > 0 && level->m_featured == 0);
+                enabledRate = enabledRate || (level->m_stars > 0 && level->m_featured == 0);
                 break;
 
             case Featured:
-                enabled = enabled || (level->m_featured > 0 && level->m_isEpic == 0);
+                enabledRate = enabledRate || (level->m_featured > 0 && level->m_isEpic == 0);
                 break;
 
             case Epic:
-                enabled = enabled || level->m_isEpic == 1;
+                enabledRate = enabledRate || level->m_isEpic == 1;
                 break;
 
             case Legendary:
-                enabled = enabled || level->m_isEpic == 2;
+                enabledRate = enabledRate || level->m_isEpic == 2;
                 break;
 
             case Mythic:
-                enabled = enabled || level->m_isEpic == 3;
+                enabledRate = enabledRate || level->m_isEpic == 3;
                 break;
 
+
             case NA:
-                enabled = enabled || (level->getAverageDifficulty() == 0 && level->m_demon == 0);
+                enabledDifficulty = enabledDifficulty || (level->getAverageDifficulty() == 0 && level->m_demon == 0);
                 break;
 
             case Auto:
-                enabled = enabled || level->m_autoLevel;
+                enabledDifficulty = enabledDifficulty || level->m_autoLevel;
                 break;
 
             case Easy:
-                enabled = enabled || (level->getAverageDifficulty() == 1 && level->m_demon == 0 && !level->m_autoLevel);
+                enabledDifficulty = enabledDifficulty || (level->getAverageDifficulty() == 1 && level->m_demon == 0 && !level->m_autoLevel);
                 break;
 
             case Normal:
-                enabled = enabled || (level->getAverageDifficulty() == 2 && level->m_demon == 0);
+                enabledDifficulty = enabledDifficulty || (level->getAverageDifficulty() == 2 && level->m_demon == 0);
                 break;
 
             case Hard:
-                enabled = enabled || (level->getAverageDifficulty() == 3 && level->m_demon == 0);
+                enabledDifficulty = enabledDifficulty || (level->getAverageDifficulty() == 3 && level->m_demon == 0);
                 break;
 
             case Harder:
-                enabled = enabled || (level->getAverageDifficulty() == 4 && level->m_demon == 0);
+                enabledDifficulty = enabledDifficulty || (level->getAverageDifficulty() == 4 && level->m_demon == 0);
                 break;
 
             case Insane:
-                enabled = enabled || (level->getAverageDifficulty() == 5 && level->m_demon == 0);
+                enabledDifficulty = enabledDifficulty || (level->getAverageDifficulty() == 5 && level->m_demon == 0);
                 break;
 
             case EasyDemon:
-                enabled = enabled || (level->m_demonDifficulty == 3 && level->m_demon != 0);
+                enabledDifficulty = enabledDifficulty || (level->m_demonDifficulty == 3 && level->m_demon != 0);
                 break;
 
             case MediumDemon:
-                enabled = enabled || (level->m_demonDifficulty == 4 && level->m_demon != 0);
+                enabledDifficulty = enabledDifficulty || (level->m_demonDifficulty == 4 && level->m_demon != 0);
                 break;
 
             case HardDemon:
-                enabled = enabled || (level->m_demonDifficulty == 0 && level->m_demon != 0);
+                enabledDifficulty = enabledDifficulty || (level->m_demonDifficulty == 0 && level->m_demon != 0);
                 break;
 
             case InsaneDemon:
-                enabled = enabled || (level->m_demonDifficulty == 5 && level->m_demon != 0);
+                enabledDifficulty = enabledDifficulty || (level->m_demonDifficulty == 5 && level->m_demon != 0);
                 break;
 
             case ExtremeDemon:
-                enabled = enabled || (level->m_demonDifficulty == 6 && level->m_demon != 0);
+                enabledDifficulty = enabledDifficulty || (level->m_demonDifficulty == 6 && level->m_demon != 0);
                 break;
 
             default:
@@ -356,7 +360,7 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
             }
         }
 
-        entry->toggle(enabled, false);
+        entry->toggle(enabledCompletion && enabledRate && enabledDifficulty, false);
     }
 
     PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
