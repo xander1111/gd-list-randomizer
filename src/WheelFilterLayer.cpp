@@ -73,8 +73,11 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
             }
         }
 
-        entry->toggle(enabled);
+        entry->toggle(enabled, false);
     }
+
+    PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
+    pickerWheel->redrawWheel();
 
     onClose(btn);
 }
