@@ -16,7 +16,9 @@ public:
 private:
     explicit WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries);
 
+    void onApplyFilters(CCObject* btn);
+
     CCArrayExt<WheelEditEntry*>* m_entries;
 
-    bool m_filterCompleted = false;
+    std::unordered_map<std::string, bool> m_filters;
 };

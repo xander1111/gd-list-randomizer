@@ -2,7 +2,7 @@
 
 #include <utility>
 
-TogglerWithLabel* TogglerWithLabel::create(CCObject* target, Function<void(CCMenuItemToggler*)> callback,
+TogglerWithLabel* TogglerWithLabel::create(CCObject* target, Function<void(TogglerWithLabel*)> callback,
     const gd::string& labelText, const float togglerScale, const float labelScale)
 {
     auto ret = new TogglerWithLabel(target, std::move(callback), togglerScale, labelText, labelScale);
@@ -27,7 +27,14 @@ bool TogglerWithLabel::init()
         ->setAutoGrowAxis(0.f)
     );
 
-    m_toggler = CCMenuItemExt::createTogglerWithStandardSprites(m_togglerScale, std::move(m_callback));
+    m_toggler = CCMenuItemExt::createTogglerWithStandardSprites(
+        m_togglerScale,
+        [this](CCObject* target)
+        {
+            m_toggled = !m_toggled;
+            m_callback(this);
+        }
+    );
     addChild(m_toggler);
 
     m_label = CCLabelBMFont::create(m_labelText.c_str(), "bigFont.fnt");
@@ -44,7 +51,13 @@ void TogglerWithLabel::toggle(const bool on) const
     m_toggler->toggle(on);
 }
 
-TogglerWithLabel::TogglerWithLabel(CCObject* target, Function<void(CCMenuItemToggler*)> callback,
-                                   const float togglerScale, gd::string labelText, const float labelScale)
+void TogglerWithLabel::toggleWithCallback(const bool on)
+{
+    toggle(on);
+    m_callback(this);
+}
+
+TogglerWithLabel::TogglerWithLabel(CCObject* target, Function<void(TogglerWithLabel*)> callback,
+    const float togglerScale, gd::string labelText, const float labelScale)
     : m_target(target), m_callback(std::move(callback)), m_togglerScale(togglerScale), m_labelScale(labelScale),
     m_labelText(std::move(labelText)) {}

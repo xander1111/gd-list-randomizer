@@ -1,6 +1,7 @@
 #include "WheelFilterLayer.h"
 
 #include "TogglerWithLabel.h"
+#include "WheelLayer.h"
 
 WheelFilterLayer* WheelFilterLayer::create(CCArrayExt<WheelEditEntry*>* entries)
 {
@@ -24,25 +25,56 @@ bool WheelFilterLayer::init()
     // Filters
     CCMenu* filtersMenu = CCMenu::create();
     filtersMenu->setID("filters-menu"_spr);
-    filtersMenu->setContentSize({m_mainLayer->getContentWidth(), m_mainLayer->getContentHeight() * 0.8f});\
-    filtersMenu->setPosition({0.f, 0.f});
+    filtersMenu->setContentSize({m_mainLayer->getContentWidth(), m_mainLayer->getContentHeight() * 0.7f});
+    filtersMenu->setPosition({0.f, 290.f * 0.15f});
 
     TogglerWithLabel* completedToggler = TogglerWithLabel::create(
         this,
-        [this] (CCMenuItemToggler* toggler)
+        [this] (const TogglerWithLabel* toggler)
         {
-            m_filterCompleted = toggler->isToggled();
+            m_filters["completed"] = toggler->m_toggled;
         },
         "Completed"
     );
-    completedToggler->toggle(true);
+    completedToggler->setID("completed-toggler"_spr);
 
     filtersMenu->addChild(completedToggler);
 
-
     m_mainLayer->addChild(filtersMenu);
+
+    // Apply button
+    ButtonSprite* applyButtonSprite = ButtonSprite::create("Apply", 0.5f);
+    CCMenuItemSpriteExtra* applyButton = CCMenuItemSpriteExtra::create(
+        applyButtonSprite,
+        this,
+        menu_selector(WheelFilterLayer::onApplyFilters)
+    );
+    applyButton->setID("apply-button"_spr);
+    applyButton->setPosition({440.f / 2.f, 290.f * 0.1f});
+
+    m_buttonMenu->addChild(applyButton);
 
     return true;
 }
 
 WheelFilterLayer::WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries) : m_entries(entries) {}
+
+void WheelFilterLayer::onApplyFilters(CCObject* btn)
+{
+    for (const auto & entry : *m_entries) {
+        bool enabled = true;
+
+        for (const auto& [filter, filterEnabled] : m_filters) {
+            if (!filterEnabled)
+                continue;
+
+            if (filter == "completed") {
+                enabled = enabled && entry->getSlice()->level->m_normalPercent == 100;
+            }
+        }
+
+        entry->toggle(enabled);
+    }
+
+    onClose(btn);
+}
