@@ -2,10 +2,10 @@
 
 #include <utility>
 
-TogglerWithLabel* TogglerWithLabel::create(CCObject* target, Function<void(TogglerWithLabel*)> callback,
+TogglerWithLabel* TogglerWithLabel::create(Function<void(TogglerWithLabel*)> callback,
     const gd::string& labelText, const float togglerScale, const float labelScale)
 {
-    auto ret = new TogglerWithLabel(target, std::move(callback), togglerScale, labelText, labelScale);
+    auto ret = new TogglerWithLabel(std::move(callback), togglerScale, labelText, labelScale);
     if (ret && ret->init()) {
         ret->autorelease();
     } else {
@@ -29,7 +29,7 @@ bool TogglerWithLabel::init()
 
     m_toggler = CCMenuItemExt::createTogglerWithStandardSprites(
         m_togglerScale,
-        [this](CCObject* target)
+        [this](CCObject*)
         {
             m_toggled = !m_toggled;
             m_callback(this);
@@ -57,7 +57,7 @@ void TogglerWithLabel::toggleWithCallback(const bool on)
     m_callback(this);
 }
 
-TogglerWithLabel::TogglerWithLabel(CCObject* target, Function<void(TogglerWithLabel*)> callback,
+TogglerWithLabel::TogglerWithLabel(Function<void(TogglerWithLabel*)> callback,
     const float togglerScale, gd::string labelText, const float labelScale)
-    : m_target(target), m_callback(std::move(callback)), m_togglerScale(togglerScale), m_labelScale(labelScale),
+    : m_callback(std::move(callback)), m_togglerScale(togglerScale), m_labelScale(labelScale),
     m_labelText(std::move(labelText)) {}
