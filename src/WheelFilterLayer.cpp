@@ -30,10 +30,11 @@ bool WheelFilterLayer::init()
     rowOne->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
-        ->setAxisAlignment(AxisAlignment::Between)
+        ->setAxisAlignment(AxisAlignment::Even)
+        ->setPadding(Padding::horizontal(10.f))
     );
-    rowOne->setContentWidth(m_menuWidth * 0.8f);
-    rowOne->setPosition({m_menuWidth / 2.f, m_menuHeight * m_filtersMenuHeightRatio});
+    rowOne->setContentWidth(m_menuWidth);
+    rowOne->setPosition({m_menuWidth / 2.f, m_menuHeight - 60.f});
 
     TogglerWithLabel* completedToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Completed] = toggler->m_toggled; },
@@ -66,10 +67,11 @@ bool WheelFilterLayer::init()
     rowTwo->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
-        ->setAxisAlignment(AxisAlignment::Between)
+        ->setAxisAlignment(AxisAlignment::Even)
+        ->setPadding(Padding::horizontal(10.f))
     );
-    rowTwo->setContentWidth(m_menuWidth * 0.8f);
-    rowTwo->setPosition({m_menuWidth / 2.f, m_menuHeight * m_filtersMenuHeightRatio - 30.f});
+    rowTwo->setContentWidth(m_menuWidth);
+    rowTwo->setPosition({m_menuWidth / 2.f, m_menuHeight - 90.f});
 
     TogglerWithLabel* unratedToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Unrated] = toggler->m_toggled; },
@@ -102,10 +104,11 @@ bool WheelFilterLayer::init()
     rowThree->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
-        ->setAxisAlignment(AxisAlignment::Between)
+        ->setAxisAlignment(AxisAlignment::Even)
+        ->setPadding(Padding::horizontal(10.f))
     );
-    rowThree->setContentWidth(m_menuWidth * 0.8f);
-    rowThree->setPosition({m_menuWidth / 2.f, m_menuHeight * m_filtersMenuHeightRatio - 60.f});
+    rowThree->setContentWidth(m_menuWidth);
+    rowThree->setPosition({m_menuWidth / 2.f, m_menuHeight - 120.f});
 
     TogglerWithLabel* epicToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Epic] = toggler->m_toggled; },

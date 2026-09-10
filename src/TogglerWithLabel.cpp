@@ -24,8 +24,10 @@ bool TogglerWithLabel::init()
         RowLayout::create()
         ->setAutoScale(false)
         ->setGap(10.f)
-        ->setAutoGrowAxis(0.f)
+        ->setAxisAlignment(AxisAlignment::Start)
     );
+
+    setContentWidth(100.f);
 
     m_toggler = CCMenuItemExt::createTogglerWithStandardSprites(
         m_togglerScale,
@@ -38,7 +40,7 @@ bool TogglerWithLabel::init()
     addChild(m_toggler);
 
     m_label = CCLabelBMFont::create(m_labelText.c_str(), "bigFont.fnt");
-    m_label->setScale(m_labelScale);
+    m_label->limitLabelWidth(100.f - m_toggler->getContentWidth() - 10.f, m_labelScale, 0.15f);
     addChild(m_label);
 
     updateLayout();

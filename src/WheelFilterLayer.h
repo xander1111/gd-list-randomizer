@@ -30,8 +30,6 @@ private:
     static constexpr float m_menuWidth = 440.f;
     static constexpr float m_menuHeight = 290.f;
 
-    static constexpr float m_filtersMenuHeightRatio = 0.7f;
-
     CCArrayExt<WheelEditEntry*>* m_entries;
 
     std::unordered_map<FilterTypes, bool> m_filters;
