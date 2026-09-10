@@ -17,7 +17,7 @@ WheelFilterLayer* WheelFilterLayer::create(CCArrayExt<WheelEditEntry*>* entries)
 
 bool WheelFilterLayer::init()
 {
-    if (!Popup::init(440.f, 290.f))  // Same size as `MoreSearchLayer` (the advanced options menu on the search screen)
+    if (!Popup::init(m_menuWidth, m_menuHeight))
         return false;
 
     setTitle("Filter enabled levels");
@@ -25,20 +25,37 @@ bool WheelFilterLayer::init()
     // Filters
     CCMenu* filtersMenu = CCMenu::create();
     filtersMenu->setID("filters-menu"_spr);
-    filtersMenu->setContentSize({m_mainLayer->getContentWidth(), m_mainLayer->getContentHeight() * 0.7f});
-    filtersMenu->setPosition({0.f, 290.f * 0.15f});
+    filtersMenu->setContentSize({m_mainLayer->getContentWidth(), m_menuHeight * m_filtersMenuHeightRatio});
+    filtersMenu->setPosition({0.f, m_menuHeight * (m_filtersMenuHeightRatio / 2.f)});
+
+
+    // First row
+    CCMenu* rowOne = CCMenu::create();
+    rowOne->setID("row-one"_spr);
+    rowOne->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Between)
+    );
+    rowOne->setContentWidth(m_menuWidth * 0.8f);
+    rowOne->setPosition({m_menuWidth / 2.f, m_menuHeight * m_filtersMenuHeightRatio});
 
     TogglerWithLabel* completedToggler = TogglerWithLabel::create(
-        this,
-        [this] (const TogglerWithLabel* toggler)
-        {
-            m_filters["completed"] = toggler->m_toggled;
-        },
+        [this] (const TogglerWithLabel* toggler) { m_filters[Completed] = toggler->m_toggled; },
         "Completed"
     );
     completedToggler->setID("completed-toggler"_spr);
+    rowOne->addChild(completedToggler);
 
-    filtersMenu->addChild(completedToggler);
+    TogglerWithLabel* uncompletedToggler = TogglerWithLabel::create(
+        [this] (const TogglerWithLabel* toggler) { m_filters[Uncompleted] = toggler->m_toggled; },
+        "Uncompleted"
+    );
+    uncompletedToggler->setID("uncompleted-toggler"_spr);
+    rowOne->addChild(uncompletedToggler);
+
+    rowOne->updateLayout();
+    m_mainLayer->addChild(rowOne);
 
     m_mainLayer->addChild(filtersMenu);
 
@@ -50,7 +67,7 @@ bool WheelFilterLayer::init()
         menu_selector(WheelFilterLayer::onApplyFilters)
     );
     applyButton->setID("apply-button"_spr);
-    applyButton->setPosition({440.f / 2.f, 290.f * 0.1f});
+    applyButton->setPosition({m_menuWidth / 2.f, m_menuHeight * 0.1f});
 
     m_buttonMenu->addChild(applyButton);
 
@@ -68,8 +85,18 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
             if (!filterEnabled)
                 continue;
 
-            if (filter == "completed") {
+            switch(filter) {
+            case Completed:
                 enabled = enabled && entry->getSlice()->level->m_normalPercent == 100;
+                break;
+
+            case Uncompleted:
+                enabled = enabled && entry->getSlice()->level->m_normalPercent != 100;
+                break;
+
+            default:
+                log::debug("Unimplemented filter type used");
+                break;
             }
         }
 

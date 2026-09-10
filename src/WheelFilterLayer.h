@@ -14,11 +14,29 @@ public:
     bool init() override;
 
 private:
-    explicit WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries);
+    enum FilterTypes {
+        Completed,
+        Uncompleted,
+        Unrated,
+        StarRate,
+        Featured,
+        Epic,
+        Legendary,
+        Mythic,
+        Coins
+    };
 
-    void onApplyFilters(CCObject* btn);
+    // Same size as `MoreSearchLayer` (the advanced options menu on the search screen)
+    static constexpr float m_menuWidth = 440.f;
+    static constexpr float m_menuHeight = 290.f;
+
+    static constexpr float m_filtersMenuHeightRatio = 0.7f;
 
     CCArrayExt<WheelEditEntry*>* m_entries;
 
-    std::unordered_map<std::string, bool> m_filters;
+    std::unordered_map<FilterTypes, bool> m_filters;
+
+    explicit WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries);
+
+    void onApplyFilters(CCObject* btn);
 };
