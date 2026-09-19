@@ -24,109 +24,134 @@ bool WheelFilterLayer::init()
     setTitle("Filter enabled levels");
 
     // Filters
+    CCMenu* filtersMenu = CCMenu::create();
+    filtersMenu->setID("filters-menu"_spr);
+    filtersMenu->setLayout(
+        ColumnLayout::create()
+        ->setAxisReverse(true)
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Between)
+        ->setPadding({0.f, 40.f, 0.f, 60.f})
+    );
+    filtersMenu->setContentSize({m_menuWidth, m_menuHeight});
+    filtersMenu->setPosition({0.f, 0.f});
+    filtersMenu->setAnchorPoint({0.f, 0.f});
 
-    // First row
-    CCMenu* rowOne = CCMenu::create();
-    rowOne->setID("filters-row-one"_spr);
-    rowOne->setLayout(
+    // Completed filters
+    CCMenu* completedMenu = CCMenu::create();
+    completedMenu->setID("completed-filters-menu"_spr);
+    completedMenu->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
         ->setPadding(Padding::horizontal(10.f))
     );
-    rowOne->setContentWidth(m_menuWidth);
-    rowOne->setPosition({m_menuWidth / 2.f, m_menuHeight - 60.f});
+    completedMenu->setContentWidth(m_menuWidth);
+    completedMenu->setPosition({m_menuWidth / 2.f, m_menuHeight - 60.f});
 
     TogglerWithLabel* completedToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Completed] = toggler->m_toggled; },
         "Completed"
     );
     completedToggler->setID("completed-toggler"_spr);
-    rowOne->addChild(completedToggler);
+    completedMenu->addChild(completedToggler);
 
     TogglerWithLabel* uncompletedToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Uncompleted] = toggler->m_toggled; },
         "Uncompleted"
     );
     uncompletedToggler->setID("uncompleted-toggler"_spr);
-    rowOne->addChild(uncompletedToggler);
+    completedMenu->addChild(uncompletedToggler);
 
-    rowOne->updateLayout();
-    m_mainLayer->addChild(rowOne);
+    completedMenu->updateLayout();
+    filtersMenu->addChild(completedMenu);
 
 
-    // Second row
-    CCMenu* rowTwo = CCMenu::create();
-    rowTwo->setID("filters-row-two"_spr);
-    rowTwo->setLayout(
+    // Rate type filters
+    CCMenu* rateMenu = CCMenu::create();
+    rateMenu->setID("rate-filters-menu"_spr);
+    rateMenu->setLayout(
+        ColumnLayout::create()
+        ->setAxisReverse(true)
+        ->setAutoScale(false)
+        ->setAutoGrowAxis(0.f)
+        ->setGap(5.f)
+    );
+
+
+    // First row
+    CCMenu* rateRowOne = CCMenu::create();
+    rateRowOne->setID("row-one"_spr);
+    rateRowOne->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
         ->setPadding(Padding::horizontal(10.f))
     );
-    rowTwo->setContentWidth(m_menuWidth);
-    rowTwo->setPosition({m_menuWidth / 2.f, m_menuHeight - 105.f});
+    rateRowOne->setContentWidth(m_menuWidth);
 
     TogglerWithLabel* unratedToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Unrated] = toggler->m_toggled; },
         "No Star"
     );
     unratedToggler->setID("unrated-toggler"_spr);
-    rowTwo->addChild(unratedToggler);
+    rateRowOne->addChild(unratedToggler);
 
     TogglerWithLabel* starRateToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[StarRate] = toggler->m_toggled; },
         "Star Rated"
     );
     starRateToggler->setID("star-rate-toggler"_spr);
-    rowTwo->addChild(starRateToggler);
+    rateRowOne->addChild(starRateToggler);
 
     TogglerWithLabel* featuredToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Featured] = toggler->m_toggled; },
         "Featured"
     );
     featuredToggler->setID("featured-toggler"_spr);
-    rowTwo->addChild(featuredToggler);
+    rateRowOne->addChild(featuredToggler);
 
-    rowTwo->updateLayout();
-    m_mainLayer->addChild(rowTwo);
+    rateRowOne->updateLayout();
+    rateMenu->addChild(rateRowOne);
 
-
-    // Third row
-    CCMenu* rowThree = CCMenu::create();
-    rowThree->setID("filters-row-three"_spr);
-    rowThree->setLayout(
+    // Second row
+    CCMenu* rateRowTwo = CCMenu::create();
+    rateRowTwo->setID("row-two"_spr);
+    rateRowTwo->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
         ->setPadding(Padding::horizontal(10.f))
     );
-    rowThree->setContentWidth(m_menuWidth);
-    rowThree->setPosition({m_menuWidth / 2.f, m_menuHeight - 135.f});
+    rateRowTwo->setContentWidth(m_menuWidth);
 
     TogglerWithLabel* epicToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Epic] = toggler->m_toggled; },
         "Epic"
     );
     epicToggler->setID("epic-toggler"_spr);
-    rowThree->addChild(epicToggler);
+    rateRowTwo->addChild(epicToggler);
 
     TogglerWithLabel* legendaryToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Legendary] = toggler->m_toggled; },
         "Legendary"
     );
     legendaryToggler->setID("legendary-toggler"_spr);
-    rowThree->addChild(legendaryToggler);
+    rateRowTwo->addChild(legendaryToggler);
 
     TogglerWithLabel* mythicToggler = TogglerWithLabel::create(
         [this] (const TogglerWithLabel* toggler) { m_filters[Mythic] = toggler->m_toggled; },
         "Mythic"
     );
     mythicToggler->setID("mythic-toggler"_spr);
-    rowThree->addChild(mythicToggler);
+    rateRowTwo->addChild(mythicToggler);
 
-    rowThree->updateLayout();
-    m_mainLayer->addChild(rowThree);
+    rateRowTwo->updateLayout();
+    rateMenu->addChild(rateRowTwo);
+
+
+    rateMenu->updateLayout();
+    filtersMenu->addChild(rateMenu);
 
 
     // Difficulty filters
@@ -238,7 +263,7 @@ bool WheelFilterLayer::init()
     difficultyMenu->addChild(autoToggler);
 
     difficultyMenu->updateLayout();
-    m_mainLayer->addChild(difficultyMenu);
+    filtersMenu->addChild(difficultyMenu);
 
 
     // Length filters
@@ -306,7 +331,11 @@ bool WheelFilterLayer::init()
     lengthMenu->addChild(platToggler);
 
     lengthMenu->updateLayout();
-    m_mainLayer->addChild(lengthMenu);
+    filtersMenu->addChild(lengthMenu);
+
+
+    filtersMenu->updateLayout();
+    m_mainLayer->addChild(filtersMenu);
 
 
     // Apply button
