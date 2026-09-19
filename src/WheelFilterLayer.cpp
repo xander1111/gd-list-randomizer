@@ -23,6 +23,21 @@ bool WheelFilterLayer::init()
 
     setTitle("Filter enabled levels");
 
+    InfoAlertButton* infoButton = InfoAlertButton::create(
+        "Filter Menu",
+        "Enables and disables levels based on filters.\n"
+        "\n"
+        "A level will be enabled if it matches at least one filter in each category. There are four categories:\n"
+        "<cg>Completed</c>/<cr>Uncompleted</c>, <cy>Rate type</c>, <ca>Difficulty</c>, and <cb>Length</c>.\n"
+        "Additionally, if no filters are enabled within a category, that category will be ignored.",
+        1.f
+    );
+    infoButton->setID("info-button"_spr);
+    infoButton->setPosition({m_menuWidth - 7.0f, m_menuHeight - 7.0f});
+    infoButton->setAnchorPoint({1.f, 1.f});
+
+    m_buttonMenu->addChild(infoButton);
+
     // Filters
     CCMenu* filtersMenu = CCMenu::create();
     filtersMenu->setID("filters-menu"_spr);
