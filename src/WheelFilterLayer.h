@@ -50,6 +50,44 @@ private:
         Plat,
     };
 
+    static constexpr FilterTypes CompletionTypes[] = {
+        Completed,
+        Uncompleted,
+    };
+
+    static constexpr FilterTypes RateTypes[] = {
+        Unrated,
+        StarRate,
+        Featured,
+        Epic,
+        Legendary,
+        Mythic,
+    };
+
+    static constexpr FilterTypes DifficultyTypes[] = {
+        NA,
+        Auto,
+        Easy,
+        Normal,
+        Hard,
+        Harder,
+        Insane,
+        EasyDemon,
+        MediumDemon,
+        HardDemon,
+        InsaneDemon,
+        ExtremeDemon,
+    };
+
+    static constexpr FilterTypes LengthTypes[] = {
+        Tiny,
+        Short,
+        Medium,
+        Long,
+        XL,
+        Plat,
+    };
+
     // Same size as `MoreSearchLayer` (the advanced options menu on the search screen)
     static constexpr float m_menuWidth = 440.f;
     static constexpr float m_menuHeight = 290.f;

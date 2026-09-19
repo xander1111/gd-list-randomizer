@@ -328,6 +328,46 @@ WheelFilterLayer::WheelFilterLayer(CCArrayExt<WheelEditEntry*>* entries) : m_ent
 
 void WheelFilterLayer::onApplyFilters(CCObject* btn)
 {
+
+    // Check if all filters in a category are disabled, if they all are, skip the category when filtering.
+    //
+    // IMO, if all filters in a category are disabled, it makes more sense to skip filtering in that category since
+    // otherwise you would end up with no levels enabled. And, if for example, you wanted to filter to any levels you
+    // haven't completed yet, you would have to go through and turn on every single filter in every other category.
+    bool skipCompletion = true;
+    bool skipRate = true;
+    bool skipDifficulty = true;
+    bool skipLength = true;
+
+    for (const auto& filter : CompletionTypes) {
+        if (m_filters[filter]) {
+            skipCompletion = false;
+            break;
+        }
+    }
+
+    for (const auto& filter : RateTypes) {
+        if (m_filters[filter]) {
+            skipRate = false;
+            break;
+        }
+    }
+
+    for (const auto& filter : DifficultyTypes) {
+        if (m_filters[filter]) {
+            skipDifficulty = false;
+            break;
+        }
+    }
+
+    for (const auto& filter : LengthTypes) {
+        if (m_filters[filter]) {
+            skipLength = false;
+            break;
+        }
+    }
+
+
     for (const auto & entry : *m_entries) {
         bool enabledCompletion = false;
         bool enabledRate = false;
@@ -455,7 +495,12 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
             }
         }
 
-        entry->toggle(enabledCompletion && enabledRate && enabledDifficulty && enabledLength, false);
+        entry->toggle(
+            (enabledCompletion || skipCompletion)
+            && (enabledRate || skipRate)
+            && (enabledDifficulty || skipDifficulty)
+            && (enabledLength || skipLength),
+            false);
     }
 
     PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
