@@ -426,11 +426,11 @@ void WheelFilterLayer::onApplyFilters(CCObject* btn)
 
             switch(filter) {
             case Completed:
-                enabledCompletion = enabledCompletion || level->m_normalPercent == 100;
+                enabledCompletion = enabledCompletion || GameStatsManager::get()->hasCompletedLevel(level);
                 break;
 
             case Uncompleted:
-                enabledCompletion = enabledCompletion || level->m_normalPercent != 100;
+                enabledCompletion = enabledCompletion || !GameStatsManager::get()->hasCompletedLevel(level);
                 break;
 
 
