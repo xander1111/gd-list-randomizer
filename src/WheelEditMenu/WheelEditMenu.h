@@ -26,6 +26,8 @@ private:
 
     void updateSearch(std::string const& input);
 
+    void onOpenFilterMenu(CCObject*);
+
     std::vector<PickerWheel::Slice>* m_slices;
     float m_width;
     float m_height;

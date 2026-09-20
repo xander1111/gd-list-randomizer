@@ -19,7 +19,7 @@ bool SliceSelectedPopup::init()
     if (!Popup::init(300.f, 100.f))
         return false;
 
-    this->setTitle(m_slice->level->m_levelName);
+    setTitle(m_slice->level->m_levelName);
 
     CCLabelBMFont* creatorLabel = CCLabelBMFont::create(("By " + m_slice->level->m_creatorName).c_str(), "bigFont.fnt");
     creatorLabel->setScale(0.4f);
