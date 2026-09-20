@@ -81,7 +81,7 @@ bool PickerWheel::init()
 
     CCDrawNode* outerOutline = CCDrawNode::create();
     outerOutline->setID("wheel-outer-outline"_spr);
-    outerOutline->drawCircle({0, 0}, m_radius + 1.5f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, *Utils::DefaultOutlineColorB, CircleSegmentCount);
+    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, *Utils::DefaultOutlineColorB, CircleSegmentCount);
     outerOutline->setZOrder(2);
 
     m_wheelOuterMenu->addChild(outerOutline);
