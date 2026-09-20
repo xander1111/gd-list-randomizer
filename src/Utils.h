@@ -2,6 +2,8 @@
 
 #include <Geode/Geode.hpp>
 
+#include "WheelTheme/WheelTheme.h"
+
 using namespace geode::prelude;
 
 class Utils
@@ -22,8 +24,29 @@ public:
     static gd::string getDifficultyIconFrame(int difficulty);
 
     // Default GD colors
-    inline static auto DefaultListColorA = new ccColor4F(161.f / 255.f, 88.f / 255.f, 44.f / 255.f, 1.f);
-    inline static auto DefaultListColorB = new ccColor4F(194.f / 255.f, 114.f / 255.f, 62.f / 255.f, 1.f);
-    inline static auto DefaultOutlineColorA = new ccColor4F(0.f, 0.f, 0.f, 1.f);
-    inline static auto DefaultOutlineColorB = new ccColor4F(1.f, 1.f, 1.f, 1.f);
+    inline static auto DefaultTheme = new WheelTheme {
+        .sliceColorCount = 2,
+        .sliceColor1 = { .r = 161.f / 255.f, .g = 88.f / 255.f, .b = 44.f / 255.f, .a = 1.f },
+        .sliceColor2 = { .r = 194.f / 255.f, .g = 114.f / 255.f, .b = 62.f / 255.f, .a = 1.f },
+
+        .textColor = { .r = 1.f, .g = 1.f, .b = 1.f, .a = 1.f },
+
+        .outlineColorInner = { .r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f },
+        .outlineColorOuter = { .r = 1.f, .g = 1.f, .b = 1.f, .a = 1.f },
+
+        .backgroundColor = { .r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f },
+        .buttonColor = WheelTheme::Green,
+
+
+        // .tickSound = ,
+        // .selectSound = ,
+
+
+        .spinSpeed = 1.f,
+        .spinDuration = 7.f,
+
+
+        .showCornerDecorations = true,
+        .showLevelNamesOnWheel = true,
+    };
 };

@@ -73,7 +73,7 @@ bool PickerWheel::init()
     // Wheel outline
     CCDrawNode* innerOutline = CCDrawNode::create();
     innerOutline->setID("wheel-inner-outline"_spr);
-    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, *Utils::DefaultOutlineColorA, CircleSegmentCount);
+    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, Utils::DefaultTheme->outlineColorInner, CircleSegmentCount);
     innerOutline->setZOrder(1);
 
     m_wheelOuterMenu->addChild(innerOutline);
@@ -81,7 +81,7 @@ bool PickerWheel::init()
 
     CCDrawNode* outerOutline = CCDrawNode::create();
     outerOutline->setID("wheel-outer-outline"_spr);
-    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, *Utils::DefaultOutlineColorB, CircleSegmentCount);
+    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, Utils::DefaultTheme->outlineColorOuter, CircleSegmentCount);
     outerOutline->setZOrder(2);
 
     m_wheelOuterMenu->addChild(outerOutline);
@@ -362,7 +362,7 @@ void PickerWheel::addEndSeparator()
             m_endSeparator = CCDrawNode::create();
             m_endSeparator->setID("end-separator"_spr);
 
-            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, *Utils::DefaultListColorB);
+            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, Utils::DefaultTheme->sliceColor2);
             m_wheelMenu->addChild(m_endSeparator);
         }
     }
@@ -422,7 +422,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(&Utils::DefaultTheme->sliceColor1, "No levels"));
 
         return wheelSlices;
     }
@@ -432,7 +432,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
 
         ccColor4F* renderColor = m_firstEnabledSlice->settings.color != nullptr
             ? m_firstEnabledSlice->settings.color
-            : Utils::DefaultListColorA;
+            : &Utils::DefaultTheme->sliceColor1;
 
         wheelSlices->addChild(generatePickerWheelCircle(renderColor, m_firstEnabledSlice->level->m_levelName.c_str()));
 
@@ -479,8 +479,8 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         ccColor4F* color = slice.settings.color != nullptr
             ? slice.settings.color
             : processedSlicesCount % 2 == 0
-                ? Utils::DefaultListColorA
-                : Utils::DefaultListColorB;
+                ? &Utils::DefaultTheme->sliceColor1
+                : &Utils::DefaultTheme->sliceColor2;
 
         // Important distinction from `slice.settings.color`: `slice.color` stores the color that *was* used to render
         // the slice, whereas `slice.settings.color` is a user set value that determines what color *should* be used to
@@ -564,14 +564,14 @@ void PickerWheel::generateTicker()
         {0.f, -4.f}
     };
 
-    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : Utils::DefaultListColorA;
+    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : &Utils::DefaultTheme->sliceColor1;
 
     m_ticker->drawPolygon(
         tickerPoints,
         3,
         *color,
         0.5f,
-        *Utils::DefaultOutlineColorA
+        Utils::DefaultTheme->outlineColorInner
     );
 
     m_ticker->setPosition({14.f, 0.f});
@@ -610,10 +610,10 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
 
     switch (colorId) {
     case 0:
-        color = Utils::DefaultListColorA;
+        color = &Utils::DefaultTheme->sliceColor1;
         break;
     case 1:
-        color = Utils::DefaultListColorB;
+        color = &Utils::DefaultTheme->sliceColor2;
         break;
     default:
         color = nullptr;
@@ -636,9 +636,9 @@ matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWhee
 
     obj["weight"] = value.weight;
 
-    if (value.color == Utils::DefaultListColorA) {
+    if (value.color == &Utils::DefaultTheme->sliceColor1) {
         obj["colorId"] = 0;
-    } else if (value.color == Utils::DefaultListColorB) {
+    } else if (value.color == &Utils::DefaultTheme->sliceColor2) {
         obj["colorId"] = 1;
     } else {
         obj["colorId"] = -1;
