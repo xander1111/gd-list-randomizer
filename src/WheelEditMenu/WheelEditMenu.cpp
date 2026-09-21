@@ -3,6 +3,7 @@
 #include "WheelEditEntry.h"
 #include "../Utils.h"
 #include "../WheelFilterLayer.h"
+#include "../WheelTheme/WheelTheme.h"
 #include "alphalaneous.alphas-ui-pack/include/nodes/scroll/Scroll.hpp"
 
 WheelEditMenu* WheelEditMenu::create(std::vector<PickerWheel::Slice>* slices, const float width, const float height)
@@ -99,7 +100,7 @@ bool WheelEditMenu::init()
 
     for (int i = 0; i < m_slices->size() ; i++) {
         auto& slice = m_slices->at(i);
-        WheelEditEntry* entry = WheelEditEntry::create(&slice, &(i % 2 == 0 ? Utils::DefaultTheme->sliceColor1 : Utils::DefaultTheme->sliceColor2), m_width - m_padding);
+        WheelEditEntry* entry = WheelEditEntry::create(&slice, &(i % 2 == 0 ? WheelTheme::getDefaultWheelTheme()->sliceColor1 : WheelTheme::getDefaultWheelTheme()->sliceColor2), m_width - m_padding);
         entry->setPositionY(static_cast<float>(m_slices->size() - 1 - i) * WheelEditEntry::Height);
 
         m_levelListLayer->addChild(entry);

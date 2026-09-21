@@ -10,7 +10,6 @@ public:
     struct SliceSettings
     {
         unsigned int weight;
-        ccColor4F* color;  // Specifies a color to render the slice using. Set to nullptr to use theme colors
         bool enabled;
     };
 
@@ -130,7 +129,7 @@ private:
 };
 
 
-// Wheel customization saving
+// Wheel configuration saving
 template<>
 struct matjson::Serialize<PickerWheel::SliceSettings>
 {

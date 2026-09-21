@@ -6,6 +6,8 @@
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
+#include "WheelTheme/WheelTheme.h"
+
 PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
 {
     auto ret = new PickerWheel(list, radius);
@@ -25,7 +27,12 @@ bool PickerWheel::init()
     setLayout(AnchorLayout::create());
 
     // Spin button
-    ButtonSprite* spinButtonSprite = ButtonSprite::create("Spin", 0.5f);
+    ButtonSprite* spinButtonSprite = ButtonSprite::create(
+        "Spin",
+        "BigFont.fnt",
+        Utils::buttonTextures[WheelTheme::getDefaultWheelTheme()->buttonColor].c_str(),
+        0.5f
+    );
     CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
         spinButtonSprite,
         this,
@@ -73,7 +80,7 @@ bool PickerWheel::init()
     // Wheel outline
     CCDrawNode* innerOutline = CCDrawNode::create();
     innerOutline->setID("wheel-inner-outline"_spr);
-    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, Utils::DefaultTheme->outlineColorInner, CircleSegmentCount);
+    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, WheelTheme::getDefaultWheelTheme()->outlineColorInner, CircleSegmentCount);
     innerOutline->setZOrder(1);
 
     m_wheelOuterMenu->addChild(innerOutline);
@@ -81,7 +88,7 @@ bool PickerWheel::init()
 
     CCDrawNode* outerOutline = CCDrawNode::create();
     outerOutline->setID("wheel-outer-outline"_spr);
-    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, Utils::DefaultTheme->outlineColorOuter, CircleSegmentCount);
+    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, WheelTheme::getDefaultWheelTheme()->outlineColorOuter, CircleSegmentCount);
     outerOutline->setZOrder(2);
 
     m_wheelOuterMenu->addChild(outerOutline);
@@ -182,7 +189,6 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
         } else {
             sliceSettings = SliceSettings {
                 .weight = 1u,
-                .color = nullptr,  // nullptr means use automatic theme colors
                 .enabled = true
             };
         }
@@ -244,11 +250,11 @@ void PickerWheel::onSpinWheel(CCObject*)
     // to account for whatever rotation the wheel had before spinning
     const float rotateAngle = -m_wheelMenu->getRotation()
         + random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
-        - 7200.f;
+        - 1800.f * static_cast<float>(WheelTheme::getDefaultWheelTheme()->spinSpeed);
 
     log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
 
-    CCRotateBy* rotate = CCRotateBy::create(7.f, rotateAngle);
+    CCRotateBy* rotate = CCRotateBy::create(WheelTheme::getDefaultWheelTheme()->spinDuration, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
     const auto onSpinEnd = CallFuncExt::create([slicePicked, this]
@@ -362,7 +368,7 @@ void PickerWheel::addEndSeparator()
             m_endSeparator = CCDrawNode::create();
             m_endSeparator->setID("end-separator"_spr);
 
-            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, Utils::DefaultTheme->sliceColor2);
+            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, WheelTheme::getDefaultWheelTheme()->sliceColor2);
             m_wheelMenu->addChild(m_endSeparator);
         }
     }
@@ -422,7 +428,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(&Utils::DefaultTheme->sliceColor1, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(&WheelTheme::getDefaultWheelTheme()->sliceColor1, "No levels"));
 
         return wheelSlices;
     }
@@ -430,9 +436,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        ccColor4F* renderColor = m_firstEnabledSlice->settings.color != nullptr
-            ? m_firstEnabledSlice->settings.color
-            : &Utils::DefaultTheme->sliceColor1;
+        ccColor4F* renderColor = &WheelTheme::getDefaultWheelTheme()->sliceColor1;
 
         wheelSlices->addChild(generatePickerWheelCircle(renderColor, m_firstEnabledSlice->level->m_levelName.c_str()));
 
@@ -476,11 +480,9 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         }
         points.emplace_back(0.f, 0.f);
 
-        ccColor4F* color = slice.settings.color != nullptr
-            ? slice.settings.color
-            : processedSlicesCount % 2 == 0
-                ? &Utils::DefaultTheme->sliceColor1
-                : &Utils::DefaultTheme->sliceColor2;
+        ccColor4F* color = processedSlicesCount % 2 == 0
+                ? &WheelTheme::getDefaultWheelTheme()->sliceColor1
+                : &WheelTheme::getDefaultWheelTheme()->sliceColor2;
 
         // Important distinction from `slice.settings.color`: `slice.color` stores the color that *was* used to render
         // the slice, whereas `slice.settings.color` is a user set value that determines what color *should* be used to
@@ -564,14 +566,14 @@ void PickerWheel::generateTicker()
         {0.f, -4.f}
     };
 
-    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : &Utils::DefaultTheme->sliceColor1;
+    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : &WheelTheme::getDefaultWheelTheme()->sliceColor1;
 
     m_ticker->drawPolygon(
         tickerPoints,
         3,
         *color,
         0.5f,
-        Utils::DefaultTheme->outlineColorInner
+        WheelTheme::getDefaultWheelTheme()->outlineColorInner
     );
 
     m_ticker->setPosition({14.f, 0.f});
@@ -585,39 +587,13 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
     if (!value.isObject()) return Err("not an object");
 
     unsigned int weight;
-    int colorId;
     bool enabled;
 
     try {
         GEODE_UNWRAP_INTO(weight, value["weight"].asUInt());
     } catch (const std::exception&) {
-        log::info("Invalid slice wight data, using default value of 1");
+        log::info("Invalid slice weight data, using default value of 1");
         weight = 1;
-    }
-
-    try {
-        // TODO store and retrieve colors properly
-        //   Colors will be able to be set to either automatically follow the theme colors, or individually coloring
-        //   each slice. If the color is set individually, we need to save the RGBA values, otherwise we need to
-        //   indicate that the color should be determined by the theme
-        GEODE_UNWRAP_INTO(colorId, value["colorId"].asInt());
-    } catch (const std::exception&) {
-        log::info("Invalid slice colorId data, using default value of 0");
-        colorId = -1;
-    }
-
-    ccColor4F* color = nullptr;
-
-    switch (colorId) {
-    case 0:
-        color = &Utils::DefaultTheme->sliceColor1;
-        break;
-    case 1:
-        color = &Utils::DefaultTheme->sliceColor2;
-        break;
-    default:
-        color = nullptr;
-        break;
     }
 
     try {
@@ -627,7 +603,7 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
         enabled = true;
     }
 
-    return Ok(PickerWheel::SliceSettings{ .weight = weight, .color = color, .enabled = enabled });
+    return Ok(PickerWheel::SliceSettings{ .weight = weight, .enabled = enabled });
 }
 
 matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWheel::SliceSettings const& value)
@@ -635,14 +611,6 @@ matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWhee
     auto obj = Value();
 
     obj["weight"] = value.weight;
-
-    if (value.color == &Utils::DefaultTheme->sliceColor1) {
-        obj["colorId"] = 0;
-    } else if (value.color == &Utils::DefaultTheme->sliceColor2) {
-        obj["colorId"] = 1;
-    } else {
-        obj["colorId"] = -1;
-    }
 
     obj["enabled"] = value.enabled;
 
