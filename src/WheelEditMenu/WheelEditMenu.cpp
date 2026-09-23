@@ -210,6 +210,5 @@ void WheelEditMenu::updateSearch(std::string const& input)
 
 void WheelEditMenu::onOpenFilterMenu(CCObject*)
 {
-    WheelFilterLayer* wheelFilterLayer = WheelFilterLayer::create(&m_entries);
-    wheelFilterLayer->show();
+    WheelFilterLayer::create(&m_entries)->show();
 }

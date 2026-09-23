@@ -2,6 +2,7 @@
 
 #include "PickerWheel.h"
 #include "Utils.h"
+#include "WheelTheme/WheelThemeEditLayer.h"
 
 WheelLayer::WheelLayer(GJLevelList* list) : m_list(list) {}
 
@@ -298,5 +299,5 @@ void WheelLayer::onEdit(CCObject*)
 
 void WheelLayer::onThemeEdit(CCObject*)
 {
-    // TODO implement
+    WheelThemeEditLayer::create(WheelTheme::getDefaultWheelTheme())->show();
 }

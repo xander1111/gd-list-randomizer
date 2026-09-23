@@ -21,7 +21,7 @@ bool WheelFilterLayer::init()
     if (!Popup::init(m_menuWidth, m_menuHeight))
         return false;
 
-    setTitle("Filter enabled levels");
+    setTitle("Filter Enabled Levels");
 
     InfoAlertButton* infoButton = InfoAlertButton::create(
         "Filter Menu",
