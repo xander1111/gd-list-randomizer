@@ -29,9 +29,11 @@ private:
 
     explicit WheelThemeEditLayer(WheelTheme* wheelTheme);
 
-    void onColorCountChanged();
+    void updateVisibleColorPickers();
 
     static void onThemeChanged();
+
+    void onResetThemeButton(CCObject*);
 
 protected:
     void onClose(CCObject*) override;

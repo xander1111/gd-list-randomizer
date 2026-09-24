@@ -361,7 +361,7 @@ bool WheelFilterLayer::init()
         menu_selector(WheelFilterLayer::onApplyFilters)
     );
     applyButton->setID("apply-button"_spr);
-    applyButton->setPosition({m_menuWidth / 2.f, m_menuHeight * 0.1f});
+    applyButton->setPosition({m_menuWidth / 2.f, 30});
 
     m_buttonMenu->addChild(applyButton);
 

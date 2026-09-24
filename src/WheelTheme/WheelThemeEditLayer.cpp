@@ -22,6 +22,19 @@ bool WheelThemeEditLayer::init()
 
     setTitle("Customize Theme");
 
+    // Reset to default theme button
+    ButtonSprite* resetThemeButtonSprite = ButtonSprite::create("Reset Theme", 0.5f);
+    CCMenuItemSpriteExtra* resetThemeButton = CCMenuItemSpriteExtra::create(
+        resetThemeButtonSprite,
+        this,
+        menu_selector(WheelThemeEditLayer::onResetThemeButton)
+    );
+    resetThemeButton->setID("apply-button"_spr);
+    resetThemeButton->setPosition({m_menuWidth / 2.f, 30});
+
+    m_buttonMenu->addChild(resetThemeButton);
+
+
     // Color customization page
     CCMenu* colorsPage = CCMenu::create();
     colorsPage->setID("colors-menu"_spr);
@@ -67,7 +80,8 @@ bool WheelThemeEditLayer::init()
             if (m_wheelTheme->sliceColorCount < 4)
                 m_wheelTheme->sliceColorCount++;
 
-            onColorCountChanged();
+            updateVisibleColorPickers();
+            onThemeChanged();
         }
     );
     addButton->setID("add-color-button"_spr);
@@ -82,7 +96,8 @@ bool WheelThemeEditLayer::init()
             if (m_wheelTheme->sliceColorCount > 2)
                 m_wheelTheme->sliceColorCount--;
 
-            onColorCountChanged();
+            updateVisibleColorPickers();
+            onThemeChanged();
         }
     );
     removeButton->setID("remove-color-button"_spr);
@@ -182,14 +197,12 @@ bool WheelThemeEditLayer::init()
 WheelThemeEditLayer::WheelThemeEditLayer(WheelTheme* wheelTheme)
     : m_wheelTheme(wheelTheme) {}
 
-void WheelThemeEditLayer::onColorCountChanged()
+void WheelThemeEditLayer::updateVisibleColorPickers()
 {
     m_sliceColor3Picker->setVisible(m_wheelTheme->sliceColorCount >= 3);
     m_sliceColor4Picker->setVisible(m_wheelTheme->sliceColorCount >= 4);
 
     m_sliceColorPickersMenu->updateLayout();
-
-    onThemeChanged();
 }
 
 void WheelThemeEditLayer::onThemeChanged()
@@ -197,12 +210,30 @@ void WheelThemeEditLayer::onThemeChanged()
     CCScene::get()->getChildByType<WheelLayer>()->updateTheme();
 }
 
+void WheelThemeEditLayer::onResetThemeButton(CCObject*)
+{
+    createQuickPopup(
+        "Reset to Default Theme",
+        "Are you sure you want to reset to the default theme?",
+        "No", "Yes",
+        [this](auto btn, const bool btn2)
+        {
+            if (btn2) {
+                *m_wheelTheme = *WheelTheme::getDefaultWheelTheme();
+                updateVisibleColorPickers();
+                onThemeChanged();
+
+                onClose(btn);
+            }
+        }
+    );
+}
+
 void WheelThemeEditLayer::onClose(CCObject* cc_object)
 {
     const gd::string listId = Utils::getListId(CCScene::get()->getChildByType<WheelLayer>()->m_list);
 
     Mod::get()->setSavedValue(listId + "-theme", *m_wheelTheme);
-
 
     Popup::onClose(cc_object);
 }
