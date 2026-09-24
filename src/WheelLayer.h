@@ -12,6 +12,8 @@ class WheelLayer : public CCLayer
 public:
     PickerWheel* m_pickerWheel = nullptr;
 
+    GJLevelList* m_list;
+
     explicit WheelLayer(GJLevelList* list);
 
     static WheelLayer* create(GJLevelList* list);
@@ -30,8 +32,6 @@ private:
     void onEdit(CCObject*);
 
     void onThemeEdit(CCObject*);
-
-    GJLevelList* m_list;
 
     CCMenu* m_wheelAndEditMenu = nullptr;
 

@@ -21,6 +21,8 @@ public:
      */
     static gd::string getDifficultyIconFrame(int difficulty);
 
+    static gd::string getListId(GJLevelList* list);
+
 
     inline static std::string buttonTextures[] = {
         "GJ_button_01.png",

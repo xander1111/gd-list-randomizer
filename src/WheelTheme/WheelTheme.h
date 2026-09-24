@@ -41,6 +41,8 @@ public:
     bool showCornerDecorations;
     bool showLevelNamesOnWheel;
 
+    // Seems to be needed for serialization
+    [[maybe_unused]] WheelTheme() = default;
 
     WheelTheme(const unsigned int sliceColorCount, const ccColor4F& sliceColor1, const ccColor4F& sliceColor2,
         const ccColor4F& sliceColor3, const ccColor4F& sliceColor4, const ccColor4F& textColor,

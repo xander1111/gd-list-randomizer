@@ -175,11 +175,10 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
 
     CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
 
-    std::map<std::string, SliceSettings> settings;
-    if (m_list->m_listType == GJLevelType::Editor)
-        settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>("editor-" + std::to_string(EditorIDs::getID(m_list)), {});
-    else
-        settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>(m_list->m_listName, {});
+    auto settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>(
+        Utils::getListId(m_list),
+        {}
+    );
 
     for (auto [key, level] : levels) {
         const int levelListIndex = list->orderForLevel(level->m_levelID);
@@ -331,10 +330,7 @@ void PickerWheel::saveSettings() const
     for (auto slice : m_slices)
         allSettings[std::to_string(slice.level->m_levelID)] = slice.settings;
 
-    if (m_list->m_listType == GJLevelType::Editor)
-        Mod::get()->setSavedValue("editor-" + std::to_string(EditorIDs::getID(m_list)), allSettings);
-    else
-        Mod::get()->setSavedValue(std::to_string(m_list->m_listID), allSettings);
+    Mod::get()->setSavedValue(Utils::getListId(m_list), allSettings);
 }
 
 void PickerWheel::redrawTicker()

@@ -1,4 +1,6 @@
 #include "WheelThemeEditLayer.h"
+
+#include "../Utils.h"
 #include "../WheelLayer.h"
 
 WheelThemeEditLayer* WheelThemeEditLayer::create(WheelTheme* wheelTheme)
@@ -195,5 +197,12 @@ void WheelThemeEditLayer::onThemeChanged()
     CCScene::get()->getChildByType<WheelLayer>()->updateTheme();
 }
 
-// TODO - When the theme menu is closed, save the theme. Probably just save it under like "<List ID>-theme"
+void WheelThemeEditLayer::onClose(CCObject* cc_object)
+{
+    const gd::string listId = Utils::getListId(CCScene::get()->getChildByType<WheelLayer>()->m_list);
 
+    Mod::get()->setSavedValue(listId + "-theme", *m_wheelTheme);
+
+
+    Popup::onClose(cc_object);
+}

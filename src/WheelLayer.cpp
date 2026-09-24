@@ -32,10 +32,12 @@ bool WheelLayer::init()
 
     setKeypadEnabled(true);
 
-    // TODO load theme from save data if exists
 
-    WheelTheme::currentTheme = new WheelTheme(*WheelTheme::getDefaultWheelTheme());
+    const gd::string listId = Utils::getListId(m_list);
 
+    // A little awkward to create a new object from an existing one here, but shouldn't really be an issue since a
+    // single WheelTheme object isn't too large
+    WheelTheme::currentTheme = new WheelTheme(Mod::get()->getSavedValue<WheelTheme>(listId + "-theme", *WheelTheme::getDefaultWheelTheme()));
 
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 

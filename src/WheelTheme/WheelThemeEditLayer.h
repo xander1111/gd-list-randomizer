@@ -32,4 +32,7 @@ private:
     void onColorCountChanged();
 
     static void onThemeChanged();
+
+protected:
+    void onClose(CCObject*) override;
 };
