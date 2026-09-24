@@ -40,9 +40,9 @@ bool WheelThemeEditLayer::init()
     colorsPage->setID("colors-menu"_spr);
     colorsPage->setLayout(
         ColumnLayout::create()
-        ->setAxisReverse(true)
+        ->setAxisReverse(false)
         ->setAutoScale(false)
-        ->setAxisAlignment(AxisAlignment::Between)
+        ->setAxisAlignment(AxisAlignment::Even)
         ->setPadding({0.f, 40.f, 0.f, 60.f})
     );
     colorsPage->setContentSize({m_menuWidth, m_menuHeight});
@@ -171,12 +171,42 @@ bool WheelThemeEditLayer::init()
     m_sliceColorPickersMenu->updateLayout();
     sliceColorsMenu->addChild(m_sliceColorPickersMenu);
 
-    // TODO level name text color
-    // TODO bg color
-    // TODO button color
-
     sliceColorsMenu->updateLayout();
     colorsPage->addChild(sliceColorsMenu);
+
+    // Other colors
+    CCMenu* otherColorMenu = CCMenu::create();
+    otherColorMenu->setID("other-color-pickers-menu"_spr);
+    otherColorMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Even)
+        ->setPadding(Padding::horizontal(20.f))
+    );
+    otherColorMenu->setContentWidth(m_menuWidth);
+
+    // Level name text color
+    WheelThemeColorPicker* levelNameColorPicker = WheelThemeColorPicker::create(
+        "Level Name",
+        "Color",
+        &m_wheelTheme->textColor,
+        [](const ccColor4B&)
+        {
+            onThemeChanged();
+        }
+    );
+    levelNameColorPicker->setID("level-name-color-picker"_spr);
+
+    otherColorMenu->addChild(levelNameColorPicker);
+
+    // TODO button color
+
+
+    // TODO bg color
+
+
+    otherColorMenu->updateLayout();
+    colorsPage->addChild(otherColorMenu);
 
     colorsPage->updateLayout();
     m_mainLayer->addChild(colorsPage);

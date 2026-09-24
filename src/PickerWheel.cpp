@@ -379,8 +379,9 @@ CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const cha
     circle->setZOrder(-1);
     sliceNode->addChild(circle);
 
-    CCLabelBMFont* label = CCLabelBMFont::create(levelName, "goldFont.fnt");
+    CCLabelBMFont* label = CCLabelBMFont::create(levelName, "bigFont.fnt");
     label->setID("slice-label"_spr);
+    label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 
     const float labelScale = std::min(MaxFontScale, m_radius * 0.7f / label->getContentSize().width);
     label->setScale(labelScale);
@@ -512,8 +513,9 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
 
         // ~1 degree is where it's nearly impossible to even tell that there's text. Larger angles might still be unreadable, but you'd be able to tell the text is missing
         if (angleDeg > 1.f) {
-            CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "goldFont.fnt");
+            CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "bigFont.fnt");
             label->setID("slice-label"_spr);
+            label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 
             // Find maximum possible scale to fit the text into the slice
             // Calculation explanations/visualizations here: https://www.desmos.com/calculator/qkrhzaq1fo
