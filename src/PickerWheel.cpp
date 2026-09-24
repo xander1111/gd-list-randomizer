@@ -379,7 +379,7 @@ CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const cha
     circle->setZOrder(-1);
     sliceNode->addChild(circle);
 
-    CCLabelBMFont* label = CCLabelBMFont::create(levelName, "bigFont.fnt");
+    CCLabelBMFont* label = CCLabelBMFont::create(WheelTheme::currentTheme->showLevelNamesOnWheel ? levelName : "?", "bigFont.fnt");
     label->setID("slice-label"_spr);
     label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 
@@ -513,7 +513,10 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
 
         // ~1 degree is where it's nearly impossible to even tell that there's text. Larger angles might still be unreadable, but you'd be able to tell the text is missing
         if (angleDeg > 1.f) {
-            CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "bigFont.fnt");
+            CCLabelBMFont* label = CCLabelBMFont::create(
+                WheelTheme::currentTheme->showLevelNamesOnWheel ? slice.level->m_levelName.c_str() : "?",
+                "bigFont.fnt"
+            );
             label->setID("slice-label"_spr);
             label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 

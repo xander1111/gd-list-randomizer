@@ -31,6 +31,8 @@ private:
     bool m_editMenuOpen = false;
 
     CCSprite* m_background = nullptr;
+    CCSprite* m_leftCornerDeco =  nullptr;
+    CCSprite* m_rightCornerDeco = nullptr;
 
     void onBack(CCObject*);
 

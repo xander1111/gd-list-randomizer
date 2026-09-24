@@ -44,23 +44,25 @@ bool WheelLayer::init()
     // Background
     generateBackground(winSize);
 
-    // Corner decorations
-    CCSprite* leftCorner = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
-    CCSprite* rightCorner = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
+    m_leftCornerDeco = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
+    m_rightCornerDeco = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
 
-    leftCorner->setID("left-corner"_spr);
-    rightCorner->setID("right-corner"_spr);
+    m_leftCornerDeco->setID("left-corner"_spr);
+    m_rightCornerDeco->setID("right-corner"_spr);
 
-    leftCorner->setAnchorPoint({0, 0});
-    rightCorner->setAnchorPoint({1, 0});
+    m_leftCornerDeco->setAnchorPoint({0, 0});
+    m_rightCornerDeco->setAnchorPoint({1, 0});
 
-    leftCorner->setPosition({-1,-1});
-    rightCorner->setPosition({winSize.width + 1,-1});
+    m_leftCornerDeco->setPosition({-1,-1});
+    m_rightCornerDeco->setPosition({winSize.width + 1,-1});
 
-    rightCorner->setFlipX(true);
+    m_rightCornerDeco->setFlipX(true);
 
-    addChild(leftCorner);
-    addChild(rightCorner);
+    addChild(m_leftCornerDeco);
+    addChild(m_rightCornerDeco);
+
+    m_leftCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
+    m_rightCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
 
 
     // Top of screen back button and edit button menu
@@ -253,6 +255,9 @@ void WheelLayer::updateTheme()
 
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
     generateBackground(winSize);
+
+    m_leftCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
+    m_rightCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
 
     m_pickerWheel->redrawWheel(true);
 }

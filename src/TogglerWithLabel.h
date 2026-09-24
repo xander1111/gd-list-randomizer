@@ -18,7 +18,7 @@ public:
 
     bool init() override;
 
-    void toggle(bool on) const;
+    void toggle(bool on);
 
     void toggleWithCallback(bool on);
 

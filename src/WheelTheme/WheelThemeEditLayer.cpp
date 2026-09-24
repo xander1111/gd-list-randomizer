@@ -1,5 +1,6 @@
 #include "WheelThemeEditLayer.h"
 
+#include "../TogglerWithLabel.h"
 #include "../Utils.h"
 #include "../WheelLayer.h"
 
@@ -275,8 +276,46 @@ bool WheelThemeEditLayer::init()
     m_settingsPage->setPosition({0.f, 0.f});
     m_settingsPage->setAnchorPoint({0.f, 0.f});
 
-    // TODO show/hide corner decos
-    // TODO show/hide level names
+    m_settingsPage->setVisible(false);
+
+    // Show/hide corner decos and level names
+    CCMenu* togglersMenu = CCMenu::create();
+    togglersMenu->setID("togglers-menu"_spr);
+    togglersMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Even)
+    );
+    togglersMenu->setContentWidth(m_menuWidth);
+
+    TogglerWithLabel* cornerDecoToggler = TogglerWithLabel::create(
+        [this](const TogglerWithLabel* toggler)
+        {
+            log::debug(":D - corner deco toggler");
+            m_wheelTheme->showCornerDecorations = toggler->m_toggled;
+            onThemeChanged();
+        },
+        "Show corner decorations"
+    );
+    cornerDecoToggler->setID("corner-deco-toggler"_spr);
+    cornerDecoToggler->toggle(m_wheelTheme->showCornerDecorations);
+    togglersMenu->addChild(cornerDecoToggler);
+
+    TogglerWithLabel* levelNameToggler = TogglerWithLabel::create(
+        [this](const TogglerWithLabel* toggler)
+        {
+            log::debug(":D - level name toggler");
+            m_wheelTheme->showLevelNamesOnWheel = toggler->m_toggled;
+            onThemeChanged();
+        },
+        "Show level names"
+    );
+    levelNameToggler->setID("level-name-toggler"_spr);
+    levelNameToggler->toggle(m_wheelTheme->showLevelNamesOnWheel);
+    togglersMenu->addChild(levelNameToggler);
+
+    togglersMenu->updateLayout();
+    m_settingsPage->addChild(togglersMenu);
 
     // TODO spin speed
     // TODO spin duration

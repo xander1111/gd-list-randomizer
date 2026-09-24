@@ -48,9 +48,10 @@ bool TogglerWithLabel::init()
     return true;
 }
 
-void TogglerWithLabel::toggle(const bool on) const
+void TogglerWithLabel::toggle(const bool on)
 {
     m_toggler->toggle(on);
+    m_toggled = on;
 }
 
 void TogglerWithLabel::toggleWithCallback(const bool on)
