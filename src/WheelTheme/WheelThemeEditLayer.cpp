@@ -1,4 +1,5 @@
 #include "WheelThemeEditLayer.h"
+#include "../WheelLayer.h"
 
 WheelThemeEditLayer* WheelThemeEditLayer::create(WheelTheme* wheelTheme)
 {
@@ -59,7 +60,7 @@ bool WheelThemeEditLayer::init()
     limitNodeWidth(plusButtonSprite, 20.f, 1.f, 0.1f);
     CCMenuItemSpriteExtra* addButton = CCMenuItemExt::createSpriteExtra(
         plusButtonSprite,
-        [this] (CCMenuItemSpriteExtra* button)
+        [this] (CCMenuItemSpriteExtra*)
         {
             if (m_wheelTheme->sliceColorCount < 4)
                 m_wheelTheme->sliceColorCount++;
@@ -74,7 +75,7 @@ bool WheelThemeEditLayer::init()
     limitNodeWidth(minusButtonSprite, 20.f, 1.f, 0.1f);
     CCMenuItemSpriteExtra* removeButton = CCMenuItemExt::createSpriteExtra(
         minusButtonSprite,
-        [this] (CCMenuItemSpriteExtra* button)
+        [this] (CCMenuItemSpriteExtra*)
         {
             if (m_wheelTheme->sliceColorCount > 2)
                 m_wheelTheme->sliceColorCount--;
@@ -103,10 +104,10 @@ bool WheelThemeEditLayer::init()
         "Wheel",
         "Color 1",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor1)),
-        std::bind_front(&WheelThemeEditLayer::onSliceColorChanged, this),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor1 = to4F(color);
+            onThemeChanged();
         }
     );
     m_sliceColor1Picker->setID("slice-color1-picker"_spr);
@@ -115,10 +116,10 @@ bool WheelThemeEditLayer::init()
         "Wheel",
         "Color 2",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor2)),
-        std::bind_front(&WheelThemeEditLayer::onSliceColorChanged, this),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor2 = to4F(color);
+            onThemeChanged();
         }
     );
     m_sliceColor2Picker->setID("slice-color2-picker"_spr);
@@ -127,10 +128,10 @@ bool WheelThemeEditLayer::init()
         "Wheel",
         "Color 3",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor3)),
-        std::bind_front(&WheelThemeEditLayer::onSliceColorChanged, this),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor3 = to4F(color);
+            onThemeChanged();
         }
     );
     m_sliceColor3Picker->setID("slice-color3-picker"_spr);
@@ -140,10 +141,10 @@ bool WheelThemeEditLayer::init()
         "Wheel",
         "Color 4",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor4)),
-        std::bind_front(&WheelThemeEditLayer::onSliceColorChanged, this),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor4 = to4F(color);
+            onThemeChanged();
         }
     );
     m_sliceColor4Picker->setID("slice-color4-picker"_spr);
@@ -183,27 +184,19 @@ bool WheelThemeEditLayer::init()
 WheelThemeEditLayer::WheelThemeEditLayer(WheelTheme* wheelTheme)
     : m_wheelTheme(wheelTheme) {}
 
-void WheelThemeEditLayer::onColorCountChanged() const
+void WheelThemeEditLayer::onColorCountChanged()
 {
     m_sliceColor3Picker->setVisible(m_wheelTheme->sliceColorCount >= 3);
     m_sliceColor4Picker->setVisible(m_wheelTheme->sliceColorCount >= 4);
 
     m_sliceColorPickersMenu->updateLayout();
-}
 
-void WheelThemeEditLayer::onSliceColorChanged(WheelThemeColorPicker*)
-{
     onThemeChanged();
 }
 
 void WheelThemeEditLayer::onThemeChanged()
 {
-    // TODO when theme gets updated:
-    //   - Redraw entire WheelLayer? At least the background and decorations need to be redrawn
-    //   - Redraw entire PickerWheel?
-    //     - Unsure if it would be worth it to try to only redraw the necessary parts, like avoiding redrawing slices if
-    //       only the outline color changed. In theory, it shouldn't really be an issue since people are probably not
-    //       going to be making that many changes in quick succession, but maybe the color picker updates frequently?
+    CCScene::get()->getChildByType<WheelLayer>()->updateTheme();
 }
 
 // TODO - When the theme menu is closed, save the theme. Probably just save it under like "<List ID>-theme"

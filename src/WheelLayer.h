@@ -9,6 +9,8 @@ using namespace geode::prelude;
 class WheelLayer : public CCLayer
 {
 public:
+    PickerWheel* m_pickerWheel = nullptr;
+
     explicit WheelLayer(GJLevelList* list);
 
     static WheelLayer* create(GJLevelList* list);
@@ -17,7 +19,7 @@ public:
     bool init() override;
     void keyBackClicked() override;
 
-    PickerWheel* m_pickerWheel = nullptr;
+    void updateTheme();
 
 private:
     void onBack(CCObject*);

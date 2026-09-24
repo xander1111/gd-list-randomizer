@@ -29,9 +29,7 @@ private:
 
     explicit WheelThemeEditLayer(WheelTheme* wheelTheme);
 
-    void onColorCountChanged() const;
+    void onColorCountChanged();
 
-    void onSliceColorChanged(WheelThemeColorPicker*);
-
-    void onThemeChanged();
+    static void onThemeChanged();
 };

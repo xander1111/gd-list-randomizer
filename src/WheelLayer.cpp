@@ -253,6 +253,18 @@ void WheelLayer::keyBackClicked()
     CCDirector::sharedDirector()->popSceneWithTransition(0.5f, kPopTransitionFade);
 }
 
+void WheelLayer::updateTheme()
+{
+    // TODO when theme gets updated:
+    //   - Redraw entire WheelLayer? At least the background and decorations need to be redrawn
+    //   - Redraw entire PickerWheel?
+    //     - Unsure if it would be worth it to try to only redraw the necessary parts, like avoiding redrawing slices if
+    //       only the outline color changed. In theory, it shouldn't really be an issue since people are probably not
+    //       going to be making that many changes in quick succession, but maybe the color picker updates frequently?
+
+    m_pickerWheel->redrawWheel();
+}
+
 void WheelLayer::onBack(CCObject*)
 {
     keyBackClicked();

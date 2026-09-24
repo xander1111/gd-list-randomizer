@@ -1,10 +1,9 @@
 #include "WheelThemeColorPicker.h"
 
 WheelThemeColorPicker* WheelThemeColorPicker::create(const std::string& labelRow1, const std::string& labelRow2,
-                                                     const ccColor3B &initialColor, Function<void(WheelThemeColorPicker*)> onClose,
-                                                     Function<void(const ccColor4B&)> callback)
+    const ccColor3B &initialColor, Function<void(const ccColor4B&)> callback)
 {
-    auto ret = new WheelThemeColorPicker(std::move(onClose), std::move(callback));
+    auto ret = new WheelThemeColorPicker(std::move(callback));
     if (ret && ret->init(labelRow1, labelRow2, initialColor)) {
         ret->autorelease();
     } else {
@@ -53,6 +52,5 @@ bool WheelThemeColorPicker::init(const std::string& labelRow1, const std::string
     return true;
 }
 
-WheelThemeColorPicker::WheelThemeColorPicker(Function<void(WheelThemeColorPicker*)> onClose,
-    Function<void(const ccColor4B&)> callback)
-    : m_onClose(std::move(onClose)), m_callback(std::move(callback)) {}
+WheelThemeColorPicker::WheelThemeColorPicker(Function<void(const ccColor4B&)> callback)
+    : m_callback(std::move(callback)) {}
