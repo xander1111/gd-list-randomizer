@@ -103,7 +103,7 @@ bool WheelThemeEditLayer::init()
     m_sliceColor1Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 1",
-        to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor1)),
+        to3B(ccc4BFromccc4F(WheelTheme::currentTheme->sliceColor1)),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor1 = to4F(color);
@@ -115,7 +115,7 @@ bool WheelThemeEditLayer::init()
     m_sliceColor2Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 2",
-        to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor2)),
+        to3B(ccc4BFromccc4F(WheelTheme::currentTheme->sliceColor2)),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor2 = to4F(color);
@@ -127,7 +127,7 @@ bool WheelThemeEditLayer::init()
     m_sliceColor3Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 3",
-        to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor3)),
+        to3B(ccc4BFromccc4F(WheelTheme::currentTheme->sliceColor3)),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor3 = to4F(color);
@@ -140,7 +140,7 @@ bool WheelThemeEditLayer::init()
     m_sliceColor4Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 4",
-        to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor4)),
+        to3B(ccc4BFromccc4F(WheelTheme::currentTheme->sliceColor4)),
         [this](const ccColor4B& color)
         {
             m_wheelTheme->sliceColor4 = to4F(color);

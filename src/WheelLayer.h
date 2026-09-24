@@ -3,6 +3,7 @@
 #include <Geode/Geode.hpp>
 
 #include "WheelEditMenu/WheelEditMenu.h"
+#include "WheelTheme/WheelTheme.h"
 
 using namespace geode::prelude;
 
@@ -19,7 +20,7 @@ public:
     bool init() override;
     void keyBackClicked() override;
 
-    void updateTheme();
+    void updateTheme() const;
 
 private:
     void onBack(CCObject*);

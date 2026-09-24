@@ -32,6 +32,11 @@ bool WheelLayer::init()
 
     setKeypadEnabled(true);
 
+    // TODO load theme from save data if exists
+
+    WheelTheme::currentTheme = new WheelTheme(*WheelTheme::getDefaultWheelTheme());
+
+
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
     // Background
@@ -250,10 +255,11 @@ bool WheelLayer::init()
 
 void WheelLayer::keyBackClicked()
 {
+    CC_SAFE_DELETE(WheelTheme::currentTheme);
     CCDirector::sharedDirector()->popSceneWithTransition(0.5f, kPopTransitionFade);
 }
 
-void WheelLayer::updateTheme()
+void WheelLayer::updateTheme() const
 {
     // TODO when theme gets updated:
     //   - Redraw entire WheelLayer? At least the background and decorations need to be redrawn
@@ -311,5 +317,5 @@ void WheelLayer::onEdit(CCObject*)
 
 void WheelLayer::onThemeEdit(CCObject*)
 {
-    WheelThemeEditLayer::create(WheelTheme::getDefaultWheelTheme())->show();
+    WheelThemeEditLayer::create(WheelTheme::currentTheme)->show();
 }

@@ -69,6 +69,8 @@ public:
         return defaultTheme;
     }
 
+    inline static WheelTheme* currentTheme = nullptr;
+
 private:
     inline static WheelTheme* defaultTheme = nullptr;
 

@@ -6,6 +6,7 @@
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
+#include "WheelLayer.h"
 #include "WheelTheme/WheelTheme.h"
 
 PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
@@ -30,7 +31,7 @@ bool PickerWheel::init()
     ButtonSprite* spinButtonSprite = ButtonSprite::create(
         "Spin",
         "BigFont.fnt",
-        Utils::buttonTextures[WheelTheme::getDefaultWheelTheme()->buttonColor].c_str(),
+        Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
         0.5f
     );
     CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
@@ -80,7 +81,7 @@ bool PickerWheel::init()
     // Wheel outline
     CCDrawNode* innerOutline = CCDrawNode::create();
     innerOutline->setID("wheel-inner-outline"_spr);
-    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, WheelTheme::getDefaultWheelTheme()->outlineColorInner, CircleSegmentCount);
+    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, WheelTheme::currentTheme->outlineColorInner, CircleSegmentCount);
     innerOutline->setZOrder(1);
 
     m_wheelOuterMenu->addChild(innerOutline);
@@ -88,7 +89,7 @@ bool PickerWheel::init()
 
     CCDrawNode* outerOutline = CCDrawNode::create();
     outerOutline->setID("wheel-outer-outline"_spr);
-    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, WheelTheme::getDefaultWheelTheme()->outlineColorOuter, CircleSegmentCount);
+    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, WheelTheme::currentTheme->outlineColorOuter, CircleSegmentCount);
     outerOutline->setZOrder(2);
 
     m_wheelOuterMenu->addChild(outerOutline);
@@ -250,11 +251,11 @@ void PickerWheel::onSpinWheel(CCObject*)
     // to account for whatever rotation the wheel had before spinning
     const float rotateAngle = -m_wheelMenu->getRotation()
         + random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
-        - 1800.f * static_cast<float>(WheelTheme::getDefaultWheelTheme()->spinSpeed);
+        - 1800.f * static_cast<float>(WheelTheme::currentTheme->spinSpeed);
 
     log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
 
-    CCRotateBy* rotate = CCRotateBy::create(WheelTheme::getDefaultWheelTheme()->spinDuration, rotateAngle);
+    CCRotateBy* rotate = CCRotateBy::create(WheelTheme::currentTheme->spinDuration, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
     const auto onSpinEnd = CallFuncExt::create([slicePicked, this]
@@ -368,7 +369,7 @@ void PickerWheel::addEndSeparator()
             m_endSeparator = CCDrawNode::create();
             m_endSeparator->setID("end-separator"_spr);
 
-            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, WheelTheme::getDefaultWheelTheme()->sliceColor2);
+            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, WheelTheme::currentTheme->sliceColor2);
             m_wheelMenu->addChild(m_endSeparator);
         }
     }
@@ -428,7 +429,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(&WheelTheme::getDefaultWheelTheme()->sliceColor1, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(&WheelTheme::currentTheme->sliceColor1, "No levels"));
 
         return wheelSlices;
     }
@@ -436,7 +437,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        ccColor4F* renderColor = &WheelTheme::getDefaultWheelTheme()->sliceColor1;
+        ccColor4F* renderColor = &WheelTheme::currentTheme->sliceColor1;
 
         wheelSlices->addChild(generatePickerWheelCircle(renderColor, m_firstEnabledSlice->level->m_levelName.c_str()));
 
@@ -480,22 +481,22 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         }
         points.emplace_back(0.f, 0.f);
 
-        unsigned int sliceColorIndex = processedSlicesCount % WheelTheme::getDefaultWheelTheme()->sliceColorCount;
+        unsigned int sliceColorIndex = processedSlicesCount % WheelTheme::currentTheme->sliceColorCount;
 
         ccColor4F* color;
 
         switch (sliceColorIndex) {
         case 0:
-            color = &WheelTheme::getDefaultWheelTheme()->sliceColor1;
+            color = &WheelTheme::currentTheme->sliceColor1;
             break;
         case 1:
-            color = &WheelTheme::getDefaultWheelTheme()->sliceColor2;
+            color = &WheelTheme::currentTheme->sliceColor2;
             break;
         case 2:
-            color = &WheelTheme::getDefaultWheelTheme()->sliceColor3;
+            color = &WheelTheme::currentTheme->sliceColor3;
             break;
         default:  // case 3
-            color = &WheelTheme::getDefaultWheelTheme()->sliceColor4;
+            color = &WheelTheme::currentTheme->sliceColor4;
             break;
         }
 
@@ -581,14 +582,14 @@ void PickerWheel::generateTicker()
         {0.f, -4.f}
     };
 
-    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : &WheelTheme::getDefaultWheelTheme()->sliceColor1;
+    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : &WheelTheme::currentTheme->sliceColor1;
 
     m_ticker->drawPolygon(
         tickerPoints,
         3,
         *color,
         0.5f,
-        WheelTheme::getDefaultWheelTheme()->outlineColorInner
+        WheelTheme::currentTheme->outlineColorInner
     );
 
     m_ticker->setPosition({14.f, 0.f});
