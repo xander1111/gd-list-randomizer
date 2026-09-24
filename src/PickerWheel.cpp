@@ -227,7 +227,7 @@ void PickerWheel::onSpinWheel(CCObject*)
     // to account for whatever rotation the wheel had before spinning
     const float rotateAngle = -m_wheelMenu->getRotation()
         + random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
-        - 1800.f * static_cast<float>(WheelTheme::currentTheme->spinSpeed);
+        - 1800.f * std::ceil(WheelTheme::currentTheme->spinDuration / 2.f);
 
     log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
 

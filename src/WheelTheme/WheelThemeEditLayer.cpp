@@ -317,8 +317,47 @@ bool WheelThemeEditLayer::init()
     togglersMenu->updateLayout();
     m_settingsPage->addChild(togglersMenu);
 
-    // TODO spin speed
-    // TODO spin duration
+    // Spin settings menu
+    CCMenu* spinSettingsMenu = CCMenu::create();
+    spinSettingsMenu->setID("spin-settings-menu"_spr);
+    spinSettingsMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Center)
+    );
+    spinSettingsMenu->setContentWidth(m_menuWidth);
+
+
+    // Spin duration
+    TextInput* spinDurationField = TextInput::create(100.f, "Spin Duration");
+    spinDurationField->setID("duration-field"_spr);
+    spinDurationField->setString(std::format("{:.2f}", m_wheelTheme->spinDuration));
+    spinDurationField->setCommonFilter(CommonFilter::Float);
+    spinDurationField->setMaxCharCount(8);
+    spinDurationField->setScale(0.75f);
+
+    spinDurationField->setCallback([this](std::string const& text)
+    {
+        if (text.empty())
+            return;
+
+        try {
+            m_wheelTheme->spinDuration = stof(text);
+        } catch (const std::exception& e) {
+            log::debug("[WheelThemeEditLayer::spinDurationField callback]: Exception occurred when updating duration: {}", e.what());
+        }
+    });
+    spinSettingsMenu->addChild(spinDurationField);
+
+    CCLabelBMFont* spinDurationLabel = CCLabelBMFont::create("Spin Duration", "bigFont.fnt");
+    spinDurationLabel->setID("spin-duration-label"_spr);
+    spinDurationLabel->setScale(0.6f);
+
+    spinSettingsMenu->addChild(spinDurationLabel);
+
+    spinSettingsMenu->updateLayout();
+    m_settingsPage->addChild(spinSettingsMenu);
+
 
     // TODO tick sound
     // TODO select sound

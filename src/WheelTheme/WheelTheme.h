@@ -29,7 +29,6 @@ public:
 
     // Wheel behaviour
 
-    unsigned int spinSpeed;
     float spinDuration;
 
 
@@ -43,8 +42,8 @@ public:
 
     WheelTheme(const unsigned int sliceColorCount, const ccColor4F& sliceColor1, const ccColor4F& sliceColor2,
         const ccColor4F& sliceColor3, const ccColor4F& sliceColor4, const ccColor4F& textColor,
-        const ccColor4F& backgroundColor, const unsigned int buttonColor, const unsigned int spinSpeed,
-        const float spinDuration, const bool showCornerDecorations, const bool showLevelNamesOnWheel)
+        const ccColor4F& backgroundColor, const unsigned int buttonColor, const float spinDuration,
+        const bool showCornerDecorations, const bool showLevelNamesOnWheel)
         : sliceColorCount(sliceColorCount),
           sliceColor1(sliceColor1),
           sliceColor2(sliceColor2),
@@ -53,7 +52,6 @@ public:
           textColor(textColor),
           backgroundColor(backgroundColor),
           buttonColor(buttonColor),
-          spinSpeed(spinSpeed),
           spinDuration(spinDuration),
           showCornerDecorations(showCornerDecorations),
           showLevelNamesOnWheel(showLevelNamesOnWheel) {}
@@ -89,7 +87,6 @@ private:
             // .selectSound = ,
 
 
-            4u,
             7.f,
 
 
@@ -169,10 +166,8 @@ struct matjson::Serialize<WheelTheme>
         unsigned int sliceColorCount;
         ccColor4F sliceColor1, sliceColor2, sliceColor3, sliceColor4;
         ccColor4F textColor;
-        ccColor4F outlineColorInner, outlineColorOuter;
         ccColor4F backgroundColor;
         unsigned int buttonColor;
-        unsigned int spinSpeed;
         float spinDuration;
         bool showCornerDecorations, showLevelNamesOnWheel;
 
@@ -236,14 +231,6 @@ struct matjson::Serialize<WheelTheme>
             backgroundColor = WheelTheme::getDefaultWheelTheme()->backgroundColor;
         }
 
-
-        try {
-            GEODE_UNWRAP_INTO(spinSpeed, value["spinSpeed"].asUInt());
-        } catch (const std::exception&) {
-            log::info("Invalid theme spinSpeed data, using default theme value");
-            spinSpeed = WheelTheme::getDefaultWheelTheme()->spinSpeed;
-        }
-
         try {
             GEODE_UNWRAP_INTO(spinDuration, value["spinDuration"].asDouble());
         } catch (const std::exception&) {
@@ -279,7 +266,6 @@ struct matjson::Serialize<WheelTheme>
 
             buttonColor,
 
-            spinSpeed,
             spinDuration,
 
             showCornerDecorations,
@@ -304,7 +290,6 @@ struct matjson::Serialize<WheelTheme>
 
         obj["buttonColor"] = value.buttonColor;
 
-        obj["spinSpeed"] = value.spinSpeed;
         obj["spinDuration"] = value.spinDuration;
         obj["showCornerDecorations"] = value.showCornerDecorations;
         obj["showLevelNamesOnWheel"] = value.showLevelNamesOnWheel;
