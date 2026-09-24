@@ -3,7 +3,6 @@
 #include <Geode/Geode.hpp>
 
 #include "WheelEditMenu/WheelEditMenu.h"
-#include "WheelTheme/WheelTheme.h"
 
 using namespace geode::prelude;
 
@@ -22,9 +21,17 @@ public:
     bool init() override;
     void keyBackClicked() override;
 
-    void updateTheme() const;
+    void updateTheme();
 
 private:
+    CCMenu* m_wheelAndEditMenu = nullptr;
+
+    WheelEditMenu* m_wheelEditMenu = nullptr;
+
+    bool m_editMenuOpen = false;
+
+    CCSprite* m_background = nullptr;
+
     void onBack(CCObject*);
 
     void onProfileClicked(CCObject*);
@@ -33,9 +40,5 @@ private:
 
     void onThemeEdit(CCObject*);
 
-    CCMenu* m_wheelAndEditMenu = nullptr;
-
-    WheelEditMenu* m_wheelEditMenu = nullptr;
-
-    bool m_editMenuOpen = false;
+    void generateBackground(const CCSize& winSize);
 };

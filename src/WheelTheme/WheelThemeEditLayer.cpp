@@ -203,6 +203,19 @@ bool WheelThemeEditLayer::init()
 
 
     // TODO bg color
+    // Background color
+    WheelThemeColorPicker* bgColorPicker = WheelThemeColorPicker::create(
+        "Background",
+        "Color",
+        &m_wheelTheme->backgroundColor,
+        [](const ccColor4B&)
+        {
+            onThemeChanged();
+        }
+    );
+    bgColorPicker->setID("bg-color-picker"_spr);
+
+    otherColorMenu->addChild(bgColorPicker);
 
 
     otherColorMenu->updateLayout();

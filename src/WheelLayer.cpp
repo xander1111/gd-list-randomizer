@@ -42,24 +42,7 @@ bool WheelLayer::init()
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
     // Background
-    //
-    // Recreates the background commonly used by the game for menus
-    CCSprite* background = CCSprite::create("GJ_gradientBG-hd.png");
-    background->setID("background"_spr);
-
-    const CCSize bgSize = background->getContentSize();
-
-    background->setScaleX((winSize.width + 10) / bgSize.width);
-    background->setScaleY((winSize.height + 10) / bgSize.height);
-
-    background->setAnchorPoint({0, 0});
-    background->setPosition({-5,-5});
-
-    background->setColor({.r = 0, .g = 102, .b = 255});
-
-    background->setZOrder(-2);
-    addChild(background);
-
+    generateBackground(winSize);
 
     // Corner decorations
     CCSprite* leftCorner = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
@@ -261,14 +244,15 @@ void WheelLayer::keyBackClicked()
     CCDirector::sharedDirector()->popSceneWithTransition(0.5f, kPopTransitionFade);
 }
 
-void WheelLayer::updateTheme() const
+void WheelLayer::updateTheme()
 {
     // TODO when theme gets updated:
     //   - Redraw entire WheelLayer? At least the background and decorations need to be redrawn
-    //   - Redraw entire PickerWheel?
-    //     - Unsure if it would be worth it to try to only redraw the necessary parts, like avoiding redrawing slices if
-    //       only the outline color changed. In theory, it shouldn't really be an issue since people are probably not
-    //       going to be making that many changes in quick succession, but maybe the color picker updates frequently?
+
+    removeChild(m_background, true);
+
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+    generateBackground(winSize);
 
     m_pickerWheel->redrawWheel(true);
 }
@@ -320,4 +304,23 @@ void WheelLayer::onEdit(CCObject*)
 void WheelLayer::onThemeEdit(CCObject*)
 {
     WheelThemeEditLayer::create(WheelTheme::currentTheme)->show();
+}
+
+void WheelLayer::generateBackground(const CCSize& winSize)
+{
+    m_background = CCSprite::create("GJ_gradientBG-hd.png");
+    m_background->setID("background"_spr);
+
+    const CCSize bgSize = m_background->getContentSize();
+
+    m_background->setScaleX((winSize.width + 10) / bgSize.width);
+    m_background->setScaleY((winSize.height + 10) / bgSize.height);
+
+    m_background->setAnchorPoint({0, 0});
+    m_background->setPosition({-5,-5});
+
+    m_background->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->backgroundColor)) /*{.r = 0, .g = 102, .b = 255}*/);
+
+    m_background->setZOrder(-2);
+    addChild(m_background);
 }
