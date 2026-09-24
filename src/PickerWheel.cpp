@@ -28,25 +28,7 @@ bool PickerWheel::init()
     setLayout(AnchorLayout::create());
 
     // Spin button
-    ButtonSprite* spinButtonSprite = ButtonSprite::create(
-        "Spin",
-        "BigFont.fnt",
-        Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
-        0.5f
-    );
-    CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
-        spinButtonSprite,
-        this,
-        menu_selector(PickerWheel::onSpinWheel)
-    );
-
-    CCMenu* const spinButtonMenu = CCMenu::create();
-    spinButtonMenu->setID("randomizer-menu"_spr);
-    spinButtonMenu->addChild(spinButton);
-    spinButtonMenu->setPosition({0, 0});
-    spinButtonMenu->setZOrder(1);
-
-    addChildAtPosition(spinButtonMenu, Anchor::Center);
+    generateSpinButton();
 
     // Wheel outer menu, used to rotate the wheel without messing up any internal angle calculations
     m_wheelOuterMenu = CCMenu::create();
@@ -78,21 +60,8 @@ bool PickerWheel::init()
 
     m_wheelOuterMenu->addChild(m_wheelMenu);
 
-    // Wheel outline
-    CCDrawNode* innerOutline = CCDrawNode::create();
-    innerOutline->setID("wheel-inner-outline"_spr);
-    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, WheelTheme::currentTheme->outlineColorInner, CircleSegmentCount);
-    innerOutline->setZOrder(1);
-
-    m_wheelOuterMenu->addChild(innerOutline);
-
-
-    CCDrawNode* outerOutline = CCDrawNode::create();
-    outerOutline->setID("wheel-outer-outline"_spr);
-    outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, WheelTheme::currentTheme->outlineColorOuter, CircleSegmentCount);
-    outerOutline->setZOrder(2);
-
-    m_wheelOuterMenu->addChild(outerOutline);
+    // Outline
+    generateOutline();
 
     // Ticker
     generateTicker();
@@ -130,7 +99,7 @@ void PickerWheel::update(float dt)
     updateCurrentlyPointedAtSlice();
 }
 
-void PickerWheel::redrawWheel()
+void PickerWheel::redrawWheel(const bool fullRedraw)
 {
     if (m_wheelMenu == nullptr || m_slicesNode == nullptr)
         return;
@@ -150,6 +119,19 @@ void PickerWheel::redrawWheel()
     addEndSeparator();
 
     updateCurrentlyPointedAtSlice();
+
+    redrawTicker();
+
+    if (fullRedraw) {
+        m_wheelOuterMenu->removeChild(m_outerOutline, true);
+        m_wheelOuterMenu->removeChild(m_innerOutline, true);
+
+        generateOutline();
+
+        removeChild(m_spinButton, true);
+
+        generateSpinButton();
+    }
 
     // Rotate wheel if there is only 1 label on it so that one label is upright
     if (m_enabledSliceCount < 2)
@@ -371,6 +353,26 @@ void PickerWheel::addEndSeparator()
     }
 }
 
+void PickerWheel::generateSpinButton()
+{
+    ButtonSprite* spinButtonSprite = ButtonSprite::create(
+        "Spin",
+        "BigFont.fnt",
+        Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
+        0.5f
+    );
+    m_spinButton = CCMenuItemSpriteExtra::create(
+        spinButtonSprite,
+        this,
+        menu_selector(PickerWheel::onSpinWheel)
+    );
+
+    m_spinButton->setZOrder(1);
+    m_spinButton->setID("spin-button"_spr);
+
+    addChildAtPosition(m_spinButton, Anchor::Center);
+}
+
 CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const
 {
     CCNode* sliceNode = CCNode::create();
@@ -565,6 +567,24 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     }
 
     return wheelSlices;
+}
+
+void PickerWheel::generateOutline()
+{
+    m_innerOutline = CCDrawNode::create();
+    m_innerOutline->setID("wheel-inner-outline"_spr);
+    m_innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, WheelTheme::currentTheme->outlineColorInner, CircleSegmentCount);
+    m_innerOutline->setZOrder(1);
+
+    m_wheelOuterMenu->addChild(m_innerOutline);
+
+
+    m_outerOutline = CCDrawNode::create();
+    m_outerOutline->setID("wheel-outer-outline"_spr);
+    m_outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, WheelTheme::currentTheme->outlineColorOuter, CircleSegmentCount);
+    m_outerOutline->setZOrder(2);
+
+    m_wheelOuterMenu->addChild(m_outerOutline);
 }
 
 void PickerWheel::generateTicker()

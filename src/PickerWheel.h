@@ -33,7 +33,7 @@ public:
 
     std::vector<Slice>* getSlices() { return &m_slices; }
 
-    void redrawWheel();
+    void redrawWheel(bool fullRedraw = false);
 
     void addOnWheelSpin(const std::function<void()>& function);
 
@@ -56,7 +56,6 @@ private:
     // End separator node, may be nullptr if the end separator was not needed when the wheel was last drawn
     CCDrawNode* m_endSeparator = nullptr;
 
-    // Mainly used for checking
     Slice* m_firstEnabledSlice = nullptr;
     Slice* m_lastEnabledSlice = nullptr;
 
@@ -84,6 +83,11 @@ private:
     std::vector<std::function<void()>> m_onWheelSpinFuncs;
 
     std::vector<std::function<void()>> m_onWheelSpinEndFuncs;
+
+    // References needed for removing and replacing when drawing the wheel
+    CCDrawNode* m_innerOutline = nullptr;
+    CCDrawNode* m_outerOutline = nullptr;
+    CCMenuItemSpriteExtra* m_spinButton = nullptr;
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
@@ -113,6 +117,8 @@ private:
 
     void addEndSeparator();
 
+    void generateSpinButton();
+
     CCNode* generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const;
 
     /**
@@ -124,6 +130,8 @@ private:
      * @return a CCMenu object that contains the wheel slices
      */
     [[nodiscard]] CCMenu* generateWheelSliceNodes();
+
+    void generateOutline();
 
     void generateTicker();
 };

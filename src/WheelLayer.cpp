@@ -270,7 +270,7 @@ void WheelLayer::updateTheme() const
     //       only the outline color changed. In theory, it shouldn't really be an issue since people are probably not
     //       going to be making that many changes in quick succession, but maybe the color picker updates frequently?
 
-    m_pickerWheel->redrawWheel();
+    m_pickerWheel->redrawWheel(true);
 }
 
 void WheelLayer::onBack(CCObject*)
