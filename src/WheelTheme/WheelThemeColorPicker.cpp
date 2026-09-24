@@ -1,10 +1,10 @@
 #include "WheelThemeColorPicker.h"
 
 WheelThemeColorPicker* WheelThemeColorPicker::create(const std::string& labelRow1, const std::string& labelRow2,
-    const ccColor3B &initialColor, Function<void(const ccColor4B&)> callback)
+    ccColor4F* m_colorToEdit, Function<void(const ccColor4B&)> callback)
 {
-    auto ret = new WheelThemeColorPicker(std::move(callback));
-    if (ret && ret->init(labelRow1, labelRow2, initialColor)) {
+    auto ret = new WheelThemeColorPicker(std::move(callback), m_colorToEdit);
+    if (ret && ret->init(labelRow1, labelRow2)) {
         ret->autorelease();
     } else {
         CC_SAFE_DELETE(ret);
@@ -13,7 +13,7 @@ WheelThemeColorPicker* WheelThemeColorPicker::create(const std::string& labelRow
     return ret;
 }
 
-bool WheelThemeColorPicker::init(const std::string& labelRow1, const std::string& labelRow2, const ccColor3B &initialColor)
+bool WheelThemeColorPicker::init(const std::string& labelRow1, const std::string& labelRow2)
 {
     if (!CCMenu::init())
         return false;
@@ -27,13 +27,17 @@ bool WheelThemeColorPicker::init(const std::string& labelRow1, const std::string
     );
 
     m_colorChannelSprite = ColorChannelSprite::create();
-    m_colorChannelSprite->setColor(initialColor);
+    m_colorChannelSprite->setColor(to3B(ccc4BFromccc4F(*m_colorToEdit)));
 
-    m_colorPickerButton = CCMenuItemExt::createSpriteExtra(m_colorChannelSprite, [initialColor, this](CCMenuItemSpriteExtra*)
+    m_colorPickerButton = CCMenuItemExt::createSpriteExtra(m_colorChannelSprite, [this](CCMenuItemSpriteExtra*)
     {
-        ColorPickPopup* picker = ColorPickPopup::create(to4B(initialColor));
+        ColorPickPopup* picker = ColorPickPopup::create(ccc4BFromccc4F(*m_colorToEdit));
         picker->setColorTarget(m_colorChannelSprite);
-        picker->setCallback(std::move(m_callback));
+        picker->setCallback([this](const ccColor4B& color)
+        {
+            *m_colorToEdit = to4F(color);
+            m_callback(color);
+        });
 
         picker->show();
     });
@@ -52,5 +56,5 @@ bool WheelThemeColorPicker::init(const std::string& labelRow1, const std::string
     return true;
 }
 
-WheelThemeColorPicker::WheelThemeColorPicker(Function<void(const ccColor4B&)> callback)
-    : m_callback(std::move(callback)) {}
+WheelThemeColorPicker::WheelThemeColorPicker(Function<void(const ccColor4B&)> callback, ccColor4F* m_colorToEdit)
+    : m_colorToEdit(m_colorToEdit), m_callback(std::move(callback)) {}
