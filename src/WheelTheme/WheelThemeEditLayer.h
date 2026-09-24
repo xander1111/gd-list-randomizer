@@ -21,11 +21,17 @@ private:
 
     WheelTheme* m_wheelTheme;
 
+    CCMenu* m_colorsPage = nullptr;
     CCMenu* m_sliceColorPickersMenu = nullptr;
     WheelThemeColorPicker* m_sliceColor1Picker = nullptr;
     WheelThemeColorPicker* m_sliceColor2Picker = nullptr;
     WheelThemeColorPicker* m_sliceColor3Picker = nullptr;
     WheelThemeColorPicker* m_sliceColor4Picker = nullptr;
+
+    CCMenu* m_settingsPage = nullptr;
+
+    CCMenuItemSpriteExtra* m_nextButton = nullptr;
+    CCMenuItemSpriteExtra* m_prevButton = nullptr;
 
     explicit WheelThemeEditLayer(WheelTheme* wheelTheme);
 

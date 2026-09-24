@@ -247,7 +247,7 @@ void WheelLayer::keyBackClicked()
 void WheelLayer::updateTheme()
 {
     // TODO when theme gets updated:
-    //   - Redraw entire WheelLayer? At least the background and decorations need to be redrawn
+    //   - Redraw decorations
 
     removeChild(m_background, true);
 

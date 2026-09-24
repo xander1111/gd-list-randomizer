@@ -35,19 +35,57 @@ bool WheelThemeEditLayer::init()
     m_buttonMenu->addChild(resetThemeButton);
 
 
+    // Next page button
+    CCSprite* nextButtonSprite = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
+    nextButtonSprite->setFlipX(true);
+    m_nextButton = CCMenuItemExt::createSpriteExtra(
+        nextButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            m_colorsPage->setVisible(false);
+            m_nextButton->setVisible(false);
+
+            m_settingsPage->setVisible(true);
+            m_prevButton->setVisible(true);
+        }
+    );
+    m_nextButton->setID("next-button"_spr);
+    m_nextButton->setPosition({m_menuWidth + 30.f, m_menuHeight / 2.f});
+
+    m_buttonMenu->addChild(m_nextButton);
+
+    // Previous page button
+    m_prevButton = CCMenuItemExt::createSpriteExtra(
+        CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png"),
+        [this](CCMenuItemSpriteExtra*)
+        {
+            m_colorsPage->setVisible(true);
+            m_nextButton->setVisible(true);
+
+            m_settingsPage->setVisible(false);
+            m_prevButton->setVisible(false);
+        }
+    );
+    m_prevButton->setID("prev-button"_spr);
+    m_prevButton->setPosition({-30.f, m_menuHeight / 2.f});
+    m_prevButton->setVisible(false);
+
+    m_buttonMenu->addChild(m_prevButton);
+
+
     // Color customization page
-    CCMenu* colorsPage = CCMenu::create();
-    colorsPage->setID("colors-menu"_spr);
-    colorsPage->setLayout(
+    m_colorsPage = CCMenu::create();
+    m_colorsPage->setID("colors-menu"_spr);
+    m_colorsPage->setLayout(
         ColumnLayout::create()
         ->setAxisReverse(false)
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
         ->setPadding({0.f, 40.f, 0.f, 60.f})
     );
-    colorsPage->setContentSize({m_menuWidth, m_menuHeight});
-    colorsPage->setPosition({0.f, 0.f});
-    colorsPage->setAnchorPoint({0.f, 0.f});
+    m_colorsPage->setContentSize({m_menuWidth, m_menuHeight});
+    m_colorsPage->setPosition({0.f, 0.f});
+    m_colorsPage->setAnchorPoint({0.f, 0.f});
 
     CCMenu* sliceColorsMenu = CCMenu::create();
     sliceColorsMenu->setID("slice-colors-menu"_spr);
@@ -172,7 +210,7 @@ bool WheelThemeEditLayer::init()
     sliceColorsMenu->addChild(m_sliceColorPickersMenu);
 
     sliceColorsMenu->updateLayout();
-    colorsPage->addChild(sliceColorsMenu);
+    m_colorsPage->addChild(sliceColorsMenu);
 
     // Other colors
     CCMenu* otherColorMenu = CCMenu::create();
@@ -201,8 +239,6 @@ bool WheelThemeEditLayer::init()
 
     // TODO button color
 
-
-    // TODO bg color
     // Background color
     WheelThemeColorPicker* bgColorPicker = WheelThemeColorPicker::create(
         "Background",
@@ -219,20 +255,38 @@ bool WheelThemeEditLayer::init()
 
 
     otherColorMenu->updateLayout();
-    colorsPage->addChild(otherColorMenu);
+    m_colorsPage->addChild(otherColorMenu);
 
-    colorsPage->updateLayout();
-    m_mainLayer->addChild(colorsPage);
+    m_colorsPage->updateLayout();
+    m_mainLayer->addChild(m_colorsPage);
 
 
-    // TODO tick sound
-    // TODO select sound
+    // Settings page
+    m_settingsPage = CCMenu::create();
+    m_settingsPage->setID("settings-menu"_spr);
+    m_settingsPage->setLayout(
+        ColumnLayout::create()
+        ->setAxisReverse(true)
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Even)
+        ->setPadding({0.f, 40.f, 0.f, 60.f})
+    );
+    m_settingsPage->setContentSize({m_menuWidth, m_menuHeight});
+    m_settingsPage->setPosition({0.f, 0.f});
+    m_settingsPage->setAnchorPoint({0.f, 0.f});
+
+    // TODO show/hide corner decos
+    // TODO show/hide level names
 
     // TODO spin speed
     // TODO spin duration
 
-    // TODO show/hide corner decos
-    // TODO show/hide level names
+    // TODO tick sound
+    // TODO select sound
+
+
+    m_settingsPage->updateLayout();
+    m_mainLayer->addChild(m_settingsPage);
 
     return true;
 }
