@@ -20,33 +20,86 @@ bool WheelThemeEditLayer::init()
     setTitle("Customize Theme");
 
     // Color customization page
-    CCMenu* colorsMenu = CCMenu::create();
-    colorsMenu->setID("colors-menu"_spr);
-    colorsMenu->setLayout(
+    CCMenu* colorsPage = CCMenu::create();
+    colorsPage->setID("colors-menu"_spr);
+    colorsPage->setLayout(
         ColumnLayout::create()
         ->setAxisReverse(true)
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Between)
         ->setPadding({0.f, 40.f, 0.f, 60.f})
     );
-    colorsMenu->setContentSize({m_menuWidth, m_menuHeight});
-    colorsMenu->setPosition({0.f, 0.f});
-    colorsMenu->setAnchorPoint({0.f, 0.f});
+    colorsPage->setContentSize({m_menuWidth, m_menuHeight});
+    colorsPage->setPosition({0.f, 0.f});
+    colorsPage->setAnchorPoint({0.f, 0.f});
 
-
-    // Slice colors update menu
     CCMenu* sliceColorsMenu = CCMenu::create();
     sliceColorsMenu->setID("slice-colors-menu"_spr);
     sliceColorsMenu->setLayout(
         RowLayout::create()
+        ->setAxisReverse(true)
         ->setAutoScale(false)
-        ->setAxisAlignment(AxisAlignment::Even)
+        ->setAxisAlignment(AxisAlignment::Between)
         ->setPadding(Padding::horizontal(20.f))
     );
     sliceColorsMenu->setContentWidth(m_menuWidth);
 
+    // Add and remove colors button
+    CCMenu* addRemoveColorsMenu = CCMenu::create();
+    addRemoveColorsMenu->setID("add-remove-colors-menu"_spr);
+    addRemoveColorsMenu->setLayout(
+        ColumnLayout::create()
+        ->setAxisReverse(true)
+        ->setAutoScale(false)
+        ->setGap(5.f)
+        ->setAutoGrowAxis(0.f)
+    );
 
-    m_sliceColor1Picker = ColorPickerWithLabel::create(
+    CCSprite* plusButtonSprite = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
+    limitNodeWidth(plusButtonSprite, 20.f, 1.f, 0.1f);
+    CCMenuItemSpriteExtra* addButton = CCMenuItemExt::createSpriteExtra(
+        plusButtonSprite,
+        [this] (CCMenuItemSpriteExtra* button)
+        {
+            if (m_wheelTheme->sliceColorCount < 4)
+                m_wheelTheme->sliceColorCount++;
+
+            onColorCountChanged();
+        }
+    );
+    addButton->setID("add-color-button"_spr);
+    addRemoveColorsMenu->addChild(addButton);
+
+    CCSprite* minusButtonSprite = CCSprite::createWithSpriteFrameName("GJ_deleteBtn_001.png");
+    limitNodeWidth(minusButtonSprite, 20.f, 1.f, 0.1f);
+    CCMenuItemSpriteExtra* removeButton = CCMenuItemExt::createSpriteExtra(
+        minusButtonSprite,
+        [this] (CCMenuItemSpriteExtra* button)
+        {
+            if (m_wheelTheme->sliceColorCount > 2)
+                m_wheelTheme->sliceColorCount--;
+
+            onColorCountChanged();
+        }
+    );
+    removeButton->setID("remove-color-button"_spr);
+    addRemoveColorsMenu->addChild(removeButton);
+
+    addRemoveColorsMenu->updateLayout();
+    sliceColorsMenu->addChild(addRemoveColorsMenu);
+
+
+    m_sliceColorPickersMenu = CCMenu::create();
+    m_sliceColorPickersMenu->setID("slice-color-pickers-menu"_spr);
+    m_sliceColorPickersMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Even)
+    );
+    m_sliceColorPickersMenu->setContentWidth(m_menuWidth - 40.f - 30.f);
+
+
+    m_sliceColor1Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 1",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor1)),
@@ -58,7 +111,7 @@ bool WheelThemeEditLayer::init()
     );
     m_sliceColor1Picker->setID("slice-color1-picker"_spr);
 
-    m_sliceColor2Picker = ColorPickerWithLabel::create(
+    m_sliceColor2Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 2",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor2)),
@@ -70,7 +123,7 @@ bool WheelThemeEditLayer::init()
     );
     m_sliceColor2Picker->setID("slice-color2-picker"_spr);
 
-    m_sliceColor3Picker = ColorPickerWithLabel::create(
+    m_sliceColor3Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 3",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor3)),
@@ -81,8 +134,9 @@ bool WheelThemeEditLayer::init()
         }
     );
     m_sliceColor3Picker->setID("slice-color3-picker"_spr);
+    m_sliceColor3Picker->setVisible(m_wheelTheme->sliceColorCount >= 3);
 
-    m_sliceColor4Picker = ColorPickerWithLabel::create(
+    m_sliceColor4Picker = WheelThemeColorPicker::create(
         "Wheel",
         "Color 4",
         to3B(ccc4BFromccc4F(WheelTheme::getDefaultWheelTheme()->sliceColor4)),
@@ -93,21 +147,25 @@ bool WheelThemeEditLayer::init()
         }
     );
     m_sliceColor4Picker->setID("slice-color4-picker"_spr);
+    m_sliceColor4Picker->setVisible(m_wheelTheme->sliceColorCount >= 4);
 
-    sliceColorsMenu->addChild(m_sliceColor1Picker);
-    sliceColorsMenu->addChild(m_sliceColor2Picker);
-    sliceColorsMenu->addChild(m_sliceColor3Picker);
-    sliceColorsMenu->addChild(m_sliceColor4Picker);
+    m_sliceColorPickersMenu->addChild(m_sliceColor1Picker);
+    m_sliceColorPickersMenu->addChild(m_sliceColor2Picker);
+    m_sliceColorPickersMenu->addChild(m_sliceColor3Picker);
+    m_sliceColorPickersMenu->addChild(m_sliceColor4Picker);
 
-    sliceColorsMenu->updateLayout();
-    colorsMenu->addChild(sliceColorsMenu);
+    m_sliceColorPickersMenu->updateLayout();
+    sliceColorsMenu->addChild(m_sliceColorPickersMenu);
 
     // TODO level name text color
     // TODO bg color
     // TODO button color
 
-    colorsMenu->updateLayout();
-    m_mainLayer->addChild(colorsMenu);
+    sliceColorsMenu->updateLayout();
+    colorsPage->addChild(sliceColorsMenu);
+
+    colorsPage->updateLayout();
+    m_mainLayer->addChild(colorsPage);
 
 
     // TODO tick sound
@@ -125,7 +183,15 @@ bool WheelThemeEditLayer::init()
 WheelThemeEditLayer::WheelThemeEditLayer(WheelTheme* wheelTheme)
     : m_wheelTheme(wheelTheme) {}
 
-void WheelThemeEditLayer::onSliceColorChanged(ColorPickerWithLabel*)
+void WheelThemeEditLayer::onColorCountChanged() const
+{
+    m_sliceColor3Picker->setVisible(m_wheelTheme->sliceColorCount >= 3);
+    m_sliceColor4Picker->setVisible(m_wheelTheme->sliceColorCount >= 4);
+
+    m_sliceColorPickersMenu->updateLayout();
+}
+
+void WheelThemeEditLayer::onSliceColorChanged(WheelThemeColorPicker*)
 {
     onThemeChanged();
 }

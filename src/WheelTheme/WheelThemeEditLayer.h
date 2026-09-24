@@ -2,7 +2,7 @@
 
 #include <Geode/Geode.hpp>
 
-#include "ColorPickerWithLabel.h"
+#include "WheelThemeColorPicker.h"
 #include "WheelTheme.h"
 
 using namespace geode::prelude;
@@ -21,14 +21,17 @@ private:
 
     WheelTheme* m_wheelTheme;
 
-    ColorPickerWithLabel* m_sliceColor1Picker = nullptr;
-    ColorPickerWithLabel* m_sliceColor2Picker = nullptr;
-    ColorPickerWithLabel* m_sliceColor3Picker = nullptr;
-    ColorPickerWithLabel* m_sliceColor4Picker = nullptr;
+    CCMenu* m_sliceColorPickersMenu = nullptr;
+    WheelThemeColorPicker* m_sliceColor1Picker = nullptr;
+    WheelThemeColorPicker* m_sliceColor2Picker = nullptr;
+    WheelThemeColorPicker* m_sliceColor3Picker = nullptr;
+    WheelThemeColorPicker* m_sliceColor4Picker = nullptr;
 
     explicit WheelThemeEditLayer(WheelTheme* wheelTheme);
 
-    void onSliceColorChanged(ColorPickerWithLabel*);
+    void onColorCountChanged() const;
+
+    void onSliceColorChanged(WheelThemeColorPicker*);
 
     void onThemeChanged();
 };

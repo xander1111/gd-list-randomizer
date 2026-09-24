@@ -1,10 +1,10 @@
-#include "ColorPickerWithLabel.h"
+#include "WheelThemeColorPicker.h"
 
-ColorPickerWithLabel* ColorPickerWithLabel::create(const std::string& labelRow1, const std::string& labelRow2,
-    const ccColor3B &initialColor, Function<void(ColorPickerWithLabel*)> onClose,
-    Function<void(const ccColor4B&)> callback)
+WheelThemeColorPicker* WheelThemeColorPicker::create(const std::string& labelRow1, const std::string& labelRow2,
+                                                     const ccColor3B &initialColor, Function<void(WheelThemeColorPicker*)> onClose,
+                                                     Function<void(const ccColor4B&)> callback)
 {
-    auto ret = new ColorPickerWithLabel(std::move(onClose), std::move(callback));
+    auto ret = new WheelThemeColorPicker(std::move(onClose), std::move(callback));
     if (ret && ret->init(labelRow1, labelRow2, initialColor)) {
         ret->autorelease();
     } else {
@@ -14,7 +14,7 @@ ColorPickerWithLabel* ColorPickerWithLabel::create(const std::string& labelRow1,
     return ret;
 }
 
-bool ColorPickerWithLabel::init(const std::string& labelRow1, const std::string& labelRow2, const ccColor3B &initialColor)
+bool WheelThemeColorPicker::init(const std::string& labelRow1, const std::string& labelRow2, const ccColor3B &initialColor)
 {
     if (!CCMenu::init())
         return false;
@@ -53,6 +53,6 @@ bool ColorPickerWithLabel::init(const std::string& labelRow1, const std::string&
     return true;
 }
 
-ColorPickerWithLabel::ColorPickerWithLabel(Function<void(ColorPickerWithLabel*)> onClose,
+WheelThemeColorPicker::WheelThemeColorPicker(Function<void(WheelThemeColorPicker*)> onClose,
     Function<void(const ccColor4B&)> callback)
     : m_onClose(std::move(onClose)), m_callback(std::move(callback)) {}

@@ -480,9 +480,24 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         }
         points.emplace_back(0.f, 0.f);
 
-        ccColor4F* color = processedSlicesCount % 2 == 0
-                ? &WheelTheme::getDefaultWheelTheme()->sliceColor1
-                : &WheelTheme::getDefaultWheelTheme()->sliceColor2;
+        unsigned int sliceColorIndex = processedSlicesCount % WheelTheme::getDefaultWheelTheme()->sliceColorCount;
+
+        ccColor4F* color;
+
+        switch (sliceColorIndex) {
+        case 0:
+            color = &WheelTheme::getDefaultWheelTheme()->sliceColor1;
+            break;
+        case 1:
+            color = &WheelTheme::getDefaultWheelTheme()->sliceColor2;
+            break;
+        case 2:
+            color = &WheelTheme::getDefaultWheelTheme()->sliceColor3;
+            break;
+        default:  // case 3
+            color = &WheelTheme::getDefaultWheelTheme()->sliceColor4;
+            break;
+        }
 
         // Important distinction from `slice.settings.color`: `slice.color` stores the color that *was* used to render
         // the slice, whereas `slice.settings.color` is a user set value that determines what color *should* be used to
