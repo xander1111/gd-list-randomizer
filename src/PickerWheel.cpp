@@ -123,11 +123,6 @@ void PickerWheel::redrawWheel(const bool fullRedraw)
     redrawTicker();
 
     if (fullRedraw) {
-        m_wheelOuterMenu->removeChild(m_outerOutline, true);
-        m_wheelOuterMenu->removeChild(m_innerOutline, true);
-
-        generateOutline();
-
         removeChild(m_spinButton, true);
 
         generateSpinButton();
@@ -571,20 +566,33 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
 
 void PickerWheel::generateOutline()
 {
-    m_innerOutline = CCDrawNode::create();
-    m_innerOutline->setID("wheel-inner-outline"_spr);
-    m_innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, WheelTheme::currentTheme->outlineColorInner, CircleSegmentCount);
-    m_innerOutline->setZOrder(1);
+    CCDrawNode* innerOutline = CCDrawNode::create();
+    innerOutline->setID("wheel-inner-outline"_spr);
+    innerOutline->drawCircle(
+        {0, 0}, m_radius,
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f},
+        0.75f,
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f},
+        CircleSegmentCount
+    );
+    innerOutline->setZOrder(1);
 
-    m_wheelOuterMenu->addChild(m_innerOutline);
+    m_wheelOuterMenu->addChild(innerOutline);
 
 
-    m_outerOutline = CCDrawNode::create();
-    m_outerOutline->setID("wheel-outer-outline"_spr);
-    m_outerOutline->drawCircle({0, 0}, m_radius + 1.f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, WheelTheme::currentTheme->outlineColorOuter, CircleSegmentCount);
-    m_outerOutline->setZOrder(2);
+    CCDrawNode* outerOutline = CCDrawNode::create();
+    outerOutline->setID("wheel-outer-outline"_spr);
+    outerOutline->drawCircle(
+        {0, 0},
+        m_radius + 1.f,
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f},
+        0.5f,
+        {.r = 1.f, .g = 1.f, .b = 1.f, .a = 1.f},
+        CircleSegmentCount
+    );
+    outerOutline->setZOrder(2);
 
-    m_wheelOuterMenu->addChild(m_outerOutline);
+    m_wheelOuterMenu->addChild(outerOutline);
 }
 
 void PickerWheel::generateTicker()
@@ -605,7 +613,7 @@ void PickerWheel::generateTicker()
         3,
         *color,
         0.5f,
-        WheelTheme::currentTheme->outlineColorInner
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f}
     );
 
     m_ticker->setPosition({14.f, 0.f});

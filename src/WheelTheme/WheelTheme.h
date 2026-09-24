@@ -17,9 +17,6 @@ public:
 
     ccColor4F textColor;
 
-    ccColor4F outlineColorInner;
-    ccColor4F outlineColorOuter;
-
     ccColor4F backgroundColor;
     unsigned int buttonColor;
 
@@ -46,17 +43,14 @@ public:
 
     WheelTheme(const unsigned int sliceColorCount, const ccColor4F& sliceColor1, const ccColor4F& sliceColor2,
         const ccColor4F& sliceColor3, const ccColor4F& sliceColor4, const ccColor4F& textColor,
-        const ccColor4F& outlineColorInner, const ccColor4F& outlineColorOuter, const ccColor4F& backgroundColor,
-        const unsigned int buttonColor, const unsigned int spinSpeed, const float spinDuration,
-        const bool showCornerDecorations, const bool showLevelNamesOnWheel)
+        const ccColor4F& backgroundColor, const unsigned int buttonColor, const unsigned int spinSpeed,
+        const float spinDuration, const bool showCornerDecorations, const bool showLevelNamesOnWheel)
         : sliceColorCount(sliceColorCount),
           sliceColor1(sliceColor1),
           sliceColor2(sliceColor2),
           sliceColor3(sliceColor3),
           sliceColor4(sliceColor4),
           textColor(textColor),
-          outlineColorInner(outlineColorInner),
-          outlineColorOuter(outlineColorOuter),
           backgroundColor(backgroundColor),
           buttonColor(buttonColor),
           spinSpeed(spinSpeed),
@@ -85,9 +79,6 @@ private:
             { .r = 0, .g = 0, .b = 0, .a = 1.f },
             { .r = 0, .g = 0, .b = 0, .a = 1.f },
 
-            { .r = 1.f, .g = 1.f, .b = 1.f, .a = 1.f },
-
-            { .r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f },
             { .r = 1.f, .g = 1.f, .b = 1.f, .a = 1.f },
 
             { .r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f },
@@ -231,21 +222,6 @@ struct matjson::Serialize<WheelTheme>
 
 
         try {
-            GEODE_UNWRAP_INTO(outlineColorInner, matjson::Serialize<ccColor4F>::fromJson(value["outlineColorInner"]));
-        } catch (const std::exception&) {
-            log::info("Invalid theme outlineColorInner data, using default theme value");
-            outlineColorInner = WheelTheme::getDefaultWheelTheme()->outlineColorInner;
-        }
-
-        try {
-            GEODE_UNWRAP_INTO(outlineColorOuter, matjson::Serialize<ccColor4F>::fromJson(value["outlineColorOuter"]));
-        } catch (const std::exception&) {
-            log::info("Invalid theme outlineColorOuter data, using default theme value");
-            outlineColorOuter = WheelTheme::getDefaultWheelTheme()->outlineColorOuter;
-        }
-
-
-        try {
             GEODE_UNWRAP_INTO(backgroundColor, matjson::Serialize<ccColor4F>::fromJson(value["backgroundColor"]));
         } catch (const std::exception&) {
             log::info("Invalid theme backgroundColor data, using default theme value");
@@ -299,9 +275,6 @@ struct matjson::Serialize<WheelTheme>
 
             textColor,
 
-            outlineColorInner,
-            outlineColorOuter,
-
             backgroundColor,
 
             buttonColor,
@@ -326,9 +299,6 @@ struct matjson::Serialize<WheelTheme>
         obj["sliceColor4"] = value.sliceColor4;
 
         obj["textColor"] = value.textColor;
-
-        obj["outlineColorInner"] = value.outlineColorInner;
-        obj["outlineColorOuter"] = value.outlineColorOuter;
 
         obj["backgroundColor"] = value.backgroundColor;
 

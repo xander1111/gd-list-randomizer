@@ -84,9 +84,7 @@ private:
 
     std::vector<std::function<void()>> m_onWheelSpinEndFuncs;
 
-    // References needed for removing and replacing when drawing the wheel
-    CCDrawNode* m_innerOutline = nullptr;
-    CCDrawNode* m_outerOutline = nullptr;
+    // Reference needed for removing and replacing when drawing the wheel
     CCMenuItemSpriteExtra* m_spinButton = nullptr;
 
     // Number of segments to use for drawing circles
