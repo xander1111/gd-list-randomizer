@@ -17,10 +17,12 @@ jobs:
 
           - name: macOS
             os: macos-latest
+            build-config: RelWithDebInfo
 
           - name: iOS
             os: macos-latest
             target: iOS
+            build-config: RelWithDebInfo
 
           - name: Android32
             os: ubuntu-latest
