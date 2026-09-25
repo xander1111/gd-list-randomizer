@@ -21,12 +21,6 @@ public:
     unsigned int buttonColor;
 
 
-    // Sounds
-    // TODO figure out how to implement custom sounds
-    //gd::string tickSound;
-    //gd::string selectSound;
-
-
     // Wheel behaviour
 
     float spinDuration;

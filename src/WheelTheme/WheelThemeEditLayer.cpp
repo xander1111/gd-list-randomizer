@@ -508,10 +508,6 @@ bool WheelThemeEditLayer::init()
     m_settingsPage->addChild(spinSettingsMenu);
 
 
-    // TODO tick sound
-    // TODO select sound
-
-
     m_settingsPage->updateLayout();
     m_mainLayer->addChild(m_settingsPage);
 
