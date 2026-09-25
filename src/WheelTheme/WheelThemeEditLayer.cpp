@@ -1,5 +1,8 @@
 #include "WheelThemeEditLayer.h"
 
+#include <iomanip>
+#include <sstream>
+
 #include "../UICommon/TogglerWithLabel.h"
 #include "../Utils.h"
 #include "../WheelLayer.h"
@@ -476,7 +479,12 @@ bool WheelThemeEditLayer::init()
     // Spin duration
     TextInput* spinDurationField = TextInput::create(100.f, "Spin Duration");
     spinDurationField->setID("duration-field"_spr);
-    spinDurationField->setString(std::format("{:.2f}", m_wheelTheme->spinDuration));
+
+    // Would like to use `std::format` but MacOS doesn't seem to support it for some reason
+    std::ostringstream spinDurationText;
+    spinDurationText << std::fixed << std::setprecision(2) << m_wheelTheme->spinDuration;
+    spinDurationField->setString(spinDurationText.str());
+
     spinDurationField->setCommonFilter(CommonFilter::Float);
     spinDurationField->setMaxCharCount(8);
     spinDurationField->setScale(0.75f);
