@@ -12,7 +12,7 @@ void Utils::playSound(gd::string soundPath)
 
 void Utils::playResourceSound(const gd::string& soundFileName)
 {
-    playSound(string::pathToString(Mod::get()->getResourcesDir() / soundFileName));
+    playSound(string::pathToString(Mod::get()->getResourcesDir() / soundFileName.c_str()));
 }
 
 gd::string Utils::getDifficultyIconFrame(int difficulty)
