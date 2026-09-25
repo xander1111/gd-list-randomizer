@@ -62,10 +62,12 @@ bool WheelEditMenu::init()
     );
 
     // Filter menu button
-    CCMenuItemSpriteExtra* filterMenuButton = CCMenuItemSpriteExtra::create(
+    CCMenuItemSpriteExtra* filterMenuButton = CCMenuItemExt::createSpriteExtra(
         CCSprite::createWithSpriteFrameName("GJ_filterIcon_001.png"),
-        this,
-        menu_selector(WheelEditMenu::onOpenFilterMenu)
+        [this](CCMenuItemSpriteExtra*)
+        {
+            WheelFilterLayer::create(&m_entries)->show();
+        }
     );
 
     buttonMenu->addChild(filterMenuButton);
@@ -206,9 +208,4 @@ void WheelEditMenu::updateSearch(std::string const& input)
         });
     else
         m_levelListLayer->setInnerContentSize({0.f, 0.f});
-}
-
-void WheelEditMenu::onOpenFilterMenu(CCObject*)
-{
-    WheelFilterLayer::create(&m_entries)->show();
 }

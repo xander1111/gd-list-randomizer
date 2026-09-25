@@ -24,11 +24,9 @@ bool WheelThemeEditLayer::init()
     setTitle("Customize Theme");
 
     // Reset to default theme button
-    ButtonSprite* resetThemeButtonSprite = ButtonSprite::create("Reset Theme", 0.5f);
-    CCMenuItemSpriteExtra* resetThemeButton = CCMenuItemSpriteExtra::create(
-        resetThemeButtonSprite,
-        this,
-        menu_selector(WheelThemeEditLayer::onResetThemeButton)
+    CCMenuItemSpriteExtra* resetThemeButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create("Reset Theme", 0.5f),
+        std::bind_front(&WheelThemeEditLayer::onResetThemeButton, this)
     );
     resetThemeButton->setID("apply-button"_spr);
     resetThemeButton->setPosition({m_menuWidth / 2.f, 30});

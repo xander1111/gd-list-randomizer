@@ -350,16 +350,14 @@ void PickerWheel::addEndSeparator()
 
 void PickerWheel::generateSpinButton()
 {
-    ButtonSprite* spinButtonSprite = ButtonSprite::create(
-        "Spin",
-        "BigFont.fnt",
-        Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
-        0.5f
-    );
-    m_spinButton = CCMenuItemSpriteExtra::create(
-        spinButtonSprite,
-        this,
-        menu_selector(PickerWheel::onSpinWheel)
+    m_spinButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create(
+            "Spin",
+            "BigFont.fnt",
+            Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
+            0.5f
+        ),
+        std::bind_front(&PickerWheel::onSpinWheel, this)
     );
 
     m_spinButton->setZOrder(1);

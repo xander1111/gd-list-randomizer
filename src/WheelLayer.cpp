@@ -78,10 +78,9 @@ bool WheelLayer::init()
     topMenu->setAnchorPoint({0.f, 0.5f});
 
     // Back button
-    CCMenuItemSpriteExtra* exitButton = CCMenuItemSpriteExtra::create(
+    CCMenuItemSpriteExtra* exitButton = CCMenuItemExt::createSpriteExtra(
         CCSprite::createWithSpriteFrameName("GJ_arrow_01_001.png"),
-        this,
-        menu_selector(WheelLayer::onBack)
+        std::bind_front(&WheelLayer::onBack, this)
     );
     exitButton->setID("exit-button"_spr);
 
@@ -100,10 +99,9 @@ bool WheelLayer::init()
     CCSprite* editButtonSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     editButtonSprite->setScale(0.6f);
 
-    CCMenuItemSpriteExtra* editButton = CCMenuItemSpriteExtra::create(
+    CCMenuItemSpriteExtra* editButton = CCMenuItemExt::createSpriteExtra(
         editButtonSprite,
-        this,
-        menu_selector(WheelLayer::onEdit)
+        std::bind_front(&WheelLayer::onEdit, this)
     );
     editButton->setID("edit-button"_spr);
 
@@ -113,10 +111,9 @@ bool WheelLayer::init()
     CCSprite* themeButtonSprite = CCSprite::createWithSpriteFrameName("GJ_paintBtn_001.png");
     themeButtonSprite->setScale(0.8f);
 
-    CCMenuItemSpriteExtra* themeButton = CCMenuItemSpriteExtra::create(
+    CCMenuItemSpriteExtra* themeButton = CCMenuItemExt::createSpriteExtra(
         themeButtonSprite,
-        this,
-        menu_selector(WheelLayer::onThemeEdit)
+        std::bind_front(&WheelLayer::onThemeEdit, this)
     );
     themeButton->setID("theme-button"_spr);
 
@@ -222,10 +219,12 @@ bool WheelLayer::init()
     const float listCreatorLabelScale = std::min(0.8f, 90.f / listCreatorLabel->getContentWidth());
     listCreatorLabel->setScale(listCreatorLabelScale);
 
-    CCMenuItemSpriteExtra* listCreatorButton = CCMenuItemSpriteExtra::create(
+    CCMenuItemSpriteExtra* listCreatorButton = CCMenuItemExt::createSpriteExtra(
         listCreatorLabel,
-        this,
-        menu_selector(WheelLayer::onProfileClicked)
+        [this](CCMenuItemSpriteExtra*)
+        {
+            ProfilePage::create(m_list->m_accountID, false)->show();
+        }
     );
     listCreatorButton->setID("creator-name"_spr);
 
@@ -262,11 +261,6 @@ void WheelLayer::updateTheme()
 void WheelLayer::onBack(CCObject*)
 {
     keyBackClicked();
-}
-
-void WheelLayer::onProfileClicked(CCObject*)
-{
-    ProfilePage::create(m_list->m_accountID, false)->show();
 }
 
 void WheelLayer::onEdit(CCObject*)

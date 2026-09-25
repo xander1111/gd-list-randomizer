@@ -16,8 +16,6 @@ public:
 private:
     explicit SliceSelectedPopup(PickerWheel::Slice* slice);
 
-    void onViewLevel(CCObject*);
-
     void onDisableLevel(CCObject* btn);
 
     PickerWheel::Slice* m_slice;

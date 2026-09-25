@@ -13,11 +13,14 @@ class $modify(RandomizerLevelListLayer, LevelListLayer) {
 		if (!LevelListLayer::init(list))
 			return false;
 
-		ButtonSprite* randomizerButtonSprite = ButtonSprite::create("Random", 0.3f);
-		CCMenuItemSpriteExtra* randomizerButton = CCMenuItemSpriteExtra::create(
-			randomizerButtonSprite,
-			this,
-			menu_selector(RandomizerLevelListLayer::onButton)
+		CCMenuItemSpriteExtra* randomizerButton = CCMenuItemExt::createSpriteExtra(
+			ButtonSprite::create("Random", 0.3f),
+			[this](CCMenuItemSpriteExtra*)
+			{
+			    CCScene* scene = WheelLayer::scene(m_levelList);
+                CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, scene);
+                CCDirector::sharedDirector()->pushScene(transitionFade);
+			}
 		);
 
         // The 'claim-button' at the end of the left-side-menu on a featured list isn't quite sized properly, so we need
@@ -31,11 +34,5 @@ class $modify(RandomizerLevelListLayer, LevelListLayer) {
 		menuLocation->updateLayout();
 
 		return true;
-	}
-
-	void onButton(CCObject*) {
-	    CCScene* scene = WheelLayer::scene(m_levelList);
-        CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, scene);
-        CCDirector::sharedDirector()->pushScene(transitionFade);
 	}
 };

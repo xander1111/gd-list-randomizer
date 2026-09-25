@@ -21,7 +21,10 @@ bool SliceSelectedPopup::init()
 
     setTitle(m_slice->level->m_levelName);
 
-    CCLabelBMFont* creatorLabel = CCLabelBMFont::create(("By " + m_slice->level->m_creatorName).c_str(), "bigFont.fnt");
+    CCLabelBMFont* creatorLabel = CCLabelBMFont::create(
+        ("By " + m_slice->level->m_creatorName).c_str(),
+        "bigFont.fnt"
+    );
     creatorLabel->setScale(0.4f);
     creatorLabel->setID("creator-label"_spr);
     m_mainLayer->addChildAtPosition(creatorLabel, Anchor::Top, {0.f, -40.f});
@@ -37,23 +40,39 @@ bool SliceSelectedPopup::init()
     buttonMenu->setAnchorPoint({0.5f, 0.f});
 
     // Disable button
-    ButtonSprite* disableButtonSprite = ButtonSprite::create("Disable Level", 0, false, "bigFont.fnt", "GJ_button_01.png", 30.f, 0.5f);
-
-    CCMenuItemSpriteExtra* disableLevelButton = CCMenuItemSpriteExtra::create(
-        disableButtonSprite,
-        this,
-        menu_selector(SliceSelectedPopup::onDisableLevel)
+    CCMenuItemSpriteExtra* disableLevelButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create(
+            "Disable Level",
+            0,
+            false,
+            "bigFont.fnt",
+            "GJ_button_01.png",
+            30.f,
+            0.5f
+        ),
+        std::bind_front(&SliceSelectedPopup::onDisableLevel, this)
     );
 
     buttonMenu->addChild(disableLevelButton);
 
     // View button
-    ButtonSprite* viewLevelButtonSprite = ButtonSprite::create("View", 0, false, "bigFont.fnt", "GJ_button_01.png", 30.f, 0.5f);
-
-    CCMenuItemSpriteExtra* viewLevelButton = CCMenuItemSpriteExtra::create(
-        viewLevelButtonSprite,
-        this,
-        menu_selector(SliceSelectedPopup::onViewLevel)
+    CCMenuItemSpriteExtra* viewLevelButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create(
+            "View",
+            0,
+            false,
+            "bigFont.fnt",
+            "GJ_button_01.png",
+            30.f,
+            0.5f
+        ),
+        [this](CCMenuItemSpriteExtra*)
+        {
+            // Load level page
+            CCScene* levelScene = LevelInfoLayer::scene(m_slice->level, false);
+            CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
+            CCDirector::sharedDirector()->pushScene(transitionFade);
+        }
     );
 
     buttonMenu->addChild(viewLevelButton);
@@ -68,14 +87,6 @@ bool SliceSelectedPopup::init()
 }
 
 SliceSelectedPopup::SliceSelectedPopup(PickerWheel::Slice* slice) : m_slice(slice) {}
-
-void SliceSelectedPopup::onViewLevel(CCObject*)
-{
-    // Load level page
-    CCScene* levelScene = LevelInfoLayer::scene(m_slice->level, false);
-    CCTransitionFade* transitionFade = CCTransitionFade::create(0.5, levelScene);
-    CCDirector::sharedDirector()->pushScene(transitionFade);
-}
 
 void SliceSelectedPopup::onDisableLevel(CCObject* btn)
 {

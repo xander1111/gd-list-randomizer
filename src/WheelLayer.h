@@ -36,8 +36,6 @@ private:
 
     void onBack(CCObject*);
 
-    void onProfileClicked(CCObject*);
-
     void onEdit(CCObject*);
 
     void onThemeEdit(CCObject*);
