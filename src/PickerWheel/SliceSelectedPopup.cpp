@@ -21,10 +21,8 @@ bool SliceSelectedPopup::init()
 
     setTitle(m_slice->level->m_levelName);
 
-    CCLabelBMFont* creatorLabel = CCLabelBMFont::create(
-        ("By " + m_slice->level->m_creatorName).c_str(),
-        "bigFont.fnt"
-    );
+    auto creatorText = std::string("By ") + m_slice->level->m_creatorName.c_str();
+    CCLabelBMFont* creatorLabel = CCLabelBMFont::create(creatorText.c_str(), "bigFont.fnt");
     creatorLabel->setScale(0.4f);
     creatorLabel->setID("creator-label"_spr);
     m_mainLayer->addChildAtPosition(creatorLabel, Anchor::Top, {0.f, -40.f});
