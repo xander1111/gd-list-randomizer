@@ -7,11 +7,17 @@ A mod that adds a wheel that can be spun to select a random level from an ingame
 
 To find the wheel, look for the 'Random' button in the sidebar when viewing a list.
 
+On the wheel page, click the 'Spin' button to select a random level from the list.
+You can also click the gear button and the pallette button in the top right of the screen to customize the wheel.
+
 
 ## Features
 
-- A wheel that you can spin to randomly pick a level from a list
-- More to come soon!
+- Adds a wheel that you can spin to randomly pick a level from a list
+- Levels on a wheel can be assigned weights, affecting their probability of being chosen
+- Levels can be disabled, removing them as an option on the wheel
+- Levels can automatically be enabled and disabled according to filters
+- Each wheel can be customized with different colors, as well as some additional wheel/theme options
 
 
 ## Reporting Bugs
