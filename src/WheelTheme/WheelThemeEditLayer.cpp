@@ -82,11 +82,163 @@ bool WheelThemeEditLayer::init()
         ->setAxisReverse(false)
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
-        ->setPadding({0.f, 40.f, 0.f, 60.f})
+        ->setPadding({0.f, 30.f, 0.f, 40.f})
     );
     m_colorsPage->setContentSize({m_menuWidth, m_menuHeight});
     m_colorsPage->setPosition({0.f, 0.f});
     m_colorsPage->setAnchorPoint({0.f, 0.f});
+
+
+    // Button color selector
+    CCMenu* buttonColorMenu = CCMenu::create();
+    buttonColorMenu->setID("button-color-menu"_spr);
+    buttonColorMenu->setLayout(
+        ColumnLayout::create()
+        ->setAxisReverse(true)
+        ->setAutoScale(false)
+        ->setAutoGrowAxis(0.f)
+    );
+
+    CCLabelBMFont* buttonColorMenuLabel = CCLabelBMFont::create(
+        "Button Color",
+        "bigFont.fnt"
+    );
+    buttonColorMenuLabel->setID("button-color-menu-label"_spr);
+    buttonColorMenuLabel->setScale(0.5f);
+    buttonColorMenu->addChild(buttonColorMenuLabel);
+
+    CCMenu* buttonColorButtonMenu = CCMenu::create();
+    buttonColorButtonMenu->setID("button-color-button-menu"_spr);
+    buttonColorButtonMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAxisAlignment(AxisAlignment::Even)
+    );
+    buttonColorButtonMenu->setContentWidth(m_menuWidth);
+
+    ButtonSprite* greenButtonSprite = ButtonSprite::create(
+        "Spin",
+        "bigFont.fnt",
+        "GJ_button_01.png"
+    );
+    greenButtonSprite->setScale(0.5f);
+    greenButtonSprite->setColor({.r = 125, .g = 125, .b = 125});
+    m_greenButton = CCMenuItemExt::createSpriteExtra(
+        greenButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            highlightButton(Utils::Green);
+            m_wheelTheme->buttonColor = Utils::Green;
+            onThemeChanged();
+        }
+    );
+    m_greenButton->setID("green-button"_spr);
+
+    ButtonSprite* cyanButtonSprite = ButtonSprite::create(
+        "Spin",
+        "bigFont.fnt",
+        "GJ_button_02.png"
+    );
+    cyanButtonSprite->setScale(0.5f);
+    cyanButtonSprite->setColor({.r = 125, .g = 125, .b = 125});
+    m_cyanButton = CCMenuItemExt::createSpriteExtra(
+        cyanButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            highlightButton(Utils::Cyan);
+            m_wheelTheme->buttonColor = Utils::Cyan;
+            onThemeChanged();
+        }
+    );
+    m_cyanButton->setID("cyan-button"_spr);
+
+    ButtonSprite* pinkButtonSprite = ButtonSprite::create(
+        "Spin",
+        "bigFont.fnt",
+        "GJ_button_03.png"
+    );
+    pinkButtonSprite->setScale(0.5f);
+    pinkButtonSprite->setColor({.r = 125, .g = 125, .b = 125});
+    m_pinkButton = CCMenuItemExt::createSpriteExtra(
+        pinkButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            highlightButton(Utils::Pink);
+            m_wheelTheme->buttonColor = Utils::Pink;
+            onThemeChanged();
+        }
+    );
+    m_pinkButton->setID("pink-button"_spr);
+
+    ButtonSprite* grayButtonSprite = ButtonSprite::create(
+        "Spin",
+        "bigFont.fnt",
+        "GJ_button_04.png"
+    );
+    grayButtonSprite->setScale(0.5f);
+    grayButtonSprite->setColor({.r = 125, .g = 125, .b = 125});
+    m_grayButton = CCMenuItemExt::createSpriteExtra(
+        grayButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            highlightButton(Utils::Gray);
+            m_wheelTheme->buttonColor = Utils::Gray;
+            onThemeChanged();
+        }
+    );
+    m_grayButton->setID("gray-button"_spr);
+
+    ButtonSprite* blueButtonSprite = ButtonSprite::create(
+        "Spin",
+        "bigFont.fnt",
+        "GJ_button_05.png"
+    );
+    blueButtonSprite->setScale(0.5f);
+    blueButtonSprite->setColor({.r = 125, .g = 125, .b = 125});
+    m_blueButton = CCMenuItemExt::createSpriteExtra(
+        blueButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            highlightButton(Utils::Blue);
+            m_wheelTheme->buttonColor = Utils::Blue;
+            onThemeChanged();
+        }
+    );
+    m_blueButton->setID("blue-button"_spr);
+
+    ButtonSprite* redButtonSprite = ButtonSprite::create(
+        "Spin",
+        "bigFont.fnt",
+        "GJ_button_06.png"
+    );
+    redButtonSprite->setScale(0.5f);
+    redButtonSprite->setColor({.r = 125, .g = 125, .b = 125});
+    m_redButton = CCMenuItemExt::createSpriteExtra(
+        redButtonSprite,
+        [this](CCMenuItemSpriteExtra*)
+        {
+            highlightButton(Utils::Red);
+            m_wheelTheme->buttonColor = Utils::Red;
+            onThemeChanged();
+        }
+    );
+    m_redButton->setID("red-button"_spr);
+
+    buttonColorButtonMenu->addChild(m_greenButton);
+    buttonColorButtonMenu->addChild(m_cyanButton);
+    buttonColorButtonMenu->addChild(m_pinkButton);
+    buttonColorButtonMenu->addChild(m_grayButton);
+    buttonColorButtonMenu->addChild(m_blueButton);
+    buttonColorButtonMenu->addChild(m_redButton);
+
+    highlightButton(m_wheelTheme->buttonColor);
+
+    buttonColorButtonMenu->updateLayout();
+    buttonColorMenu->addChild(buttonColorButtonMenu);
+
+    buttonColorMenu->updateLayout();
+    m_colorsPage->addChild(buttonColorMenu);
+
 
     CCMenu* sliceColorsMenu = CCMenu::create();
     sliceColorsMenu->setID("slice-colors-menu"_spr);
@@ -238,8 +390,6 @@ bool WheelThemeEditLayer::init()
 
     otherColorMenu->addChild(levelNameColorPicker);
 
-    // TODO button color
-
     // Background color
     WheelThemeColorPicker* bgColorPicker = WheelThemeColorPicker::create(
         "Background",
@@ -253,7 +403,6 @@ bool WheelThemeEditLayer::init()
     bgColorPicker->setID("bg-color-picker"_spr);
 
     otherColorMenu->addChild(bgColorPicker);
-
 
     otherColorMenu->updateLayout();
     m_colorsPage->addChild(otherColorMenu);
@@ -270,7 +419,7 @@ bool WheelThemeEditLayer::init()
         ->setAxisReverse(true)
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
-        ->setPadding({0.f, 40.f, 0.f, 60.f})
+        ->setPadding({0.f, 30.f, 0.f, 40.f})
     );
     m_settingsPage->setContentSize({m_menuWidth, m_menuHeight});
     m_settingsPage->setPosition({0.f, 0.f});
@@ -402,6 +551,47 @@ void WheelThemeEditLayer::onResetThemeButton(CCObject*)
             }
         }
     );
+}
+
+void WheelThemeEditLayer::highlightButton(const unsigned int color) const
+{
+    m_wheelTheme->buttonColor = color;
+
+    if (m_greenButton != nullptr && m_greenButton->getChildByType<ButtonSprite>() != nullptr)
+        m_greenButton->getChildByType<ButtonSprite>()->setColor(
+            color == Utils::Green ? ccColor3B { .r = 255, .g = 255, .b = 255 }
+            : ccColor3B { .r = 125, .g = 125, .b = 125 }
+        );
+
+    if (m_cyanButton != nullptr && m_cyanButton->getChildByType<ButtonSprite>() != nullptr)
+        m_cyanButton->getChildByType<ButtonSprite>()->setColor(
+            color == Utils::Cyan ? ccColor3B { .r = 255, .g = 255, .b = 255 }
+            : ccColor3B { .r = 125, .g = 125, .b = 125 }
+        );
+
+    if (m_pinkButton != nullptr && m_pinkButton->getChildByType<ButtonSprite>() != nullptr)
+        m_pinkButton->getChildByType<ButtonSprite>()->setColor(
+            color == Utils::Pink ? ccColor3B { .r = 255, .g = 255, .b = 255 }
+            : ccColor3B { .r = 125, .g = 125, .b = 125 }
+        );
+
+    if (m_grayButton != nullptr && m_grayButton->getChildByType<ButtonSprite>() != nullptr)
+        m_grayButton->getChildByType<ButtonSprite>()->setColor(
+            color == Utils::Gray ? ccColor3B { .r = 255, .g = 255, .b = 255 }
+            : ccColor3B { .r = 125, .g = 125, .b = 125 }
+        );
+
+    if (m_blueButton != nullptr && m_blueButton->getChildByType<ButtonSprite>() != nullptr)
+        m_blueButton->getChildByType<ButtonSprite>()->setColor(
+            color == Utils::Blue ? ccColor3B { .r = 255, .g = 255, .b = 255 }
+            : ccColor3B { .r = 125, .g = 125, .b = 125 }
+        );
+
+    if (m_redButton != nullptr && m_redButton->getChildByType<ButtonSprite>() != nullptr)
+        m_redButton->getChildByType<ButtonSprite>()->setColor(
+            color == Utils::Red ? ccColor3B { .r = 255, .g = 255, .b = 255 }
+            : ccColor3B { .r = 125, .g = 125, .b = 125 }
+        );
 }
 
 void WheelThemeEditLayer::onClose(CCObject* cc_object)

@@ -23,6 +23,15 @@ public:
 
     static gd::string getListId(GJLevelList* list);
 
+    enum ButtonColors : unsigned int {
+        Green = 0,
+        Cyan = 1,
+        Pink = 2,
+        Gray = 3,
+        Blue = 4,
+        Red = 5,
+    };
+
 
     inline static std::string buttonTextures[] = {
         "GJ_button_01.png",

@@ -2,6 +2,7 @@
 
 #include <Geode/Geode.hpp>
 
+#include "../Utils.h"
 #include "WheelThemeColorPicker.h"
 #include "WheelTheme.h"
 
@@ -21,6 +22,9 @@ private:
 
     WheelTheme* m_wheelTheme;
 
+    CCMenuItemSpriteExtra* m_nextButton = nullptr;
+    CCMenuItemSpriteExtra* m_prevButton = nullptr;
+
     CCMenu* m_colorsPage = nullptr;
     CCMenu* m_sliceColorPickersMenu = nullptr;
     WheelThemeColorPicker* m_sliceColor1Picker = nullptr;
@@ -30,8 +34,12 @@ private:
 
     CCMenu* m_settingsPage = nullptr;
 
-    CCMenuItemSpriteExtra* m_nextButton = nullptr;
-    CCMenuItemSpriteExtra* m_prevButton = nullptr;
+    CCMenuItemSpriteExtra* m_greenButton = nullptr;
+    CCMenuItemSpriteExtra* m_cyanButton = nullptr;
+    CCMenuItemSpriteExtra* m_pinkButton = nullptr;
+    CCMenuItemSpriteExtra* m_grayButton = nullptr;
+    CCMenuItemSpriteExtra* m_blueButton = nullptr;
+    CCMenuItemSpriteExtra* m_redButton = nullptr;
 
     explicit WheelThemeEditLayer(WheelTheme* wheelTheme);
 
@@ -40,6 +48,8 @@ private:
     static void onThemeChanged();
 
     void onResetThemeButton(CCObject*);
+
+    void highlightButton(unsigned int color) const;
 
 protected:
     void onClose(CCObject*) override;
