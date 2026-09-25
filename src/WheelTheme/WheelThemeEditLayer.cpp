@@ -438,7 +438,6 @@ bool WheelThemeEditLayer::init()
     TogglerWithLabel* cornerDecoToggler = TogglerWithLabel::create(
         [this](const TogglerWithLabel* toggler)
         {
-            log::debug(":D - corner deco toggler");
             m_wheelTheme->showCornerDecorations = toggler->m_toggled;
             onThemeChanged();
         },
@@ -451,7 +450,6 @@ bool WheelThemeEditLayer::init()
     TogglerWithLabel* levelNameToggler = TogglerWithLabel::create(
         [this](const TogglerWithLabel* toggler)
         {
-            log::debug(":D - level name toggler");
             m_wheelTheme->showLevelNamesOnWheel = toggler->m_toggled;
             onThemeChanged();
         },
