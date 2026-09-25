@@ -1,7 +1,7 @@
-#include "../PickerWheel/PickerWheel.h"
+#include "PickerWheel.h"
 
 #include "EaseWheelSpin.h"
-#include "../PickerWheel/SliceSelectedPopup.h"
+#include "SliceSelectedPopup.h"
 #include "../Utils.h"
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>

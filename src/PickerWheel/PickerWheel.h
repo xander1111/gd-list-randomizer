@@ -11,6 +11,10 @@ public:
     {
         unsigned int weight;
         bool enabled;
+
+        // Needed for saving a map containing a SliceSettings object due to std::pair declaring operator== even when the
+        // inner types don't support it, making the JSON saving logic think operator== is available even when it isn't
+        bool operator==(const SliceSettings&) const = default;
     };
 
     struct Slice
