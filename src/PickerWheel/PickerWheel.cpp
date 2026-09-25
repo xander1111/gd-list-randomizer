@@ -2,12 +2,12 @@
 
 #include "EaseWheelSpin.h"
 #include "SliceSelectedPopup.h"
-#include "Utils.h"
+#include "../Utils.h"
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
-#include "WheelLayer.h"
-#include "WheelTheme/WheelTheme.h"
+#include "../WheelLayer.h"
+#include "../WheelTheme/WheelTheme.h"
 
 PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
 {
@@ -350,16 +350,14 @@ void PickerWheel::addEndSeparator()
 
 void PickerWheel::generateSpinButton()
 {
-    ButtonSprite* spinButtonSprite = ButtonSprite::create(
-        "Spin",
-        "BigFont.fnt",
-        Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
-        0.5f
-    );
-    m_spinButton = CCMenuItemSpriteExtra::create(
-        spinButtonSprite,
-        this,
-        menu_selector(PickerWheel::onSpinWheel)
+    m_spinButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create(
+            "Spin",
+            "BigFont.fnt",
+            Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
+            0.5f
+        ),
+        std::bind_front(&PickerWheel::onSpinWheel, this)
     );
 
     m_spinButton->setZOrder(1);
@@ -383,8 +381,7 @@ CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const cha
     label->setID("slice-label"_spr);
     label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 
-    const float labelScale = std::min(MaxFontScale, m_radius * 0.7f / label->getContentSize().width);
-    label->setScale(labelScale);
+    label->limitLabelWidth(m_radius * 0.7f, MaxFontScale, 0.1f);
     label->setRotation(0.f);
     label->setPosition({m_radius * 0.95f, 0});
     label->setAnchorPoint({1.f, 0.45f});
@@ -532,18 +529,15 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
             // Highest Y value is not directly above the other end of the arc, and the 'height' I want is actually the
             // base of the isosceles triangle that fills the arc
             const float sliceHeight = sqrt(powf(maxYPoint->y, 2.f) + powf(m_radius - maxYPoint->x, 2.f));
-
-            const float maxWidth = sliceHeight / (sliceHeight / m_radius + label->getContentHeight() / label->getContentWidth());
-            const float maxScale = maxWidth / label->getContentWidth();
+            float maxWidth = sliceHeight / (sliceHeight / m_radius + label->getContentHeight() / label->getContentWidth());
 
             // Further limit the width of the text so it doesn't run into the 'spin' button
-            float labelScale = std::min(MaxFontScale, m_radius * 0.7f / label->getContentSize().width);
-            labelScale = std::min(labelScale, maxScale);
-            label->setScale(labelScale);
+            maxWidth = std::min(maxWidth, m_radius * 0.7f);
+            label->limitLabelWidth(maxWidth, MaxFontScale, 0.01f);
 
             label->setRotation(angleDeg / -2.f);
             label->setPosition({m_radius * 0.95f * cos(angleRad / 2.f), m_radius * 0.95f * sin(angleRad / 2.f)});
-            label->setAnchorPoint({1.f, 0.4f});
+            label->setAnchorPoint({1.f, 0.45f});
             label->setZOrder(1);
 
             sliceNode->addChild(label);

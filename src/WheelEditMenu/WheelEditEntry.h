@@ -2,7 +2,7 @@
 
 #include <Geode/Geode.hpp>
 
-#include "../PickerWheel.h"
+#include "../PickerWheel/PickerWheel.h"
 
 using namespace geode::prelude;
 

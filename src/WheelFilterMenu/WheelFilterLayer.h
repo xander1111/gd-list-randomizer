@@ -2,7 +2,7 @@
 
 #include <Geode/Geode.hpp>
 
-#include "WheelEditMenu/WheelEditEntry.h"
+#include "../WheelEditMenu/WheelEditEntry.h"
 
 using namespace geode::prelude;
 

@@ -1,6 +1,6 @@
 #include "WheelThemeEditLayer.h"
 
-#include "../TogglerWithLabel.h"
+#include "../UICommon/TogglerWithLabel.h"
 #include "../Utils.h"
 #include "../WheelLayer.h"
 
@@ -24,11 +24,9 @@ bool WheelThemeEditLayer::init()
     setTitle("Customize Theme");
 
     // Reset to default theme button
-    ButtonSprite* resetThemeButtonSprite = ButtonSprite::create("Reset Theme", 0.5f);
-    CCMenuItemSpriteExtra* resetThemeButton = CCMenuItemSpriteExtra::create(
-        resetThemeButtonSprite,
-        this,
-        menu_selector(WheelThemeEditLayer::onResetThemeButton)
+    CCMenuItemSpriteExtra* resetThemeButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create("Reset Theme", 0.5f),
+        std::bind_front(&WheelThemeEditLayer::onResetThemeButton, this)
     );
     resetThemeButton->setID("apply-button"_spr);
     resetThemeButton->setPosition({m_menuWidth / 2.f, 30});
@@ -440,7 +438,6 @@ bool WheelThemeEditLayer::init()
     TogglerWithLabel* cornerDecoToggler = TogglerWithLabel::create(
         [this](const TogglerWithLabel* toggler)
         {
-            log::debug(":D - corner deco toggler");
             m_wheelTheme->showCornerDecorations = toggler->m_toggled;
             onThemeChanged();
         },
@@ -453,7 +450,6 @@ bool WheelThemeEditLayer::init()
     TogglerWithLabel* levelNameToggler = TogglerWithLabel::create(
         [this](const TogglerWithLabel* toggler)
         {
-            log::debug(":D - level name toggler");
             m_wheelTheme->showLevelNamesOnWheel = toggler->m_toggled;
             onThemeChanged();
         },

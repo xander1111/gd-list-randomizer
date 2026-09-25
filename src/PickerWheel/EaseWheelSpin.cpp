@@ -1,4 +1,4 @@
-#include "EaseWheelSpin.h"
+#include "../PickerWheel/EaseWheelSpin.h"
 
 EaseWheelSpin* EaseWheelSpin::create(CCActionInterval* pAction)
 {

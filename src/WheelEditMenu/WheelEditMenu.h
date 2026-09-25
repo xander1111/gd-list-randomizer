@@ -4,7 +4,7 @@
 #include <Geode/Geode.hpp>
 
 #include "WheelEditEntry.h"
-#include "../PickerWheel.h"
+#include "../PickerWheel/PickerWheel.h"
 
 using namespace geode::prelude;
 
@@ -26,8 +26,6 @@ private:
 
     void updateSearch(std::string const& input);
 
-    void onOpenFilterMenu(CCObject*);
-
     std::vector<PickerWheel::Slice>* m_slices;
     float m_width;
     float m_height;
@@ -35,4 +33,5 @@ private:
     alpha::ui::AdvancedScrollLayer* m_levelListLayer = nullptr;
     CCArrayExt<WheelEditEntry*> m_entries = {};
     CCMenu* m_content = nullptr;
+    CCMenuItemSpriteExtra* m_filterButton = nullptr;
 };

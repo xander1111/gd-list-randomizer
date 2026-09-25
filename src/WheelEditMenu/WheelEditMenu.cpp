@@ -2,7 +2,7 @@
 
 #include "WheelEditEntry.h"
 #include "../Utils.h"
-#include "../WheelFilterLayer.h"
+#include "../WheelFilterMenu/WheelFilterLayer.h"
 #include "../WheelTheme/WheelTheme.h"
 #include "alphalaneous.alphas-ui-pack/include/nodes/scroll/Scroll.hpp"
 
@@ -62,13 +62,15 @@ bool WheelEditMenu::init()
     );
 
     // Filter menu button
-    CCMenuItemSpriteExtra* filterMenuButton = CCMenuItemSpriteExtra::create(
+    m_filterButton = CCMenuItemExt::createSpriteExtra(
         CCSprite::createWithSpriteFrameName("GJ_filterIcon_001.png"),
-        this,
-        menu_selector(WheelEditMenu::onOpenFilterMenu)
+        [this](CCMenuItemSpriteExtra*)
+        {
+            WheelFilterLayer::create(&m_entries)->show();
+        }
     );
 
-    buttonMenu->addChild(filterMenuButton);
+    buttonMenu->addChild(m_filterButton);
 
     buttonMenu->updateLayout();
 
@@ -130,6 +132,8 @@ void WheelEditMenu::onWheelSpin() const
 {
     for (const auto entry : m_entries)
         entry->setEnabled(false);
+
+    m_filterButton->setEnabled(false);
 }
 
 void WheelEditMenu::onWheelSpinEnd() const
@@ -206,9 +210,4 @@ void WheelEditMenu::updateSearch(std::string const& input)
         });
     else
         m_levelListLayer->setInnerContentSize({0.f, 0.f});
-}
-
-void WheelEditMenu::onOpenFilterMenu(CCObject*)
-{
-    WheelFilterLayer::create(&m_entries)->show();
 }

@@ -1,8 +1,8 @@
-#include "WheelFilterLayer.h"
+#include "../WheelFilterMenu/WheelFilterLayer.h"
 
-#include "DimmingButton.h"
-#include "TogglerWithLabel.h"
-#include "WheelLayer.h"
+#include "../UICommon/DimmingButton.h"
+#include "../UICommon/TogglerWithLabel.h"
+#include "../WheelLayer.h"
 
 WheelFilterLayer* WheelFilterLayer::create(CCArrayExt<WheelEditEntry*>* entries)
 {
@@ -354,11 +354,9 @@ bool WheelFilterLayer::init()
 
 
     // Apply button
-    ButtonSprite* applyButtonSprite = ButtonSprite::create("Apply", 0.5f);
-    CCMenuItemSpriteExtra* applyButton = CCMenuItemSpriteExtra::create(
-        applyButtonSprite,
-        this,
-        menu_selector(WheelFilterLayer::onApplyFilters)
+    CCMenuItemSpriteExtra* applyButton = CCMenuItemExt::createSpriteExtra(
+        ButtonSprite::create("Apply", 0.5f),
+        std::bind_front(&WheelFilterLayer::onApplyFilters, this)
     );
     applyButton->setID("apply-button"_spr);
     applyButton->setPosition({m_menuWidth / 2.f, 30});
