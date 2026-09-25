@@ -62,7 +62,7 @@ bool WheelEditMenu::init()
     );
 
     // Filter menu button
-    CCMenuItemSpriteExtra* filterMenuButton = CCMenuItemExt::createSpriteExtra(
+    m_filterButton = CCMenuItemExt::createSpriteExtra(
         CCSprite::createWithSpriteFrameName("GJ_filterIcon_001.png"),
         [this](CCMenuItemSpriteExtra*)
         {
@@ -70,7 +70,7 @@ bool WheelEditMenu::init()
         }
     );
 
-    buttonMenu->addChild(filterMenuButton);
+    buttonMenu->addChild(m_filterButton);
 
     buttonMenu->updateLayout();
 
@@ -132,6 +132,8 @@ void WheelEditMenu::onWheelSpin() const
 {
     for (const auto entry : m_entries)
         entry->setEnabled(false);
+
+    m_filterButton->setEnabled(false);
 }
 
 void WheelEditMenu::onWheelSpinEnd() const

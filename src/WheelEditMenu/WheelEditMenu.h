@@ -33,4 +33,5 @@ private:
     alpha::ui::AdvancedScrollLayer* m_levelListLayer = nullptr;
     CCArrayExt<WheelEditEntry*> m_entries = {};
     CCMenu* m_content = nullptr;
+    CCMenuItemSpriteExtra* m_filterButton = nullptr;
 };
