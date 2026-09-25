@@ -37,7 +37,7 @@ bool SliceSelectedPopup::init()
     buttonMenu->setAnchorPoint({0.5f, 0.f});
 
     // Disable button
-    ButtonSprite* disableButtonSprite = ButtonSprite::create("Disable Level", 0, false, "bigFont.fnt", "GJ_button_01-uhd.png", 30.f, 0.5f);
+    ButtonSprite* disableButtonSprite = ButtonSprite::create("Disable Level", 0, false, "bigFont.fnt", "GJ_button_01.png", 30.f, 0.5f);
 
     CCMenuItemSpriteExtra* disableLevelButton = CCMenuItemSpriteExtra::create(
         disableButtonSprite,
@@ -48,7 +48,7 @@ bool SliceSelectedPopup::init()
     buttonMenu->addChild(disableLevelButton);
 
     // View button
-    ButtonSprite* viewLevelButtonSprite = ButtonSprite::create("View", 0, false, "bigFont.fnt", "GJ_button_01-uhd.png", 30.f, 0.5f);
+    ButtonSprite* viewLevelButtonSprite = ButtonSprite::create("View", 0, false, "bigFont.fnt", "GJ_button_01.png", 30.f, 0.5f);
 
     CCMenuItemSpriteExtra* viewLevelButton = CCMenuItemSpriteExtra::create(
         viewLevelButtonSprite,
