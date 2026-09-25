@@ -73,7 +73,7 @@ bool WheelEditEntry::init()
     // Level name
     CCLabelBMFont* levelNameLabel = CCLabelBMFont::create(m_slice->level->m_levelName.c_str(), "bigFont.fnt");
     levelNameLabel->setID("level-name-label"_spr);
-    levelNameLabel->setScale(std::min(0.5f, 0.75f * m_width / levelNameLabel->getContentWidth()));
+    levelNameLabel->limitLabelWidth(0.75f * m_width, 0.5f, 0.1f);
 
     leftMenu->addChild(levelNameLabel);
 

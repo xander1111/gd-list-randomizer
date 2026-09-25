@@ -208,16 +208,14 @@ bool WheelLayer::init()
     CCLabelBMFont* listNameLabel = CCLabelBMFont::create(m_list->m_listName.c_str(), "bigFont.fnt");
     listNameLabel->setID("title-label"_spr);
 
-    const float listNameLabelScale = std::min(0.8f, 240.f / listNameLabel->getContentWidth());
-    listNameLabel->setScale(listNameLabelScale);
+    listNameLabel->limitLabelWidth(240.f, 0.8f, 0.1f);
 
     titleMenu->addChild(listNameLabel);
 
     // List creator
     CCLabelBMFont* listCreatorLabel = CCLabelBMFont::create(m_list->m_creatorName.c_str(), "goldFont.fnt");
 
-    const float listCreatorLabelScale = std::min(0.8f, 90.f / listCreatorLabel->getContentWidth());
-    listCreatorLabel->setScale(listCreatorLabelScale);
+    listCreatorLabel->limitLabelWidth(90.f, 0.8f, 0.1f);
 
     CCMenuItemSpriteExtra* listCreatorButton = CCMenuItemExt::createSpriteExtra(
         listCreatorLabel,
