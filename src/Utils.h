@@ -21,9 +21,24 @@ public:
      */
     static gd::string getDifficultyIconFrame(int difficulty);
 
-    // Default GD colors
-    inline static auto DefaultListColorA = new ccColor4F(161.f / 255.f, 88.f / 255.f, 44.f / 255.f, 1.f);
-    inline static auto DefaultListColorB = new ccColor4F(194.f / 255.f, 114.f / 255.f, 62.f / 255.f, 1.f);
-    inline static auto DefaultOutlineColorA = new ccColor4F(0.f, 0.f, 0.f, 1.f);
-    inline static auto DefaultOutlineColorB = new ccColor4F(1.f, 1.f, 1.f, 1.f);
+    static gd::string getListId(GJLevelList* list);
+
+    enum ButtonColors : unsigned int {
+        Green = 0,
+        Cyan = 1,
+        Pink = 2,
+        Gray = 3,
+        Blue = 4,
+        Red = 5,
+    };
+
+
+    inline static std::string buttonTextures[] = {
+        "GJ_button_01.png",
+        "GJ_button_02.png",
+        "GJ_button_03.png",
+        "GJ_button_04.png",
+        "GJ_button_05.png",
+        "GJ_button_06.png",
+    };
 };

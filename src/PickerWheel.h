@@ -10,7 +10,6 @@ public:
     struct SliceSettings
     {
         unsigned int weight;
-        ccColor4F* color;  // Specifies a color to render the slice using. Set to nullptr to use theme colors
         bool enabled;
     };
 
@@ -34,7 +33,7 @@ public:
 
     std::vector<Slice>* getSlices() { return &m_slices; }
 
-    void redrawWheel();
+    void redrawWheel(bool fullRedraw = false);
 
     void addOnWheelSpin(const std::function<void()>& function);
 
@@ -57,7 +56,6 @@ private:
     // End separator node, may be nullptr if the end separator was not needed when the wheel was last drawn
     CCDrawNode* m_endSeparator = nullptr;
 
-    // Mainly used for checking
     Slice* m_firstEnabledSlice = nullptr;
     Slice* m_lastEnabledSlice = nullptr;
 
@@ -85,6 +83,9 @@ private:
     std::vector<std::function<void()>> m_onWheelSpinFuncs;
 
     std::vector<std::function<void()>> m_onWheelSpinEndFuncs;
+
+    // Reference needed for removing and replacing when drawing the wheel
+    CCMenuItemSpriteExtra* m_spinButton = nullptr;
 
     // Number of segments to use for drawing circles
     static constexpr unsigned int CircleSegmentCount = 65;
@@ -114,6 +115,8 @@ private:
 
     void addEndSeparator();
 
+    void generateSpinButton();
+
     CCNode* generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const;
 
     /**
@@ -126,11 +129,13 @@ private:
      */
     [[nodiscard]] CCMenu* generateWheelSliceNodes();
 
+    void generateOutline();
+
     void generateTicker();
 };
 
 
-// Wheel customization saving
+// Wheel configuration saving
 template<>
 struct matjson::Serialize<PickerWheel::SliceSettings>
 {

@@ -6,6 +6,9 @@
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
+#include "WheelLayer.h"
+#include "WheelTheme/WheelTheme.h"
+
 PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
 {
     auto ret = new PickerWheel(list, radius);
@@ -25,20 +28,7 @@ bool PickerWheel::init()
     setLayout(AnchorLayout::create());
 
     // Spin button
-    ButtonSprite* spinButtonSprite = ButtonSprite::create("Spin", 0.5f);
-    CCMenuItemSpriteExtra* spinButton = CCMenuItemSpriteExtra::create(
-        spinButtonSprite,
-        this,
-        menu_selector(PickerWheel::onSpinWheel)
-    );
-
-    CCMenu* const spinButtonMenu = CCMenu::create();
-    spinButtonMenu->setID("randomizer-menu"_spr);
-    spinButtonMenu->addChild(spinButton);
-    spinButtonMenu->setPosition({0, 0});
-    spinButtonMenu->setZOrder(1);
-
-    addChildAtPosition(spinButtonMenu, Anchor::Center);
+    generateSpinButton();
 
     // Wheel outer menu, used to rotate the wheel without messing up any internal angle calculations
     m_wheelOuterMenu = CCMenu::create();
@@ -70,21 +60,8 @@ bool PickerWheel::init()
 
     m_wheelOuterMenu->addChild(m_wheelMenu);
 
-    // Wheel outline
-    CCDrawNode* innerOutline = CCDrawNode::create();
-    innerOutline->setID("wheel-inner-outline"_spr);
-    innerOutline->drawCircle({0, 0}, m_radius, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.75f, *Utils::DefaultOutlineColorA, CircleSegmentCount);
-    innerOutline->setZOrder(1);
-
-    m_wheelOuterMenu->addChild(innerOutline);
-
-
-    CCDrawNode* outerOutline = CCDrawNode::create();
-    outerOutline->setID("wheel-outer-outline"_spr);
-    outerOutline->drawCircle({0, 0}, m_radius + 1.5f, {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f}, 0.5f, *Utils::DefaultOutlineColorB, CircleSegmentCount);
-    outerOutline->setZOrder(2);
-
-    m_wheelOuterMenu->addChild(outerOutline);
+    // Outline
+    generateOutline();
 
     // Ticker
     generateTicker();
@@ -122,7 +99,7 @@ void PickerWheel::update(float dt)
     updateCurrentlyPointedAtSlice();
 }
 
-void PickerWheel::redrawWheel()
+void PickerWheel::redrawWheel(const bool fullRedraw)
 {
     if (m_wheelMenu == nullptr || m_slicesNode == nullptr)
         return;
@@ -142,6 +119,14 @@ void PickerWheel::redrawWheel()
     addEndSeparator();
 
     updateCurrentlyPointedAtSlice();
+
+    redrawTicker();
+
+    if (fullRedraw) {
+        removeChild(m_spinButton, true);
+
+        generateSpinButton();
+    }
 
     // Rotate wheel if there is only 1 label on it so that one label is upright
     if (m_enabledSliceCount < 2)
@@ -167,11 +152,10 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
 
     CCDictionaryExt<int, GJGameLevel*> levels = list->m_levelsDict->asExt<int, GJGameLevel*>();
 
-    std::map<std::string, SliceSettings> settings;
-    if (m_list->m_listType == GJLevelType::Editor)
-        settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>("editor-" + std::to_string(EditorIDs::getID(m_list)), {});
-    else
-        settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>(m_list->m_listName, {});
+    auto settings = Mod::get()->getSavedValue<std::map<std::string, SliceSettings>>(
+        Utils::getListId(m_list),
+        {}
+    );
 
     for (auto [key, level] : levels) {
         const int levelListIndex = list->orderForLevel(level->m_levelID);
@@ -182,7 +166,6 @@ PickerWheel::PickerWheel(GJLevelList* list, const float radius)
         } else {
             sliceSettings = SliceSettings {
                 .weight = 1u,
-                .color = nullptr,  // nullptr means use automatic theme colors
                 .enabled = true
             };
         }
@@ -244,11 +227,11 @@ void PickerWheel::onSpinWheel(CCObject*)
     // to account for whatever rotation the wheel had before spinning
     const float rotateAngle = -m_wheelMenu->getRotation()
         + random::generate(slicePicked->endAngleDeg, slicePicked->startAngleDeg)
-        - 7200.f;
+        - 1800.f * std::ceil(WheelTheme::currentTheme->spinDuration / 2.f);
 
     log::debug("Picked random slice: level name: {}, slice angle range: ({}, {}), random rotation angle: {}", levelPicked->m_levelName, slicePicked->startAngleDeg, slicePicked->endAngleDeg, rotateAngle);
 
-    CCRotateBy* rotate = CCRotateBy::create(7.f, rotateAngle);
+    CCRotateBy* rotate = CCRotateBy::create(WheelTheme::currentTheme->spinDuration, rotateAngle);
     EaseWheelSpin* rotateEase = EaseWheelSpin::create(rotate);
 
     const auto onSpinEnd = CallFuncExt::create([slicePicked, this]
@@ -324,10 +307,7 @@ void PickerWheel::saveSettings() const
     for (auto slice : m_slices)
         allSettings[std::to_string(slice.level->m_levelID)] = slice.settings;
 
-    if (m_list->m_listType == GJLevelType::Editor)
-        Mod::get()->setSavedValue("editor-" + std::to_string(EditorIDs::getID(m_list)), allSettings);
-    else
-        Mod::get()->setSavedValue(std::to_string(m_list->m_listID), allSettings);
+    Mod::get()->setSavedValue(Utils::getListId(m_list), allSettings);
 }
 
 void PickerWheel::redrawTicker()
@@ -362,10 +342,30 @@ void PickerWheel::addEndSeparator()
             m_endSeparator = CCDrawNode::create();
             m_endSeparator->setID("end-separator"_spr);
 
-            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, *Utils::DefaultListColorB);
+            m_endSeparator->drawSegment({0, 0}, {m_radius, 0}, lineThickness, WheelTheme::currentTheme->sliceColor2);
             m_wheelMenu->addChild(m_endSeparator);
         }
     }
+}
+
+void PickerWheel::generateSpinButton()
+{
+    ButtonSprite* spinButtonSprite = ButtonSprite::create(
+        "Spin",
+        "BigFont.fnt",
+        Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
+        0.5f
+    );
+    m_spinButton = CCMenuItemSpriteExtra::create(
+        spinButtonSprite,
+        this,
+        menu_selector(PickerWheel::onSpinWheel)
+    );
+
+    m_spinButton->setZOrder(1);
+    m_spinButton->setID("spin-button"_spr);
+
+    addChildAtPosition(m_spinButton, Anchor::Center);
 }
 
 CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const char* levelName) const
@@ -379,8 +379,9 @@ CCNode* PickerWheel::generatePickerWheelCircle(const ccColor4F* color, const cha
     circle->setZOrder(-1);
     sliceNode->addChild(circle);
 
-    CCLabelBMFont* label = CCLabelBMFont::create(levelName, "goldFont.fnt");
+    CCLabelBMFont* label = CCLabelBMFont::create(WheelTheme::currentTheme->showLevelNamesOnWheel ? levelName : "?", "bigFont.fnt");
     label->setID("slice-label"_spr);
+    label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 
     const float labelScale = std::min(MaxFontScale, m_radius * 0.7f / label->getContentSize().width);
     label->setScale(labelScale);
@@ -422,7 +423,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we have no levels, draw a placeholder wheel
         log::debug("No slices, generating placeholder wheel");
 
-        wheelSlices->addChild(generatePickerWheelCircle(Utils::DefaultListColorA, "No levels"));
+        wheelSlices->addChild(generatePickerWheelCircle(&WheelTheme::currentTheme->sliceColor1, "No levels"));
 
         return wheelSlices;
     }
@@ -430,9 +431,7 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         // When we only have one level in the list, we can just draw a circle
         log::debug("1 slice, generating circle wheel");
 
-        ccColor4F* renderColor = m_firstEnabledSlice->settings.color != nullptr
-            ? m_firstEnabledSlice->settings.color
-            : Utils::DefaultListColorA;
+        ccColor4F* renderColor = &WheelTheme::currentTheme->sliceColor1;
 
         wheelSlices->addChild(generatePickerWheelCircle(renderColor, m_firstEnabledSlice->level->m_levelName.c_str()));
 
@@ -476,11 +475,24 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
         }
         points.emplace_back(0.f, 0.f);
 
-        ccColor4F* color = slice.settings.color != nullptr
-            ? slice.settings.color
-            : processedSlicesCount % 2 == 0
-                ? Utils::DefaultListColorA
-                : Utils::DefaultListColorB;
+        unsigned int sliceColorIndex = processedSlicesCount % WheelTheme::currentTheme->sliceColorCount;
+
+        ccColor4F* color;
+
+        switch (sliceColorIndex) {
+        case 0:
+            color = &WheelTheme::currentTheme->sliceColor1;
+            break;
+        case 1:
+            color = &WheelTheme::currentTheme->sliceColor2;
+            break;
+        case 2:
+            color = &WheelTheme::currentTheme->sliceColor3;
+            break;
+        default:  // case 3
+            color = &WheelTheme::currentTheme->sliceColor4;
+            break;
+        }
 
         // Important distinction from `slice.settings.color`: `slice.color` stores the color that *was* used to render
         // the slice, whereas `slice.settings.color` is a user set value that determines what color *should* be used to
@@ -501,8 +513,12 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
 
         // ~1 degree is where it's nearly impossible to even tell that there's text. Larger angles might still be unreadable, but you'd be able to tell the text is missing
         if (angleDeg > 1.f) {
-            CCLabelBMFont* label = CCLabelBMFont::create(slice.level->m_levelName.c_str(), "goldFont.fnt");
+            CCLabelBMFont* label = CCLabelBMFont::create(
+                WheelTheme::currentTheme->showLevelNamesOnWheel ? slice.level->m_levelName.c_str() : "?",
+                "bigFont.fnt"
+            );
             label->setID("slice-label"_spr);
+            label->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->textColor)));
 
             // Find maximum possible scale to fit the text into the slice
             // Calculation explanations/visualizations here: https://www.desmos.com/calculator/qkrhzaq1fo
@@ -553,6 +569,37 @@ CCMenu* PickerWheel::generateWheelSliceNodes()
     return wheelSlices;
 }
 
+void PickerWheel::generateOutline()
+{
+    CCDrawNode* innerOutline = CCDrawNode::create();
+    innerOutline->setID("wheel-inner-outline"_spr);
+    innerOutline->drawCircle(
+        {0, 0}, m_radius,
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f},
+        0.75f,
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f},
+        CircleSegmentCount
+    );
+    innerOutline->setZOrder(1);
+
+    m_wheelOuterMenu->addChild(innerOutline);
+
+
+    CCDrawNode* outerOutline = CCDrawNode::create();
+    outerOutline->setID("wheel-outer-outline"_spr);
+    outerOutline->drawCircle(
+        {0, 0},
+        m_radius + 1.f,
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 0.f},
+        0.5f,
+        {.r = 1.f, .g = 1.f, .b = 1.f, .a = 1.f},
+        CircleSegmentCount
+    );
+    outerOutline->setZOrder(2);
+
+    m_wheelOuterMenu->addChild(outerOutline);
+}
+
 void PickerWheel::generateTicker()
 {
     m_ticker = CCDrawNode::create();
@@ -564,14 +611,14 @@ void PickerWheel::generateTicker()
         {0.f, -4.f}
     };
 
-    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : Utils::DefaultListColorA;
+    ccColor4F* color = m_enabledSliceCount > 0 ? m_slices[m_currentlyPointedAtSlice].color : &WheelTheme::currentTheme->sliceColor1;
 
     m_ticker->drawPolygon(
         tickerPoints,
         3,
         *color,
         0.5f,
-        *Utils::DefaultOutlineColorA
+        {.r = 0.f, .g = 0.f, .b = 0.f, .a = 1.f}
     );
 
     m_ticker->setPosition({14.f, 0.f});
@@ -585,39 +632,13 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
     if (!value.isObject()) return Err("not an object");
 
     unsigned int weight;
-    int colorId;
     bool enabled;
 
     try {
         GEODE_UNWRAP_INTO(weight, value["weight"].asUInt());
     } catch (const std::exception&) {
-        log::info("Invalid slice wight data, using default value of 1");
+        log::info("Invalid slice weight data, using default value of 1");
         weight = 1;
-    }
-
-    try {
-        // TODO store and retrieve colors properly
-        //   Colors will be able to be set to either automatically follow the theme colors, or individually coloring
-        //   each slice. If the color is set individually, we need to save the RGBA values, otherwise we need to
-        //   indicate that the color should be determined by the theme
-        GEODE_UNWRAP_INTO(colorId, value["colorId"].asInt());
-    } catch (const std::exception&) {
-        log::info("Invalid slice colorId data, using default value of 0");
-        colorId = -1;
-    }
-
-    ccColor4F* color = nullptr;
-
-    switch (colorId) {
-    case 0:
-        color = Utils::DefaultListColorA;
-        break;
-    case 1:
-        color = Utils::DefaultListColorB;
-        break;
-    default:
-        color = nullptr;
-        break;
     }
 
     try {
@@ -627,7 +648,7 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
         enabled = true;
     }
 
-    return Ok(PickerWheel::SliceSettings{ .weight = weight, .color = color, .enabled = enabled });
+    return Ok(PickerWheel::SliceSettings{ .weight = weight, .enabled = enabled });
 }
 
 matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWheel::SliceSettings const& value)
@@ -635,14 +656,6 @@ matjson::Value matjson::Serialize<PickerWheel::SliceSettings>::toJson(PickerWhee
     auto obj = Value();
 
     obj["weight"] = value.weight;
-
-    if (value.color == Utils::DefaultListColorA) {
-        obj["colorId"] = 0;
-    } else if (value.color == Utils::DefaultListColorB) {
-        obj["colorId"] = 1;
-    } else {
-        obj["colorId"] = -1;
-    }
 
     obj["enabled"] = value.enabled;
 

@@ -2,6 +2,7 @@
 
 #include "PickerWheel.h"
 #include "Utils.h"
+#include "WheelTheme/WheelThemeEditLayer.h"
 
 WheelLayer::WheelLayer(GJLevelList* list) : m_list(list) {}
 
@@ -31,45 +32,37 @@ bool WheelLayer::init()
 
     setKeypadEnabled(true);
 
+
+    const gd::string listId = Utils::getListId(m_list);
+
+    // A little awkward to create a new object from an existing one here, but shouldn't really be an issue since a
+    // single WheelTheme object isn't too large
+    WheelTheme::currentTheme = new WheelTheme(Mod::get()->getSavedValue<WheelTheme>(listId + "-theme", *WheelTheme::getDefaultWheelTheme()));
+
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
     // Background
-    //
-    // Recreates the background commonly used by the game for menus
-    CCSprite* background = CCSprite::create("GJ_gradientBG-hd.png");
-    background->setID("background"_spr);
+    generateBackground(winSize);
 
-    const CCSize bgSize = background->getContentSize();
+    m_leftCornerDeco = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
+    m_rightCornerDeco = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
 
-    background->setScaleX((winSize.width + 10) / bgSize.width);
-    background->setScaleY((winSize.height + 10) / bgSize.height);
+    m_leftCornerDeco->setID("left-corner"_spr);
+    m_rightCornerDeco->setID("right-corner"_spr);
 
-    background->setAnchorPoint({0, 0});
-    background->setPosition({-5,-5});
+    m_leftCornerDeco->setAnchorPoint({0, 0});
+    m_rightCornerDeco->setAnchorPoint({1, 0});
 
-    background->setColor({.r = 0, .g = 102, .b = 255});
+    m_leftCornerDeco->setPosition({-1,-1});
+    m_rightCornerDeco->setPosition({winSize.width + 1,-1});
 
-    background->setZOrder(-2);
-    addChild(background);
+    m_rightCornerDeco->setFlipX(true);
 
+    addChild(m_leftCornerDeco);
+    addChild(m_rightCornerDeco);
 
-    // Corner decorations
-    CCSprite* leftCorner = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
-    CCSprite* rightCorner = CCSprite::createWithSpriteFrameName("GJ_sideArt_001.png");
-
-    leftCorner->setID("left-corner"_spr);
-    rightCorner->setID("right-corner"_spr);
-
-    leftCorner->setAnchorPoint({0, 0});
-    rightCorner->setAnchorPoint({1, 0});
-
-    leftCorner->setPosition({-1,-1});
-    rightCorner->setPosition({winSize.width + 1,-1});
-
-    rightCorner->setFlipX(true);
-
-    addChild(leftCorner);
-    addChild(rightCorner);
+    m_leftCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
+    m_rightCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
 
 
     // Top of screen back button and edit button menu
@@ -94,6 +87,15 @@ bool WheelLayer::init()
 
     topMenu->addChild(exitButton);
 
+    // Top-right menu, contains the wheel edit and theme edit buttons
+    CCMenu* const topRightMenu = CCMenu::create();
+    topRightMenu->setID("top-right-menu"_spr);
+    topRightMenu->setLayout(
+        RowLayout::create()
+        ->setAutoScale(false)
+        ->setAutoGrowAxis(0.f)
+    );
+
     // Open edit menu button
     CCSprite* editButtonSprite = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     editButtonSprite->setScale(0.6f);
@@ -105,7 +107,25 @@ bool WheelLayer::init()
     );
     editButton->setID("edit-button"_spr);
 
-    topMenu->addChild(editButton);
+    topRightMenu->addChild(editButton);
+
+    // Edit theme button
+    CCSprite* themeButtonSprite = CCSprite::createWithSpriteFrameName("GJ_paintBtn_001.png");
+    themeButtonSprite->setScale(0.8f);
+
+    CCMenuItemSpriteExtra* themeButton = CCMenuItemSpriteExtra::create(
+        themeButtonSprite,
+        this,
+        menu_selector(WheelLayer::onThemeEdit)
+    );
+    themeButton->setID("theme-button"_spr);
+
+    topRightMenu->addChild(themeButton);
+
+
+    topRightMenu->updateLayout();
+
+    topMenu->addChild(topRightMenu);
 
     topMenu->updateLayout();
 
@@ -222,7 +242,21 @@ bool WheelLayer::init()
 
 void WheelLayer::keyBackClicked()
 {
+    CC_SAFE_DELETE(WheelTheme::currentTheme);
     CCDirector::sharedDirector()->popSceneWithTransition(0.5f, kPopTransitionFade);
+}
+
+void WheelLayer::updateTheme()
+{
+    removeChild(m_background, true);
+
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+    generateBackground(winSize);
+
+    m_leftCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
+    m_rightCornerDeco->setVisible(WheelTheme::currentTheme->showCornerDecorations);
+
+    m_pickerWheel->redrawWheel(true);
 }
 
 void WheelLayer::onBack(CCObject*)
@@ -267,4 +301,28 @@ void WheelLayer::onEdit(CCObject*)
 
     m_pickerWheel->runAction(wheelMove);
     m_wheelEditMenu->runAction(editMoveSeq);
+}
+
+void WheelLayer::onThemeEdit(CCObject*)
+{
+    WheelThemeEditLayer::create(WheelTheme::currentTheme)->show();
+}
+
+void WheelLayer::generateBackground(const CCSize& winSize)
+{
+    m_background = CCSprite::create("GJ_gradientBG-hd.png");
+    m_background->setID("background"_spr);
+
+    const CCSize bgSize = m_background->getContentSize();
+
+    m_background->setScaleX((winSize.width + 10) / bgSize.width);
+    m_background->setScaleY((winSize.height + 10) / bgSize.height);
+
+    m_background->setAnchorPoint({0, 0});
+    m_background->setPosition({-5,-5});
+
+    m_background->setColor(to3B(ccc4BFromccc4F(WheelTheme::currentTheme->backgroundColor)) /*{.r = 0, .g = 102, .b = 255}*/);
+
+    m_background->setZOrder(-2);
+    addChild(m_background);
 }

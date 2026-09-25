@@ -1,5 +1,7 @@
 #include "Utils.h"
 
+#include <cvolton.level-id-api/include/EditorIDs.hpp>
+
 void Utils::playSound(gd::string soundPath)
 {
     FMODAudioEngine* fmod = FMODAudioEngine::get();
@@ -24,4 +26,12 @@ gd::string Utils::getDifficultyIconFrame(int difficulty)
 
     log::debug("[Utils::getDifficultyIcon]: Unknown difficulty value: {}", difficulty);
     return "diffIcon_00_btn_001.png";
+}
+
+gd::string Utils::getListId(GJLevelList* list)
+{
+    if (list->m_listType == GJLevelType::Editor)
+        return "editor-" + std::to_string(EditorIDs::getID(list));
+    else
+        return std::to_string(list->m_listID);
 }
