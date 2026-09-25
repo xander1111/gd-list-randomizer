@@ -1,13 +1,13 @@
-#include "PickerWheel.h"
+#include "../PickerWheel/PickerWheel.h"
 
 #include "EaseWheelSpin.h"
-#include "SliceSelectedPopup.h"
-#include "Utils.h"
+#include "../PickerWheel/SliceSelectedPopup.h"
+#include "../Utils.h"
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
-#include "WheelLayer.h"
-#include "WheelTheme/WheelTheme.h"
+#include "../WheelLayer.h"
+#include "../WheelTheme/WheelTheme.h"
 
 PickerWheel* PickerWheel::create(GJLevelList* list, float radius)
 {

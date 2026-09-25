@@ -4,7 +4,7 @@
 #include <Geode/Geode.hpp>
 
 #include "WheelEditEntry.h"
-#include "../PickerWheel.h"
+#include "../PickerWheel/PickerWheel.h"
 
 using namespace geode::prelude;
 

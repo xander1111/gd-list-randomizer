@@ -1,6 +1,6 @@
 #include "WheelLayer.h"
 
-#include "PickerWheel.h"
+#include "PickerWheel/PickerWheel.h"
 #include "Utils.h"
 #include "WheelTheme/WheelThemeEditLayer.h"
 

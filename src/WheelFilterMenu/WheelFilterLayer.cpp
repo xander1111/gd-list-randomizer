@@ -1,8 +1,8 @@
-#include "WheelFilterLayer.h"
+#include "../WheelFilterMenu/WheelFilterLayer.h"
 
-#include "DimmingButton.h"
-#include "TogglerWithLabel.h"
-#include "WheelLayer.h"
+#include "../UICommon/DimmingButton.h"
+#include "../UICommon/TogglerWithLabel.h"
+#include "../WheelLayer.h"
 
 WheelFilterLayer* WheelFilterLayer::create(CCArrayExt<WheelEditEntry*>* entries)
 {

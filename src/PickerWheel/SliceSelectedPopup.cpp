@@ -1,6 +1,6 @@
-#include "SliceSelectedPopup.h"
+#include "../PickerWheel/SliceSelectedPopup.h"
 
-#include "WheelLayer.h"
+#include "../WheelLayer.h"
 
 SliceSelectedPopup* SliceSelectedPopup::create(PickerWheel::Slice* slice)
 {

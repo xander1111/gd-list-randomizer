@@ -1,4 +1,4 @@
-#include "DimmingButton.h"
+#include "../UICommon/DimmingButton.h"
 
 DimmingButton* DimmingButton::create(CCNode* sprite, Function<void(DimmingButton*)> callback, const bool on)
 {

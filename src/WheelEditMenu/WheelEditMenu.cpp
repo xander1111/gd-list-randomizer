@@ -2,7 +2,7 @@
 
 #include "WheelEditEntry.h"
 #include "../Utils.h"
-#include "../WheelFilterLayer.h"
+#include "../WheelFilterMenu/WheelFilterLayer.h"
 #include "../WheelTheme/WheelTheme.h"
 #include "alphalaneous.alphas-ui-pack/include/nodes/scroll/Scroll.hpp"
 

@@ -1,6 +1,6 @@
 #include "WheelThemeEditLayer.h"
 
-#include "../TogglerWithLabel.h"
+#include "../UICommon/TogglerWithLabel.h"
 #include "../Utils.h"
 #include "../WheelLayer.h"
 
