@@ -8,7 +8,7 @@
     },
     "id": "xe1a.list_randomizer",
     "name": "List Randomizer",
-    "version": "v1.0.0",
+    "version": "v1.0.1",
     "developer": "xander1111",
     "description": "Adds a wheel that can be spun to pick a random level from any ingame list",
     "dependencies": {
