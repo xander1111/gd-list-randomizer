@@ -37,7 +37,8 @@ bool WheelLayer::init()
 
     // A little awkward to create a new object from an existing one here, but shouldn't really be an issue since a
     // single WheelTheme object isn't too large
-    WheelTheme::currentTheme = new WheelTheme(Mod::get()->getSavedValue<WheelTheme>(listId + "-theme", *WheelTheme::getDefaultWheelTheme()));
+    auto themeKey = std::string(listId.c_str()) + "-theme";
+    WheelTheme::currentTheme = new WheelTheme(Mod::get()->getSavedValue<WheelTheme>(themeKey, *WheelTheme::getDefaultWheelTheme()));
 
     const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
