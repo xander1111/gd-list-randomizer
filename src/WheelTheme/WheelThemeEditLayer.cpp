@@ -494,10 +494,9 @@ bool WheelThemeEditLayer::init()
         if (text.empty())
             return;
 
-        try {
-            m_wheelTheme->spinDuration = stof(text);
-        } catch (const std::exception& e) {
-            log::debug("[WheelThemeEditLayer::spinDurationField callback]: Exception occurred when updating duration: {}", e.what());
+        GEODE_UNWRAP_INTO_OR_ELSE(m_wheelTheme->spinDuration, err, numFromString<float>(text))
+        {
+            log::debug("[WheelThemeEditLayer::spinDurationField callback]: Exception occurred when updating duration: {}", err);
         }
     });
     spinSettingsMenu->addChild(spinDurationField);

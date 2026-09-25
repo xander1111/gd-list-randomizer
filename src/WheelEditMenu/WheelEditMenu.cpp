@@ -162,15 +162,7 @@ void WheelEditMenu::updateSearch(std::string const& input)
     const std::string inputLower = string::toLower(input);
 
     int levelId = 0;
-    if (!input.empty()) {
-        try {
-            levelId = stoi(input);
-        } catch (std::invalid_argument&) {
-            levelId = 0;
-        } catch (std::out_of_range&) {
-            levelId = 0;
-        }
-    }
+    GEODE_UNWRAP_INTO_IF_OK(levelId, numFromString<int>(input));
 
     int visibleCount = 0;
     for (const auto entry : m_entries) {

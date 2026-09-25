@@ -155,12 +155,15 @@ void WheelEditEntry::updateWeight(std::string const& text) const
     if (text.empty())
         return;
 
-    try {
-        m_slice->settings.weight = stoi(text);
+    Result<unsigned int> newWeight = numFromString<unsigned int>(text);
+
+    if (newWeight.isOk()) {
+        m_slice->settings.weight = newWeight.unwrap();
+
         PickerWheel* pickerWheel = CCScene::get()->getChildByType<WheelLayer>()->m_pickerWheel;
         pickerWheel->redrawWheel();
-    } catch (const std::exception& e) {
-        log::debug("[WheelEditEntry::updateWeight]: Exception occurred when updating weight: {}", e.what());
+    } else {
+        log::debug("[WheelEditEntry::updateWeight]: Exception occurred when updating weight");
     }
 }
 

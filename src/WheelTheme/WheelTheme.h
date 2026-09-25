@@ -101,30 +101,24 @@ struct matjson::Serialize<ccColor4F>
 
         float r, g, b, a;
 
-        try {
-            GEODE_UNWRAP_INTO(r, value["r"].asDouble());
-        } catch (const std::exception&) {
+
+        GEODE_UNWRAP_INTO_OR_ELSE(r, err, value["r"].asDouble())
+        {
             log::info("Invalid color red data, using default value of 0");
             r = 0.;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(g, value["g"].asDouble());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(g, err, value["g"].asDouble()) {
             log::info("Invalid color green data, using default value of 0");
             g = 0.;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(b, value["b"].asDouble());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(b, err, value["b"].asDouble()) {
             log::info("Invalid color blue data, using default value of 0");
             b = 0.;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(a, value["a"].asDouble());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(a, err, value["a"].asDouble()) {
             log::info("Invalid color alpha data, using default value of 1");
             a = 1.;
         }
@@ -166,83 +160,61 @@ struct matjson::Serialize<WheelTheme>
         bool showCornerDecorations, showLevelNamesOnWheel;
 
 
-        try {
-            GEODE_UNWRAP_INTO(sliceColorCount, value["sliceColorCount"].asUInt());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(sliceColorCount, err, value["sliceColorCount"].asUInt()) {
             log::info("Invalid theme sliceColorCount data, using default theme value");
             sliceColorCount = WheelTheme::getDefaultWheelTheme()->sliceColorCount;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(sliceColor1, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor1"]));
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(sliceColor1, err, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor1"])) {
             log::info("Invalid theme sliceColor1 data, using default theme value");
             sliceColor1 = WheelTheme::getDefaultWheelTheme()->sliceColor1;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(sliceColor2, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor2"]));
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(sliceColor2, err, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor2"])) {
             log::info("Invalid theme sliceColor2 data, using default theme value");
             sliceColor2 = WheelTheme::getDefaultWheelTheme()->sliceColor2;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(sliceColor3, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor3"]));
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(sliceColor3, err, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor3"])) {
             log::info("Invalid theme sliceColor3 data, using default theme value");
             sliceColor3 = WheelTheme::getDefaultWheelTheme()->sliceColor3;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(sliceColor4, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor4"]));
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(sliceColor4, err, matjson::Serialize<ccColor4F>::fromJson(value["sliceColor4"])) {
             log::info("Invalid theme sliceColor4 data, using default theme value");
             sliceColor4 = WheelTheme::getDefaultWheelTheme()->sliceColor4;
         }
 
 
-        try {
-            GEODE_UNWRAP_INTO(textColor, matjson::Serialize<ccColor4F>::fromJson(value["textColor"]));
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(textColor, err, matjson::Serialize<ccColor4F>::fromJson(value["textColor"])) {
             log::info("Invalid theme textColor data, using default theme value");
             textColor = WheelTheme::getDefaultWheelTheme()->textColor;
         }
 
 
-        try {
-            GEODE_UNWRAP_INTO(backgroundColor, matjson::Serialize<ccColor4F>::fromJson(value["backgroundColor"]));
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(backgroundColor, err, matjson::Serialize<ccColor4F>::fromJson(value["backgroundColor"])) {
             log::info("Invalid theme backgroundColor data, using default theme value");
             backgroundColor = WheelTheme::getDefaultWheelTheme()->backgroundColor;
         }
 
 
-        try {
-            GEODE_UNWRAP_INTO(buttonColor, value["buttonColor"].asUInt());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(buttonColor, err, value["buttonColor"].asUInt()) {
             log::info("Invalid theme buttonColor data, using default theme value");
-            backgroundColor = WheelTheme::getDefaultWheelTheme()->backgroundColor;
+            buttonColor = WheelTheme::getDefaultWheelTheme()->buttonColor;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(spinDuration, value["spinDuration"].asDouble());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(spinDuration, err, value["spinDuration"].asDouble()) {
             log::info("Invalid theme spinDuration data, using default theme value");
             spinDuration = WheelTheme::getDefaultWheelTheme()->spinDuration;
         }
 
 
-        try {
-            GEODE_UNWRAP_INTO(showCornerDecorations, value["showCornerDecorations"].asBool());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(showCornerDecorations, err, value["showCornerDecorations"].asBool()) {
             log::info("Invalid theme showCornerDecorations data, using default theme value");
             showCornerDecorations = WheelTheme::getDefaultWheelTheme()->showCornerDecorations;
         }
 
-        try {
-            GEODE_UNWRAP_INTO(showLevelNamesOnWheel, value["showLevelNamesOnWheel"].asBool());
-        } catch (const std::exception&) {
+        GEODE_UNWRAP_INTO_OR_ELSE(showLevelNamesOnWheel, err, value["showLevelNamesOnWheel"].asBool()) {
             log::info("Invalid theme showLevelNamesOnWheel data, using default theme value");
             showLevelNamesOnWheel = WheelTheme::getDefaultWheelTheme()->showLevelNamesOnWheel;
         }

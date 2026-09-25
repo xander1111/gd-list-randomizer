@@ -628,19 +628,8 @@ Result<PickerWheel::SliceSettings> matjson::Serialize<PickerWheel::SliceSettings
     unsigned int weight;
     bool enabled;
 
-    try {
-        GEODE_UNWRAP_INTO(weight, value["weight"].asUInt());
-    } catch (const std::exception&) {
-        log::info("Invalid slice weight data, using default value of 1");
-        weight = 1;
-    }
-
-    try {
-        GEODE_UNWRAP_INTO(enabled, value["enabled"].asBool());
-    } catch (const std::exception&) {
-        log::info("Invalid slice enabled data, using default value of true");
-        enabled = true;
-    }
+    GEODE_UNWRAP_INTO(weight, value["weight"].asUInt());
+    GEODE_UNWRAP_INTO(enabled, value["enabled"].asBool());
 
     return Ok(PickerWheel::SliceSettings{ .weight = weight, .enabled = enabled });
 }
