@@ -22,7 +22,7 @@ bool SliceSelectedPopup::init()
     setTitle(m_slice->level->m_levelName);
 
     CCLabelBMFont* creatorLabel = CCLabelBMFont::create(
-        ("By " + m_slice->level->m_creatorName).c_str(),
+        ("By " + std::string(m_slice->level->m_creatorName)).c_str(),
         "bigFont.fnt"
     );
     creatorLabel->setScale(0.4f);

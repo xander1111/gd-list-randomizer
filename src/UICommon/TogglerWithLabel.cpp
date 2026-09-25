@@ -3,7 +3,7 @@
 #include <utility>
 
 TogglerWithLabel* TogglerWithLabel::create(Function<void(TogglerWithLabel*)> callback,
-    const gd::string& labelText, const float togglerScale, const float labelScale)
+    const std::string& labelText, const float togglerScale, const float labelScale)
 {
     auto ret = new TogglerWithLabel(std::move(callback), togglerScale, labelText, labelScale);
     if (ret && ret->init()) {
@@ -61,6 +61,6 @@ void TogglerWithLabel::toggleWithCallback(const bool on)
 }
 
 TogglerWithLabel::TogglerWithLabel(Function<void(TogglerWithLabel*)> callback,
-    const float togglerScale, gd::string labelText, const float labelScale)
+    const float togglerScale, std::string labelText, const float labelScale)
     : m_callback(std::move(callback)), m_togglerScale(togglerScale), m_labelScale(labelScale),
     m_labelText(std::move(labelText)) {}

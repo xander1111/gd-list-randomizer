@@ -7,8 +7,8 @@ using namespace geode::prelude;
 class Utils
 {
 public:
-    static void playSound(gd::string soundPath);
-    static void playResourceSound(const gd::string& soundFileName);
+    static void playSound(std::string soundPath);
+    static void playResourceSound(const std::string& soundFileName);
 
     /**
      * Provides a way to get the frame for the icon of a given difficulty value.
@@ -19,9 +19,9 @@ public:
      * @c GJDifficultySprite::getDifficultyFrame also gives the frames for the difficulty icon with the difficulty name
      * below it, and we want just the icon, which is a different frame
      */
-    static gd::string getDifficultyIconFrame(int difficulty);
+    static std::string getDifficultyIconFrame(int difficulty);
 
-    static gd::string getListId(GJLevelList* list);
+    static std::string getListId(GJLevelList* list);
 
     enum ButtonColors : unsigned int {
         Green = 0,

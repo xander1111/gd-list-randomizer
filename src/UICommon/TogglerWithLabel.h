@@ -14,7 +14,7 @@ public:
     bool m_toggled = false;
 
     static TogglerWithLabel* create(Function<void(TogglerWithLabel*)> callback,
-        const gd::string& labelText, float togglerScale = 0.8f, float labelScale = 0.35f);
+        const std::string& labelText, float togglerScale = 0.8f, float labelScale = 0.35f);
 
     bool init() override;
 
@@ -26,11 +26,11 @@ private:
     Function<void(TogglerWithLabel*)> m_callback;
     float m_togglerScale;
     float m_labelScale;
-    gd::string m_labelText;
+    std::string m_labelText;
 
     CCMenuItemToggler* m_toggler = nullptr;
     CCLabelBMFont* m_label = nullptr;
 
     explicit TogglerWithLabel(Function<void(TogglerWithLabel*)> callback, float togglerScale,
-        gd::string labelText, float labelScale);
+        std::string labelText, float labelScale);
 };
