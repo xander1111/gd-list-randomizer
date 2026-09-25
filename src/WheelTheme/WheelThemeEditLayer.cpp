@@ -3,6 +3,8 @@
 #include "../UICommon/TogglerWithLabel.h"
 #include "../Utils.h"
 #include "../WheelLayer.h"
+#include <iomanip>
+#include <sstream>
 
 WheelThemeEditLayer* WheelThemeEditLayer::create(WheelTheme* wheelTheme)
 {
@@ -476,7 +478,9 @@ bool WheelThemeEditLayer::init()
     // Spin duration
     TextInput* spinDurationField = TextInput::create(100.f, "Spin Duration");
     spinDurationField->setID("duration-field"_spr);
-    spinDurationField->setString(std::format("{:.2f}", m_wheelTheme->spinDuration));
+    std::ostringstream spinDurationText;
+    spinDurationText << std::fixed << std::setprecision(2) << m_wheelTheme->spinDuration;
+    spinDurationField->setString(spinDurationText.str());
     spinDurationField->setCommonFilter(CommonFilter::Float);
     spinDurationField->setMaxCharCount(8);
     spinDurationField->setScale(0.75f);
