@@ -592,7 +592,7 @@ void WheelThemeEditLayer::highlightButton(const unsigned int color) const
 
 void WheelThemeEditLayer::onClose(CCObject* cc_object)
 {
-    const gd::string listId = Utils::getListId(CCScene::get()->getChildByType<WheelLayer>()->m_list);
+    const std::string listId = Utils::getListId(CCScene::get()->getChildByType<WheelLayer>()->m_list);
 
     Mod::get()->setSavedValue(listId + "-theme", *m_wheelTheme);
 

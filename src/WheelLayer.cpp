@@ -33,7 +33,7 @@ bool WheelLayer::init()
     setKeypadEnabled(true);
 
 
-    const gd::string listId = Utils::getListId(m_list);
+    const std::string listId = Utils::getListId(m_list);
 
     // A little awkward to create a new object from an existing one here, but shouldn't really be an issue since a
     // single WheelTheme object isn't too large
@@ -183,7 +183,7 @@ bool WheelLayer::init()
     difficultyIcon->setLayout(AnchorLayout::create());
     difficultyIcon->setContentSize({30.f, 30.f});
 
-    const gd::string difficultyFrame = Utils::getDifficultyIconFrame(m_list->m_difficulty);
+    const std::string difficultyFrame = Utils::getDifficultyIconFrame(m_list->m_difficulty);
 
     CCSprite* difficultySprite = CCSprite::createWithSpriteFrameName(difficultyFrame.c_str());
     difficultySprite->setID("difficulty-sprite"_spr);

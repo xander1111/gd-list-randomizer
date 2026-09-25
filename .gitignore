@@ -1,3 +1,4 @@
 # Build files
 /build-win/
+/build-android64/
 /cmake-build-geode/
