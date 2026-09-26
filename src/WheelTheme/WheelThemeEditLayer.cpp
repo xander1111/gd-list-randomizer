@@ -244,8 +244,12 @@ bool WheelThemeEditLayer::init()
     m_colorsPage->addChild(buttonColorMenu);
 
 
+    CCNode* sliceColorsOuterMenu = CCNode::create();
+    sliceColorsOuterMenu->setID("slice-colors-menu"_spr);
+    sliceColorsOuterMenu->setLayout(AnchorLayout::create());
+
     CCMenu* sliceColorsMenu = CCMenu::create();
-    sliceColorsMenu->setID("slice-colors-menu"_spr);
+    sliceColorsMenu->setID("slice-colors-inner-menu"_spr);
     sliceColorsMenu->setLayout(
         RowLayout::create()
         ->setAxisReverse(true)
@@ -367,7 +371,21 @@ bool WheelThemeEditLayer::init()
     sliceColorsMenu->addChild(m_sliceColorPickersMenu);
 
     sliceColorsMenu->updateLayout();
-    m_colorsPage->addChild(sliceColorsMenu);
+    sliceColorsOuterMenu->addChildAtPosition(sliceColorsMenu, Anchor::Center);
+
+    // Slice colors menu background
+    NineSlice* sliceColorsMenuBackground = NineSlice::create("square02_001.png");
+    sliceColorsMenuBackground->setID("slice-colors-menu-background"_spr);
+    sliceColorsMenuBackground->setOpacity(80u);
+    sliceColorsMenuBackground->setZOrder(-2);
+    sliceColorsMenuBackground->setContentSize({m_menuWidth - 60.f, sliceColorsMenu->getContentHeight() + 5.f});
+
+    sliceColorsOuterMenu->addChildAtPosition(sliceColorsMenuBackground, Anchor::Center);
+
+
+    sliceColorsOuterMenu->setContentSize(sliceColorsMenu->getContentSize());
+    sliceColorsOuterMenu->updateLayout();
+    m_colorsPage->addChild(sliceColorsOuterMenu);
 
     // Other colors
     CCMenu* otherColorMenu = CCMenu::create();

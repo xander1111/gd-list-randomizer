@@ -53,8 +53,12 @@ bool WheelFilterLayer::init()
     filtersMenu->setAnchorPoint({0.f, 0.f});
 
     // Completed filters
+    CCNode* completedOuterMenu = CCNode::create();
+    completedOuterMenu->setID("completed-filters-menu"_spr);
+    completedOuterMenu->setLayout(AnchorLayout::create());
+
     CCMenu* completedMenu = CCMenu::create();
-    completedMenu->setID("completed-filters-menu"_spr);
+    completedMenu->setID("completed-inner-menu"_spr);
     completedMenu->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
@@ -79,12 +83,29 @@ bool WheelFilterLayer::init()
     completedMenu->addChild(uncompletedToggler);
 
     completedMenu->updateLayout();
-    filtersMenu->addChild(completedMenu);
+    completedOuterMenu->addChildAtPosition(completedMenu, Anchor::Center);
+
+    // Completed menu background
+    NineSlice* completedMenuBackground = NineSlice::create("square02_001.png");
+    completedMenuBackground->setID("completed-menu-background"_spr);
+    completedMenuBackground->setOpacity(80u);
+    completedMenuBackground->setZOrder(-2);
+    completedMenuBackground->setContentSize({m_menuWidth - 20.f, completedMenu->getContentHeight() + 5.f});
+
+    completedOuterMenu->addChildAtPosition(completedMenuBackground, Anchor::Center);
+
+    completedOuterMenu->setContentSize(completedMenu->getContentSize());
+    completedOuterMenu->updateLayout();
+    filtersMenu->addChild(completedOuterMenu);
 
 
     // Rate type filters
+    CCNode* rateOuterMenu = CCNode::create();
+    rateOuterMenu->setID("rate-filters-menu"_spr);
+    rateOuterMenu->setLayout(AnchorLayout::create());
+
     CCMenu* rateMenu = CCMenu::create();
-    rateMenu->setID("rate-filters-menu"_spr);
+    rateMenu->setID("rate-inner-menu"_spr);
     rateMenu->setLayout(
         ColumnLayout::create()
         ->setAxisReverse(true)
@@ -166,12 +187,29 @@ bool WheelFilterLayer::init()
 
 
     rateMenu->updateLayout();
-    filtersMenu->addChild(rateMenu);
+    rateOuterMenu->addChildAtPosition(rateMenu, Anchor::Center);
+
+    // Rate menu background
+    NineSlice* rateMenuBackground = NineSlice::create("square02_001.png");
+    rateMenuBackground->setID("rate-menu-background"_spr);
+    rateMenuBackground->setOpacity(80u);
+    rateMenuBackground->setZOrder(-2);
+    rateMenuBackground->setContentSize({m_menuWidth - 20.f, rateMenu->getContentHeight() + 5.f});
+
+    rateOuterMenu->addChildAtPosition(rateMenuBackground, Anchor::Center);
+
+    rateOuterMenu->setContentSize(rateMenu->getContentSize());
+    rateOuterMenu->updateLayout();
+    filtersMenu->addChild(rateOuterMenu);
 
 
     // Difficulty filters
+    CCNode* difficultyOuterMenu = CCNode::create();
+    difficultyOuterMenu->setID("difficulty-filters-menu"_spr);
+    difficultyOuterMenu->setLayout(AnchorLayout::create());
+
     CCMenu* difficultyMenu = CCMenu::create();
-    difficultyMenu->setID("difficulty-filters-menu"_spr);
+    difficultyMenu->setID("difficulty-inner-menu"_spr);
     difficultyMenu->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
@@ -278,12 +316,29 @@ bool WheelFilterLayer::init()
     difficultyMenu->addChild(autoToggler);
 
     difficultyMenu->updateLayout();
-    filtersMenu->addChild(difficultyMenu);
+    difficultyOuterMenu->addChildAtPosition(difficultyMenu, Anchor::Center);
+
+    // Difficulty menu background
+    NineSlice* difficultyMenuBackground = NineSlice::create("square02_001.png");
+    difficultyMenuBackground->setID("difficulty-menu-background"_spr);
+    difficultyMenuBackground->setOpacity(80u);
+    difficultyMenuBackground->setZOrder(-2);
+    difficultyMenuBackground->setContentSize({m_menuWidth - 20.f, difficultyMenu->getContentHeight() + 5.f});
+
+    difficultyOuterMenu->addChildAtPosition(difficultyMenuBackground, Anchor::Center);
+
+    difficultyOuterMenu->setContentSize(difficultyMenu->getContentSize());
+    difficultyOuterMenu->updateLayout();
+    filtersMenu->addChild(difficultyOuterMenu);
 
 
     // Length filters
+    CCNode* lengthOuterMenu = CCNode::create();
+    lengthOuterMenu->setID("length-filters-menu"_spr);
+    lengthOuterMenu->setLayout(AnchorLayout::create());
+
     CCMenu* lengthMenu = CCMenu::create();
-    lengthMenu->setID("length-filters-menu"_spr);
+    lengthMenu->setID("length-inner-menu"_spr);
     lengthMenu->setLayout(
         RowLayout::create()
         ->setAutoScale(false)
@@ -346,7 +401,20 @@ bool WheelFilterLayer::init()
     lengthMenu->addChild(platToggler);
 
     lengthMenu->updateLayout();
-    filtersMenu->addChild(lengthMenu);
+    lengthOuterMenu->addChildAtPosition(lengthMenu, Anchor::Center);
+
+    // Difficulty menu background
+    NineSlice* lengthMenuBackground = NineSlice::create("square02_001.png");
+    lengthMenuBackground->setID("length-menu-background"_spr);
+    lengthMenuBackground->setOpacity(80u);
+    lengthMenuBackground->setZOrder(-2);
+    lengthMenuBackground->setContentSize({m_menuWidth - 20.f, lengthMenu->getContentHeight() + 5.f});
+
+    lengthOuterMenu->addChildAtPosition(lengthMenuBackground, Anchor::Center);
+
+    lengthOuterMenu->setContentSize(lengthMenu->getContentSize());
+    lengthOuterMenu->updateLayout();
+    filtersMenu->addChild(lengthOuterMenu);
 
 
     filtersMenu->updateLayout();
