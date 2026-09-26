@@ -36,6 +36,7 @@ bool WheelThemeEditLayer::init()
 
     m_buttonMenu->addChild(resetThemeButton);
 
+    const CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
     // Next page button
     CCSprite* nextButtonSprite = CCSprite::createWithSpriteFrameName("GJ_arrow_03_001.png");
@@ -52,7 +53,8 @@ bool WheelThemeEditLayer::init()
         }
     );
     m_nextButton->setID("next-button"_spr);
-    m_nextButton->setPosition({m_menuWidth + 30.f, m_menuHeight / 2.f});
+    m_nextButton->setPosition({m_menuWidth + (winSize.width - m_menuWidth) / 2.f - 10.f, m_menuHeight / 2.f});
+    m_nextButton->setAnchorPoint({1.f, 0.5f});
 
     m_buttonMenu->addChild(m_nextButton);
 
@@ -69,7 +71,8 @@ bool WheelThemeEditLayer::init()
         }
     );
     m_prevButton->setID("prev-button"_spr);
-    m_prevButton->setPosition({-30.f, m_menuHeight / 2.f});
+    m_prevButton->setPosition({-(winSize.width - m_menuWidth) / 2.f + 10.f, m_menuHeight / 2.f});
+    m_prevButton->setAnchorPoint({0.f, 0.5f});
     m_prevButton->setVisible(false);
 
     m_buttonMenu->addChild(m_prevButton);
@@ -247,8 +250,8 @@ bool WheelThemeEditLayer::init()
         RowLayout::create()
         ->setAxisReverse(true)
         ->setAutoScale(false)
-        ->setAxisAlignment(AxisAlignment::Between)
-        ->setPadding(Padding::horizontal(20.f))
+        ->setAxisAlignment(AxisAlignment::Center)
+        ->setPadding(Padding::horizontal(30.f))
     );
     sliceColorsMenu->setContentWidth(m_menuWidth);
 
@@ -306,7 +309,7 @@ bool WheelThemeEditLayer::init()
         ->setAutoScale(false)
         ->setAxisAlignment(AxisAlignment::Even)
     );
-    m_sliceColorPickersMenu->setContentWidth(m_menuWidth - 40.f - 30.f);
+    m_sliceColorPickersMenu->setContentWidth(m_menuWidth - 60.f - 30.f);
 
 
     m_sliceColor1Picker = WheelThemeColorPicker::create(

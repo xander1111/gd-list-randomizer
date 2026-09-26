@@ -149,6 +149,8 @@ bool WheelLayer::init()
     m_pickerWheel->setID("picker-wheel"_spr);
     m_pickerWheel->setPosition({m_wheelAndEditMenu->getContentWidth() / 2.f, m_wheelAndEditMenu->getContentHeight() / 2.f});
 
+    // Make sure the wheel and edit menu can both fit on screen
+    limitNodeWidth(m_wheelAndEditMenu, winSize.width * 0.9f, 1.f, 0.1f);
     m_wheelAndEditMenu->addChild(m_pickerWheel);
 
     // Wheel edit menu
