@@ -485,7 +485,7 @@ bool WheelThemeEditLayer::init()
     spinDurationText << std::fixed << std::setprecision(2) << m_wheelTheme->spinDuration;
     spinDurationField->setString(spinDurationText.str());
 
-    spinDurationField->setCommonFilter(CommonFilter::Float);
+    spinDurationField->setFilter("1234567890.");
     spinDurationField->setMaxCharCount(8);
     spinDurationField->setScale(0.75f);
 
