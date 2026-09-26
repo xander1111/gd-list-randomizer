@@ -140,6 +140,8 @@ void WheelEditMenu::onWheelSpinEnd() const
 {
     for (const auto entry : m_entries)
         entry->setEnabled(true);
+
+    m_filterButton->setEnabled(true);
 }
 
 WheelEditEntry* WheelEditMenu::entryForSlice(PickerWheel::Slice* slice) const
