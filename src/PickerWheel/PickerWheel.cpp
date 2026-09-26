@@ -353,7 +353,7 @@ void PickerWheel::generateSpinButton()
     m_spinButton = CCMenuItemExt::createSpriteExtra(
         ButtonSprite::create(
             "Spin",
-            "BigFont.fnt",
+            "bigFont.fnt",
             Utils::buttonTextures[WheelTheme::currentTheme->buttonColor].c_str(),
             0.5f
         ),

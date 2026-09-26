@@ -12,6 +12,10 @@
     "developer": "xander1111",
     "description": "Adds a wheel that can be spun to pick a random level from any ingame list",
     "dependencies": {
+        "geode.node-ids": {
+            "version": ">=1.23.0",
+            "required": true
+        },
         "alphalaneous.alphas-ui-pack": {
             "version": ">=1.3.0",
             "required": true
