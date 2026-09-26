@@ -265,6 +265,11 @@ void WheelLayer::onBack(CCObject*)
 
 void WheelLayer::onEdit(CCObject*)
 {
+    // Prevent opening/closing the edit menu when it's already being opened/closed
+    if (m_editMenuMoving)
+        return;
+    m_editMenuMoving = true;
+
     m_editMenuOpen = !m_editMenuOpen;
 
     // Edit menu should be made visible before moving on screen, but shouldn't be made invisible before moving off screen
@@ -290,6 +295,8 @@ void WheelLayer::onEdit(CCObject*)
     {
         // Edit menu should be made invisible after moving off screen
         m_wheelEditMenu->setVisible(m_editMenuOpen);
+
+        m_editMenuMoving = false;
     });
     CCSequence* editMoveSeq = CCSequence::create(editMove, updateEditMenuVisibility, nullptr);
 

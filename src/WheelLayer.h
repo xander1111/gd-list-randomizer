@@ -29,6 +29,7 @@ private:
     WheelEditMenu* m_wheelEditMenu = nullptr;
 
     bool m_editMenuOpen = false;
+    bool m_editMenuMoving = false;
 
     CCSprite* m_background = nullptr;
     CCSprite* m_leftCornerDeco =  nullptr;
